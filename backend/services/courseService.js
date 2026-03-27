@@ -21,21 +21,12 @@ class CourseService {
 
     // Initializes all courses in the database into memory, used on first startup of the application to cache frequently accessed items.
     async init() {
-        try {
-            const result = await db.queryStd('SELECT * FROM courses', []);
+        const result = await db.queryStd('SELECT * FROM courses', []);
 
-            this.numCourses = result.length;
-
-            for (let index = 1; index <= this.numCourses; index++) {
-                var course = new Course(index);
-                await course.init();
-                //console.log(course.course_code);
-                this.#course_map.set(course.course_code, course);
-            }
-
-            console.log('courseService initialized!');
-        } catch (err) {
-            console.error('Error:', err);
+        for (const row of result) {
+            const course = new Course(row.course_id);
+            await course.init();
+            this.#course_map.set(course.course_code, course);
         }
     }
 
@@ -63,15 +54,62 @@ class CourseService {
         return this.getCourseInfo(course_code)[4];
     }
 
+    // Add Courses
+
+    async addNewCourse(courseData) {
+        const course_code = courseData.course_code;
+        const title = courseData.title;
+        const description = courseData.description;
+        const credits = courseData.credits;
+
+        const result = await db.queryAdm(
+            'INSERT INTO courses (course_code, title, description, credits) VALUES (?, ?, ?, ?)',
+            [course_code, title, description, credits]
+        );
+        this.refresh();
+
+        return result;
+    }
+
+    async removeCourse(course_code) {
+        const result = await db.queryAdm('DELETE FROM courses WHERE course_code = ?', [
+            course_code,
+        ]);
+        this.refresh();
+
+        return result;
+    }
+
+    async updateCourse(course_code, title, description, credits) {
+        const result = await db.queryAdm(
+            'UPDATE courses SET title = ?, description = ?, credits = ? WHERE course_code = ?',
+            [title, description, credits, course_code]
+        );
+        this.refresh();
+        return result;
+    }
+
     // ****** Sections ******
 
     // Create new section
-    async createSection(course_id, semester_id, professor_id, capacity, days, start_time, end_time) {
+    async createSection(
+        course_id,
+        semester_id,
+        professor_id,
+        capacity,
+        days,
+        start_time,
+        end_time
+    ) {
         try {
             console.log(course_id, semester_id, professor_id, capacity, days, start_time, end_time);
-        } catch(err) {
+        } catch (err) {
             console.error(err);
         }
+    }
+
+    async refresh() {
+        await this.init();
     }
 }
 

@@ -1,3 +1,6 @@
+// Remove once all features are implemented.
+/* eslint-disable no-unused-vars */
+
 /*
  * During development of the backend, app.js will be a simple CLI utility
  * This allows for rapid testing and development of the backend
@@ -26,21 +29,28 @@
  *
  */
 
-//import CourseService from './services/courseService.js';
+import CourseService from './services/courseService.js';
 import CourseController from './controllers/courseController.js';
 import AuthController from './controllers/authController.js';
+import AuthService from './services/authService.js';
 import * as readline from 'node:readline/promises';
 import { stdin as input, stdout as output, exit } from 'node:process';
-import * as Errors from './errors/index.js';
+import AdminController from './controllers/adminController.js';
+//import * as Errors from './errors/index.js';
 
 const rl = readline.createInterface({ input, output });
 
 async function main() {
     try {
-        const cc = new CourseController(rl);
-        const ac = new AuthController(rl);
+        const cs = new CourseService();
+        await cs.init();
 
-        const context = { rl, cc, ac, currentUser: null };
+        const cc = new CourseController(rl, cs);
+        const as = new AuthService();
+        const ac = new AuthController(rl);
+        const adm = new AdminController(rl);
+
+        const context = { rl, cc, cs, ac, as, adm, currentUser: null };
 
         let state = 'LOGIN';
 
@@ -59,13 +69,13 @@ async function main() {
                     state = await usersMenu(context);
                     break;
                 case 'ENROLLMENT_MENU':
-                    state = await loginMenu(context);
+                    state = await enrollmentMenu(context);
                     break;
                 case 'SECTIONS_MENU':
-                    state = await loginMenu(context);
+                    state = await sectionsMenu(context);
                     break;
                 case 'PREREQUISITES_MENU':
-                    state = await loginMenu(context);
+                    state = await prerequisitesMenu(context);
                     break;
                 case 'LOGOUT':
                     context.currentUser = null;
@@ -168,6 +178,7 @@ async function coursesMenu(context) {
     console.log('2. Add New Course');
     console.log('3. Update Existing Course');
     console.log('4. Remove an Existing Course');
+    console.log('5. Return to Main Menu');
     console.log('6. Logout');
     console.log('7. Exit');
 
@@ -175,21 +186,29 @@ async function coursesMenu(context) {
 
     switch (selection.toLowerCase()) {
         case '1':
-            console.log(await context.cc.getCourseInfo());
+            await context.cc.getCourseInfo();
             return 'COURSES_MENU';
 
         case '2':
+            await context.cc.addNewCourse();
             return 'COURSES_MENU';
 
         case '3':
+            await context.cc.updateCourse();
             return 'COURSES_MENU';
 
         case '4':
+            await context.cc.removeCourse();
             return 'COURSES_MENU';
+
+        case '5':
+        case 'back':
+        case 'main':
+            return 'MAIN_MENU';
 
         case '6':
         case 'logout':
-            return 'LOGIN';
+            return 'LOGOUT';
 
         case '7':
         case 'exit':
@@ -209,6 +228,7 @@ async function usersMenu(context) {
     console.log('2. Update User Info');
     console.log('3. ADMIN - Add New User');
     console.log('4. ADMIN - Remove a User');
+    console.log('5. Return to Main Menu');
     console.log('6. Logout');
     console.log('7. Exit');
 
@@ -216,21 +236,29 @@ async function usersMenu(context) {
 
     switch (selection.toLowerCase()) {
         case '1':
-            console.log(await context.cc.getCourseInfo());
+            console.log(await context.ac.getUserInfo(context.currentUser));
             return 'USERS_MENU';
 
         case '2':
+            context.currentUser = await context.ac.updateUserInfo(context.currentUser);
             return 'USERS_MENU';
 
         case '3':
+            await context.adm.addUser();
             return 'USERS_MENU';
 
         case '4':
+            await context.adm.removeUser();
             return 'USERS_MENU';
+
+        case '5':
+        case 'back':
+        case 'main':
+            return 'MAIN_MENU';
 
         case '6':
         case 'logout':
-            return 'LOGIN';
+            return 'LOGOUT';
 
         case '7':
         case 'exit':
@@ -242,10 +270,159 @@ async function usersMenu(context) {
     }
 }
 
-async function enrollmentMenu(context) {}
+// Enrollment Menu
+async function enrollmentMenu(context) {
+    console.log('**** ENROLLMENT MENU ****');
+    console.log('Enter the number that corresponds to your choice.');
+    console.log('1. Enroll in a Section');
+    console.log('2. Drop Enrollment');
+    console.log('3. View My Enrollments');
+    console.log('4. View Section Enrollment Roster');
+    console.log('5. Return to Main Menu');
+    console.log('6. Logout');
+    console.log('7. Exit');
 
-async function sectionsMenu(context) {}
+    const selection = (await rl.question('Select an option: ')).trim();
 
-async function prerequisitesMenu(context) {}
+    switch (selection.toLowerCase()) {
+        case '1':
+            console.log('\nEnroll in a Section is not implemented yet.\n');
+            return 'ENROLLMENT_MENU';
+
+        case '2':
+            console.log('\nDrop Enrollment is not implemented yet.\n');
+            return 'ENROLLMENT_MENU';
+
+        case '3':
+            console.log('\nView My Enrollments is not implemented yet.\n');
+            return 'ENROLLMENT_MENU';
+
+        case '4':
+            console.log('\nView Section Enrollment Roster is not implemented yet.\n');
+            return 'ENROLLMENT_MENU';
+
+        case '5':
+        case 'back':
+        case 'main':
+            return 'MAIN_MENU';
+
+        case '6':
+        case 'logout':
+            return 'LOGOUT';
+
+        case '7':
+        case 'exit':
+            return 'EXIT';
+
+        default:
+            console.log('\nInvalid selection.\n');
+            return 'ENROLLMENT_MENU';
+    }
+}
+
+// Sections menu
+async function sectionsMenu(context) {
+    console.log('**** SECTIONS MENU ****');
+    console.log('Enter the number that corresponds to your choice.');
+    console.log('1. Get Section Info');
+    console.log('2. View Sections by Course');
+    console.log('3. Add New Section');
+    console.log('4. Update Existing Section');
+    console.log('5. Remove an Existing Section');
+    console.log('6. Return to Main Menu');
+    console.log('7. Logout');
+    console.log('8. Exit');
+
+    const selection = (await rl.question('Select an option: ')).trim();
+
+    switch (selection.toLowerCase()) {
+        case '1':
+            console.log('\nGet Section Info is not implemented yet.\n');
+            return 'SECTIONS_MENU';
+
+        case '2':
+            console.log('\nView Sections by Course is not implemented yet.\n');
+            return 'SECTIONS_MENU';
+
+        case '3':
+            console.log('\nAdd New Section is not implemented yet.\n');
+            return 'SECTIONS_MENU';
+
+        case '4':
+            console.log('\nUpdate Existing Section is not implemented yet.\n');
+            return 'SECTIONS_MENU';
+
+        case '5':
+            console.log('\nRemove an Existing Section is not implemented yet.\n');
+            return 'SECTIONS_MENU';
+
+        case '6':
+        case 'back':
+        case 'main':
+            return 'MAIN_MENU';
+
+        case '7':
+        case 'logout':
+            return 'LOGOUT';
+
+        case '8':
+        case 'exit':
+            return 'EXIT';
+
+        default:
+            console.log('\nInvalid selection.\n');
+            return 'SECTIONS_MENU';
+    }
+}
+
+// Prerequisites menu
+async function prerequisitesMenu(context) {
+    console.log('**** PREREQUISITES MENU ****');
+    console.log('Enter the number that corresponds to your choice.');
+    console.log('1. View Prerequisites for a Course');
+    console.log('2. Add a Prerequisite');
+    console.log('3. Remove a Prerequisite');
+    console.log('4. Validate Prerequisite Chain');
+    console.log('5. Return to Main Menu');
+    console.log('6. Logout');
+    console.log('7. Exit');
+
+    const selection = (await rl.question('Select an option: ')).trim();
+
+    switch (selection.toLowerCase()) {
+        case '1':
+            console.log('\nView Prerequisites for a Course is not implemented yet.\n');
+            return 'PREREQUISITES_MENU';
+
+        case '2':
+            console.log('\nAdd a Prerequisite is not implemented yet.\n');
+            return 'PREREQUISITES_MENU';
+
+        case '3':
+            console.log('\nRemove a Prerequisite is not implemented yet.\n');
+            return 'PREREQUISITES_MENU';
+
+        case '4':
+            console.log('\nValidate Prerequisite Chain is not implemented yet.\n');
+            return 'PREREQUISITES_MENU';
+
+        case '5':
+        case 'back':
+        case 'main':
+            return 'MAIN_MENU';
+
+        case '6':
+        case 'logout':
+            return 'LOGOUT';
+
+        case '7':
+        case 'exit':
+            return 'EXIT';
+
+        default:
+            console.log('\nInvalid selection.\n');
+            return 'PREREQUISITES_MENU';
+    }
+}
 
 main();

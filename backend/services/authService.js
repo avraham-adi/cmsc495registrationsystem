@@ -23,6 +23,11 @@ class AuthService {
         const user = new User(email);
         await user.init();
         
+        const result = await this.firstLoginCheck(user);
+        if (result === true) {
+            return user;
+        }
+
         const passwordCheck = await bcrypt.compare(password, user.getPasswordHash());
 
         if (passwordCheck === false) {
@@ -85,7 +90,18 @@ class AuthService {
         return null;
     }
 
-    //async authorizeRole(user, allowedRoles) {}
+    async getUserInfo(user) {
+        await user.refresh();
+        return user.getUserInfo();
+    }
+
+    async updateUserInfo(user, name, email) {
+        const userID = user.getUserID();
+        await db.queryAdm(
+            'UPDATE users SET name = ?, email = ? WHERE user_id = ?',
+            [name, email, userID]
+        );
+    }
 
     async logoutUser(user) {
         const dbUser = new User(user.getEmail());

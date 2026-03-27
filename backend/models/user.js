@@ -96,10 +96,7 @@ class User {
     }
 
     compareUser(user) {
-        if (this.getUserInfo() == user.getUserInfo()) {
-            return true;
-        }
-        return false;
+        return JSON.stringify(this.getUserInfo()) === JSON.stringify(user.getUserInfo());
     }
 
     getUserID() {

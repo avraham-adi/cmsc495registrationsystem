@@ -1,7 +1,5 @@
 // Given the current STATE, direct the call from COURSES_MENU to the appropriate service call.
 
-//import * as readline from 'node:readline/promises';
-//import { stdin as input, stdout as output } from 'node:process';
 import AuthService from '../services/authService.js';
 
 class AuthController {
@@ -45,6 +43,47 @@ class AuthController {
     async logoutUser(user) {
         const logout = await this.as.logoutUser(user);
         return logout;
+    }
+
+    // Display User Info
+    async getUserInfo(user) {
+        const userInfo = await this.as.getUserInfo(user);
+        return userInfo;
+    }
+
+    async updateUserInfo(user) {
+        const changeSelection = (
+            await this.rl.question(
+                'What would you like to change?\n1. Name\n2. Email\n3. Password\n\n\nEnter all numbers you wish to change: '
+            )
+        ).trim();
+
+        let bool = false;
+        let name = user.getName();
+        let email = user.getEmail();
+        for (let char of changeSelection) {
+            if (char == '1') {
+                name = (await this.rl.question('Please enter the Course Title: ')).trim();
+                bool = true;
+            } else if (char == '2') {
+                email = (await this.rl.question('Please enter the Course Description: ')).trim();
+                bool = true;
+            }
+
+            if (bool === true) {
+                // Update information
+                this.as.updateUserInfo(user, name, email);
+            }
+
+            if (char == '3') {
+                this.changePassword(email);
+            }
+
+            bool = false;
+        }
+
+        user.refresh();
+        return user;
     }
 }
 
