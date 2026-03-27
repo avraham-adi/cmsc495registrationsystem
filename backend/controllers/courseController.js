@@ -71,7 +71,7 @@ class CourseController {
 
             if (bool === true) {
                 // Update information
-                this.cs.updateCourse(selection, cct, ccd, ccc);
+                await this.cs.updateCourse(selection, cct, ccd, ccc);
             }
 
             bool = false;
@@ -83,7 +83,7 @@ class CourseController {
         const selection = (await this.rl.question('Please enter the Course Code: ')).trim();
 
         try {
-            this.cs.removeCourse(selection);
+            await this.cs.removeCourse(selection);
             console.log('\n\n\nCourse successfully removed!\n\n\n');
         } catch (err) {
             console.error(err);

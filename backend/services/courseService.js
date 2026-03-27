@@ -35,6 +35,11 @@ class CourseService {
     // Gets course information from memory
     getCourseInfo(course_code) {
         const course = this.#course_map.get(course_code);
+
+        if (!course) {
+            return console.log('Course not found.');
+        }
+
         return [course.course_id, course_code, course.title, course.description, course.credits];
     }
 
@@ -109,6 +114,7 @@ class CourseService {
     }
 
     async refresh() {
+        this.#course_map.clear();
         await this.init();
     }
 }
