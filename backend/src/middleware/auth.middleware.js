@@ -93,5 +93,5 @@ function firstLoginMiddleware(options = {}) {
     };
 }
 
-export { firstLoginMiddleware };
+export { firstLoginMiddleware, authMiddleware };
 export default authMiddleware;

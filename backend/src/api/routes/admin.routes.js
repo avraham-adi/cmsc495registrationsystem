@@ -13,10 +13,10 @@ const adminController = new AdminController();
 router.use(authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN'));
 
 // Admin-only routes
-router.post('/users', validateBody(addUserSchema), adminController.addUser);
-router.patch('/users/:id/role', validateParams(idParamSchema), validateBody(setUserRoleSchema), adminController.setUserRole);
-router.delete('/users/:id', validateParams(idParamSchema), adminController.removeUser);
-router.get('/users/:id', validateParams(idParamSchema), adminController.getUserByID);
-router.get('/users', validateQuery(getAllUsersQuerySchema), adminController.getAllUsers);
+router.post('/admin', validateBody(addUserSchema), adminController.addUser);
+router.put('/admin/:id/role', validateParams(idParamSchema), validateBody(setUserRoleSchema), adminController.setUserRole);
+router.delete('/admin/:id', validateParams(idParamSchema), adminController.removeUser);
+router.get('/admin/:id', validateParams(idParamSchema), adminController.getUserByID);
+router.get('/admin', validateQuery(getAllUsersQuerySchema), adminController.getAllUsers);
 
 export default router;

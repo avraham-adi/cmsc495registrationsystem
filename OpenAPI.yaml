@@ -1,0 +1,458 @@
+openapi: 3.1.0
+info: 
+  title: Course Registration System - OpenAPI 3.1
+  description: |-
+    This is the Course Registration System developed by Group Delta for the CMSC495 Computer Science Capstone Project.
+  contact:
+    url: https://github.com/avraham-adi/cmsc495registrationsystem
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Read the README.md file in the GitHub repository for more information.
+  url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
+servers:
+  - url: http://127.0.0.1:3000
+tags:
+  - name: auth
+    description: Authentication and token generation
+    externalDocs:
+      description: Read More
+      url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
+  - name: admin
+    description: Admin operations
+    externalDocs:
+      description: Read More
+      url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
+  - name: course
+    description: Course CRUD
+    externalDocs:
+      description: Read More
+      url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
+  - name: prerequisite
+    description: View and add prerequisites
+    externalDocs:
+      description: Read More
+      url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
+  - name: semester
+    description: View and add semesters
+    externalDocs:
+      description: Read More
+      url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
+  - name: section
+    description: Section CRUD and waitlist access codes
+    externalDocs:
+      description: Read More
+      url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
+  - name: enrollment
+    description: Enrollment CRUD
+    externalDocs:
+      description: Read More
+      url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
+paths:
+  /login:
+    get:
+      tags:
+        - auth
+      summary: Logs user into the system
+      description: log user into the system
+      operationId: login
+      parameters:
+        - name: email
+          in: query
+          description: The user email for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The user password for login
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Login'
+        '400':
+          description: Missing credentials in body
+        '401':
+          description: Invalid email and/or password
+      security:
+        - type: oauth2
+        - flows:
+          - password:
+            - tokenUrl: https://example.com/api/oauth2/token
+            - refreshUrl: https://example.com/api/oauth2/login
+            - scopes:
+              - write: Modify own user account
+              - read: Read own user account
+  /logout:
+    get:
+      tags:
+        - auth
+      summary: Logs user out of the system
+      description: Log user out of the system
+      operationId: logout
+      parameters: []
+      responses:
+        '200':
+          description: successful operation
+  /user/{id}:
+    get:
+      tags:
+        - auth
+      summary: Gets an object containing the current user.
+      description: Get an object containing the current user.
+      operationId: getCurrentUser
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+        '401':
+          description: Invalid or missing token
+        '404':
+          description: User not found
+      security:
+        - type: http
+        - scheme: bearer
+        - bearerFormat: JWT
+    patch:
+      tags:
+        - auth
+      summary: Changes the password for the current user
+      description: Change the password for the current user
+      operationId: changePassword
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+        - name: password
+          in: query
+          description: The new password
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Password changed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+      security:
+        - type: http
+        - scheme: bearer
+        - bearerFormat: JWT
+    put:
+      tags:
+        - auth
+      summary: Updates the current user
+      description: Update the current user
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+      security:
+        - type: http
+        - scheme: bearer
+        - bearerFormat: JWT
+  /admin:
+    get:
+      tags:
+        - admin
+      summary: Gets all users sorted into pages
+      description: Get all users sorted into pages
+      operationId: getAllUsers
+      parameters:
+        - name: page
+          in: query
+          description: Page number, default = 1
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: number of items per page, default = 10
+          required: true
+          schema:
+            type: integer
+        - name: search
+          in: query
+          description: Search string
+          required: false
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: role filter, one of ADMIN, STUDENT, PROFESSOR
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Login'
+      security:
+        - auth:
+          - role: ADMIN
+    post:
+      tags:
+        - admin
+      summary: Adds a new user
+      description: Add a new user
+      operationId: addUser
+      parameters:
+        - name: name
+          in: query
+          description: User name
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: User email
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: role attribute (string)
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: User role (one of ADMIN, STUDENT, PROFESSOR)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Login'
+      security:
+        - auth:
+          - role: ADMIN
+  /admin/{id}:
+    get:
+      tags:
+        - admin
+      summary: Gets User by ID
+      description: Get User by ID
+      operationId: getUserByID
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Login'
+      security:
+        - auth:
+          - role: ADMIN
+    delete:
+      tags:
+        - admin
+      summary: Removes the selected user
+      description: Remove the selected user
+      operationId: removeUser
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Login'
+      security:
+        - auth:
+          - role: ADMIN
+  /admin/{id}/role:
+    put:
+      tags:
+        - admin
+      summary: Sets the user role
+      description: Set the user role
+      operationId: setUserRole
+      parameters:
+        - name: id
+          in: path
+          description:
+          required: true
+          schema:
+            type: integer
+        - name: userType
+          in: query
+          description:
+          required: true
+          schema:
+            type: string
+        - name: roleDetails
+          in: query
+          description:
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Login'
+      security:
+        - auth:
+          - role: ADMIN
+
+  /course:
+
+components:
+  schemas:
+    Login:
+      type: object
+      properties:
+        message:
+          type: string
+        firstLogin:
+          type: boolean
+        token:
+          type: string
+          format: password
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int32
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+            first_login:
+              type: boolean
+            role:
+              type: string
+            role_id:
+              type: integer
+            role_details:
+              type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        first_login:
+          type: boolean
+        role:
+          type: string
+        role_id:
+          type: integer
+        role_details:
+          type: string
+    AuthUser:
+      type: object
+      properties:
+        token:
+          type: string
+          format: password
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int32
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+            first_login:
+              type: boolean
+            role:
+              type: string
+            role_id:
+              type: integer
+            role_details:
+              type: string

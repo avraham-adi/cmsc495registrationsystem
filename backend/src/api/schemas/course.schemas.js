@@ -10,10 +10,10 @@ const courseCodeSchema = z
 
 // Validation schema for course-related operations
 export const courseBodySchema = z.object({
-    courseCode: courseCodeSchema,
-    courseTitle: z.string().trim().min(1).max(100),
-    courseDescription: z.string().trim().min(1),
-    courseCredits: z.coerce.number().int().positive(),
+    code: courseCodeSchema,
+    title: z.string().trim().min(1).max(100),
+    desc: z.string().trim().min(1),
+    cred: z.coerce.number().int().positive(),
 });
 
 export const getAllCoursesQuerySchema = paginationQuerySchema.extend({

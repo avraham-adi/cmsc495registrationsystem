@@ -1,18 +1,18 @@
 // Middleware to validate incoming requests using Zod schemas to simplify validation logic across routes.
 export function validateRequest(schema, source = 'body') {
-    return (req, res, next) => {
-        const result = schema.safeParse(req[source]);
+	return (req, res, next) => {
+		const result = schema.safeParse(req[source]);
 
-        if (!result.success) {
-            return res.status(400).json({
-                error: 'Validation failed.',
-                details: result.error.flatten(),
-            });
-        }
+		if (!result.success) {
+			return res.status(400).json({
+				error: 'Validation failed.',
+				details: result.error.flatten(),
+			});
+		}
 
-        Object.assign(req[source], result.data);
-        next();
-    };
+		Object.assign(req[source], result.data);
+		next();
+	};
 }
 
 export const validateBody = (schema) => validateRequest(schema, 'body');

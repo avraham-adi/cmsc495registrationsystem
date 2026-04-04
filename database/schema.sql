@@ -43,7 +43,7 @@ DROP TABLE IF EXISTS `registrationdb`.`admins` ;
 CREATE TABLE IF NOT EXISTS `registrationdb`.`admins` (
   `user_id` INT NOT NULL,
   `employee_id` INT NOT NULL AUTO_INCREMENT,
-  `access_level` INT NOT NULL,
+  `access_level` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`employee_id`),
   UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC) VISIBLE,
   INDEX `user_id_idx` (`user_id` ASC) VISIBLE,

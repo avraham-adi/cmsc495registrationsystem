@@ -110,22 +110,22 @@ export async function runPasswordSuite(ctx, request) {
     const initialPasswordCases = [
         {
             options: {
-                method: 'POST',
+                method: 'PATCH',
                 body: JSON.stringify({ newPassword: 'SomeValidPassword123!' }),
             },
             expectedStatus: 401,
-            failureMessage: 'POST /api/auth/change-password should reject missing token',
-            successMessage: 'POST /api/auth/change-password rejects missing token',
+            failureMessage: 'PATCH /api/auth/change-password should reject missing token',
+            successMessage: 'PATCH /api/auth/change-password rejects missing token',
         },
         {
             options: {
-                method: 'POST',
+                method: 'PATCH',
                 headers: authHeaders(ctx.nonAdminAuth.token),
                 body: JSON.stringify({}),
             },
             expectedStatus: 400,
-            failureMessage: 'POST /api/auth/change-password should reject missing new password',
-            successMessage: 'POST /api/auth/change-password rejects missing new password',
+            failureMessage: 'PATCH /api/auth/change-password should reject missing new password',
+            successMessage: 'PATCH /api/auth/change-password rejects missing new password',
         },
     ];
 
@@ -136,18 +136,18 @@ export async function runPasswordSuite(ctx, request) {
     }
 
     const policyCases = [
-        ['Password', 'POST /api/auth/change-password rejects default password reuse'],
-        [ctx.passwordPolicyTests.tooShort, 'POST /api/auth/change-password rejects too-short password'],
-        [ctx.passwordPolicyTests.missingUppercase, 'POST /api/auth/change-password rejects password missing uppercase letter'],
-        [ctx.passwordPolicyTests.missingLowercase, 'POST /api/auth/change-password rejects password missing lowercase letter'],
-        [ctx.passwordPolicyTests.missingNumber, 'POST /api/auth/change-password rejects password missing number'],
-        [ctx.passwordPolicyTests.missingSpecial, 'POST /api/auth/change-password rejects password missing special character'],
-        [ctx.passwordPolicyTests.containsEmailLocalPart, 'POST /api/auth/change-password rejects password containing email local-part'],
+        ['Password', 'PATCH /api/auth/change-password rejects default password reuse'],
+        [ctx.passwordPolicyTests.tooShort, 'PATCH /api/auth/change-password rejects too-short password'],
+        [ctx.passwordPolicyTests.missingUppercase, 'PATCH /api/auth/change-password rejects password missing uppercase letter'],
+        [ctx.passwordPolicyTests.missingLowercase, 'PATCH /api/auth/change-password rejects password missing lowercase letter'],
+        [ctx.passwordPolicyTests.missingNumber, 'PATCH /api/auth/change-password rejects password missing number'],
+        [ctx.passwordPolicyTests.missingSpecial, 'PATCH /api/auth/change-password rejects password missing special character'],
+        [ctx.passwordPolicyTests.containsEmailLocalPart, 'PATCH /api/auth/change-password rejects password containing email local-part'],
     ];
 
     for (const [newPassword, successMessage] of policyCases) {
         const res = await request('/api/auth/change-password', {
-            method: 'POST',
+            method: 'PATCH',
             headers: authHeaders(ctx.nonAdminAuth.token),
             body: JSON.stringify({ newPassword }),
         });
@@ -156,12 +156,12 @@ export async function runPasswordSuite(ctx, request) {
     }
 
     const validPasswordChange = await request('/api/auth/change-password', {
-        method: 'POST',
+        method: 'PATCH',
         headers: authHeaders(ctx.nonAdminAuth.token),
         body: JSON.stringify({ newPassword: ctx.newUserUpdatedPassword }),
     });
-    assertStatus(validPasswordChange, 200, 'POST /api/auth/change-password should accept valid request');
-    logPass('POST /api/auth/change-password accepts valid authenticated request');
+    assertStatus(validPasswordChange, 200, 'PATCH /api/auth/change-password should accept valid request');
+    logPass('PATCH /api/auth/change-password accepts valid authenticated request');
 
     const oldPasswordRejected = await request('/api/auth/login', {
         method: 'POST',
@@ -186,28 +186,28 @@ export async function runUpdateUserInfoSuite(ctx, request) {
     };
 
     const withoutToken = await request('/api/auth/update-user', {
-        method: 'POST',
+        method: 'PUT',
         body: JSON.stringify(updatePayload),
     });
     assertStatus(withoutToken, 401, 'POST /api/auth/update-user should reject missing token');
-    logPass('POST /api/auth/update-user rejects missing token');
+    logPass('PUT /api/auth/update-user rejects missing token');
 
     const withInvalidToken = await request('/api/auth/update-user', {
-        method: 'POST',
+        method: 'PUT',
         headers: authHeaders('not-a-real-token'),
         body: JSON.stringify(updatePayload),
     });
-    assertStatus(withInvalidToken, 401, 'POST /api/auth/update-user should reject invalid token');
-    logPass('POST /api/auth/update-user rejects invalid token');
+    assertStatus(withInvalidToken, 401, 'PUT /api/auth/update-user should reject invalid token');
+    logPass('PUT /api/auth/update-user rejects invalid token');
 
     const missingFieldCases = [
-        [{ email: updatePayload.email }, 'POST /api/auth/update-user rejects missing name'],
-        [{ name: updatePayload.name }, 'POST /api/auth/update-user rejects missing email'],
+        [{ email: updatePayload.email }, 'PUT /api/auth/update-user rejects missing name'],
+        [{ name: updatePayload.name }, 'PUT /api/auth/update-user rejects missing email'],
     ];
 
     for (const [body, successMessage] of missingFieldCases) {
         const res = await request('/api/auth/update-user', {
-            method: 'POST',
+            method: 'PUT',
             headers: authHeaders(ctx.updatedNonAdminAuth.token),
             body: JSON.stringify(body),
         });
@@ -216,15 +216,15 @@ export async function runUpdateUserInfoSuite(ctx, request) {
     }
 
     const updateRes = await request('/api/auth/update-user', {
-        method: 'POST',
+        method: 'PUT',
         headers: authHeaders(ctx.updatedNonAdminAuth.token),
         body: JSON.stringify(updatePayload),
     });
-    assertStatus(updateRes, 200, 'POST /api/auth/update-user should accept valid authenticated request');
-    assertTruthy(updateRes.body?.token, 'POST /api/auth/update-user should return a refreshed token', updateRes.body);
-    assertEqual(updateRes.body?.user?.name, ctx.updatedUserProfile.name, 'POST /api/auth/update-user should return updated name', updateRes.body);
-    assertEqual(updateRes.body?.user?.email, ctx.updatedUserProfile.email, 'POST /api/auth/update-user should return updated email', updateRes.body);
-    logPass('POST /api/auth/update-user accepts valid authenticated request');
+    assertStatus(updateRes, 200, 'PUT /api/auth/update-user should accept valid authenticated request');
+    assertTruthy(updateRes.body?.token, 'PUT /api/auth/update-user should return a refreshed token', updateRes.body);
+    assertEqual(updateRes.body?.user?.name, ctx.updatedUserProfile.name, 'PUT /api/auth/update-user should return updated name', updateRes.body);
+    assertEqual(updateRes.body?.user?.email, ctx.updatedUserProfile.email, 'PUT /api/auth/update-user should return updated email', updateRes.body);
+    logPass('PUT /api/auth/update-user accepts valid authenticated request');
 
     ctx.updatedNonAdminAuth = {
         token: updateRes.body.token,
@@ -241,24 +241,24 @@ export async function runUpdateUserInfoSuite(ctx, request) {
     logPass('GET /api/auth/me reflects updated profile information');
 
     const passwordChangeAfterProfileUpdate = await request('/api/auth/change-password', {
-        method: 'POST',
+        method: 'PATCH',
         headers: authHeaders(ctx.updatedNonAdminAuth.token),
         body: JSON.stringify({ newPassword: ctx.finalUserPassword }),
     });
-    assertStatus(passwordChangeAfterProfileUpdate, 200, 'POST /api/auth/change-password should succeed with refreshed token after profile update');
+    assertStatus(passwordChangeAfterProfileUpdate, 200, 'PATCH /api/auth/change-password should succeed with refreshed token after profile update');
     assertTruthy(passwordChangeAfterProfileUpdate.body?.token, 'Password change after profile update should return a token', passwordChangeAfterProfileUpdate.body);
-    logPass('POST /api/auth/change-password works with refreshed token after profile update');
+    logPass('PATCH /api/auth/change-password works with refreshed token after profile update');
 
     const duplicateEmailRejected = await request('/api/auth/update-user', {
-        method: 'POST',
+        method: 'PUT',
         headers: authHeaders(ctx.updatedNonAdminAuth.token),
         body: JSON.stringify({
             name: ctx.updatedUserProfile.name,
             email: ADMIN_USER.email,
         }),
     });
-    assertStatus(duplicateEmailRejected, 409, 'POST /api/auth/update-user should reject duplicate email addresses');
-    logPass('POST /api/auth/update-user rejects duplicate email addresses');
+    assertStatus(duplicateEmailRejected, 409, 'PUT /api/auth/update-user should reject duplicate email addresses');
+    logPass('PUT /api/auth/update-user rejects duplicate email addresses');
 
     const oldEmailLoginRejected = await request('/api/auth/login', {
         method: 'POST',

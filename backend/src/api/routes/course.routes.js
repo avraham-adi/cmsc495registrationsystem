@@ -1,24 +1,28 @@
 import { Router } from 'express';
 import CourseController from '../controllers/course.controller.js';
-import authMiddleware, { firstLoginMiddleware } from '../../middleware/auth.middleware.js';
-import authorizeRoles from '../../middleware/rbac.middleware.js';
-import { validateBody, validateParams, validateQuery } from '../middleware/validateRequest.middleware.js';
-import { courseBodySchema, getAllCoursesQuerySchema } from '../schemas/course.schemas.js';
-import { courseIdParamSchema } from '../schemas/common.schema.js';
+import { authMiddleware as auth, firstLoginMiddleware as flm } from '../../middleware/auth.middleware.js';
+import { default as roles } from '../../middleware/rbac.middleware.js';
+import {
+	validateBody as body,
+	validateParams as params,
+	validateQuery as query,
+} from '../middleware/validateRequest.middleware.js';
+import { courseBodySchema as course, getAllCoursesQuerySchema as courses } from '../schemas/course.schemas.js';
+import { courseIdParamSchema as id } from '../schemas/common.schema.js';
 
-const router = Router();
-const courseController = new CourseController();
+const r = Router();
+const c = new CourseController();
 
 // Public Course Routes
-router.get('/:courseId', validateParams(courseIdParamSchema), courseController.getCourseInfo);
-router.get('/', validateQuery(getAllCoursesQuerySchema), courseController.getAllCourses);
+r.get('/:courseId', params(id), c.getInfo);
+r.get('/', query(courses), c.getCourses);
 
 // Apply auth + first-login + ADMIN role to all routes below
-router.use(authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN'));
+r.use(auth, flm(), roles('ADMIN'));
 
 // Protected Course Routes (Requires ADMIN authorization)
-router.post('/', validateBody(courseBodySchema), courseController.addNewCourse);
-router.patch('/:courseId', validateParams(courseIdParamSchema), validateBody(courseBodySchema), courseController.updateCourse);
-router.delete('/:courseId', validateParams(courseIdParamSchema), courseController.removeCourse);
+r.post('/', body(course), c.addCourse);
+r.put('/:courseId', params(id), body(course), c.updateCourse);
+r.delete('/:courseId', params(id), c.removeCourse);
 
-export default router;
+export default r;

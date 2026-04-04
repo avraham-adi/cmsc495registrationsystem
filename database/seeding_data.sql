@@ -23,7 +23,7 @@ ALTER TABLE `students` AUTO_INCREMENT = 10000000;
 ALTER TABLE `enrollments` AUTO_INCREMENT = 1;
 
 INSERT INTO `users` (`name`, `email`, `password_hash`, `first_login`) VALUES
-('Christian Horner', 'horne_chri87@gmail.com', '$2b$10$C2w4QzmAJrZiePIcjTGZrOpLsqRMHk5AzCujHyk2xT/RR45.NiNkO', '0');
+('Christian Horner', 'horne_chri87@gmail.com', '$2b$10$C2w4QzmAJrZiePIcjTGZrOpLsqRMHk5AzCujHyk2xT/RR45.NiNkO', '0'),
 ('Toto Wolff', 'wolff_toto00@gmail.com', '$2b$10$6X9t36ieKXmVr8v8/8nbwO4jRJ9uSgYzQJod/ul8EFp.pdlHj8xGm', 1),
 ('James Vowles', 'vowle_jame00@gmail.com', '$2b$10$Sp0rGH/DFAVajsvUzCqQj.U2K2Fl8CL7tvrh3lqE4qOV39f5XEvtq', 1),
 ('Zak Brown', 'brown_zak00@gmail.com', '$2b$10$gT4l/chl8/m2BNGFfDovt.9qqFlYjiUhm3dJsgtueuhd67i16HLYK', 1),

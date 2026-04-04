@@ -31,16 +31,16 @@ export function createTestContext() {
         },
         courseTest: {
             create: {
-                courseCode: `APIT${String(now).slice(-3)}`,
-                courseTitle: `API Test Course ${now}`,
-                courseDescription: 'Created by apiTestRunner for CRUD validation.',
-                courseCredits: 3,
+                code: `APIT${String(now).slice(-3)}`,
+                title: `API Test Course ${now}`,
+                desc: 'Created by apiTestRunner for CRUD validation.',
+                cred: 3,
             },
             update: {
-                courseCode: `APUT${String(now + 1).slice(-3)}`,
-                courseTitle: `Updated API Test Course ${now + 1}`,
-                courseDescription: 'Updated by apiTestRunner for CRUD validation.',
-                courseCredits: 4,
+                code: `APUT${String(now + 1).slice(-3)}`,
+                title: `Updated API Test Course ${now + 1}`,
+                desc: 'Updated by apiTestRunner for CRUD validation.',
+                cred: 4,
             },
         },
         sectionTest: {
