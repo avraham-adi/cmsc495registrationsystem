@@ -10,7 +10,7 @@ class EnrollmentService {
         this.pre = new PrerequisiteService();
     }
 
-    async addEnroll(studentId, sectionId, actingUser, accessCode = null) {
+    async addEnroll(studentId, sectionId, actingUser) {
         this.verifyOwn(studentId, actingUser);
 
         const s = await db.query('SELECT * FROM students WHERE student_id = ?', [studentId]);
@@ -37,13 +37,6 @@ class EnrollmentService {
         const e = await db.query('SELECT * FROM enrollments WHERE student_id = ? AND section_id = ? LIMIT 1', [studentId, sectionId]);
         if (e.length > 0) {
             throw new Errors.ValidationError('Student already has an enrollment record for this section.');
-        }
-
-        if (accessCode) {
-            const id = await this.enrollWithCode(sectionId, studentId, null, accessCode);
-            const r = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [id]);
-            const en = Enrollment.fromPersistence(r[0]);
-            return en.toObject();
         }
 
         const id = await this.enrollHelp(sectionId, studentId);
@@ -91,35 +84,11 @@ class EnrollmentService {
                 throw new Errors.ValidationError('Only waitlisted records can be moved to enrolled.');
             }
 
-            if (accessCode) {
-                await this.enrollWithCode(cur.section_id, null, enrollmentId, accessCode);
-            } else {
-                const con = await db.getConnection();
-                try {
-                    await db.beginTransaction(con);
-
-                    const s = await db.queryWithConnection(con, 'SELECT capacity FROM sections WHERE section_id = ? FOR UPDATE', [cur.section_id]);
-                    const e = await db.queryWithConnection(con, 'SELECT enrollment_id, status FROM enrollments WHERE section_id = ? ORDER BY enrollment_id ASC FOR UPDATE', [cur.section_id]);
-                    const cnt = e.filter((row) => row.status === 'enrolled').length;
-                    const first = e.find((row) => row.status === 'waitlisted');
-
-                    if (cnt >= Number(s[0].capacity)) {
-                        throw new Errors.SectionFullError(cur.section_id);
-                    }
-
-                    if (!first || Number(first.enrollment_id) !== Number(enrollmentId)) {
-                        throw new Errors.ValidationError('Only the next waitlisted student may be promoted.');
-                    }
-
-                    await db.queryWithConnection(con, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', [status, enrollmentId]);
-                    await db.commit(con);
-                } catch (err) {
-                    await db.rollback(con);
-                    throw err;
-                } finally {
-                    db.releaseConnection(con);
-                }
+            if (!accessCode) {
+                throw new Errors.ValidationError('A valid access code is required to move from waitlisted to enrolled.');
             }
+
+            await this.enrollWithCode(cur.section_id, null, enrollmentId, accessCode);
         } else {
             throw new Errors.ValidationError('Manual transition to waitlisted is not allowed.');
         }
@@ -172,7 +141,7 @@ class EnrollmentService {
         try {
             await db.beginTransaction(con);
 
-            const s = await db.queryWithConnection(con, 'SELECT access_codes FROM sections WHERE section_id = ? FOR UPDATE', [sectionId]);
+            const s = await db.queryWithConnection(con, 'SELECT access_codes, capacity FROM sections WHERE section_id = ? FOR UPDATE', [sectionId]);
             if (s.length === 0) {
                 throw new Errors.NotFoundError('Section');
             }
@@ -187,6 +156,22 @@ class EnrollmentService {
             await db.queryWithConnection(con, 'UPDATE sections SET access_codes = ? WHERE section_id = ?', [JSON.stringify(codes), sectionId]);
 
             if (enrollmentId) {
+                const e = await db.queryWithConnection(
+                    con,
+                    'SELECT enrollment_id, status FROM enrollments WHERE section_id = ? ORDER BY enrollment_id ASC FOR UPDATE',
+                    [sectionId]
+                );
+                const cnt = e.filter((row) => row.status === 'enrolled').length;
+                const first = e.find((row) => row.status === 'waitlisted');
+
+                if (cnt >= Number(s[0].capacity)) {
+                    throw new Errors.SectionFullError(sectionId);
+                }
+
+                if (!first || Number(first.enrollment_id) !== Number(enrollmentId)) {
+                    throw new Errors.ValidationError('Only the next waitlisted student may be promoted.');
+                }
+
                 await db.queryWithConnection(con, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', ['enrolled', enrollmentId]);
                 await db.commit(con);
                 return enrollmentId;
@@ -223,18 +208,20 @@ class EnrollmentService {
             const cap = Number(c[0].capacity);
             const e = await db.queryWithConnection(con, 'SELECT enrollment_id, status FROM enrollments WHERE section_id = ? ORDER BY enrollment_id ASC FOR UPDATE', [sectionId]);
 
-            let cnt = e.filter((row) => row.status === 'enrolled').length;
+            const cnt = e.filter((row) => row.status === 'enrolled').length;
             const wait = e.filter((row) => row.status === 'waitlisted');
             let wc = wait.length;
 
-            if (wait.length > 0 && cnt < cap) {
+            let eCnt = cnt;
+
+            if (wait.length > 0 && eCnt < cap) {
                 for (const row of wait) {
-                    if (cnt >= cap) {
+                    if (eCnt >= cap) {
                         break;
                     }
 
                     await db.queryWithConnection(con, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', ['enrolled', row.enrollment_id]);
-                    cnt += 1;
+                    eCnt += 1;
                     wc -= 1;
                 }
             }
@@ -244,7 +231,7 @@ class EnrollmentService {
                 return;
             }
 
-            if (cnt < cap) {
+            if (eCnt < cap) {
                 try {
                     const r = await db.queryWithConnection(con, 'INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, ?)', [studentId, sectionId, 'enrolled']);
                     await db.commit(con);

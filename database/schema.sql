@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `registrationdb`.`users` (
   `email` VARCHAR(100) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `first_login` TINYINT NOT NULL DEFAULT '1',
-  `sess_ver` INT NOT NULL,
+  `sess_ver` INT NOT NULL DEFAULT '0',
   `last_login_at` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
