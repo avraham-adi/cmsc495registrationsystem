@@ -1057,7 +1057,7 @@ SELECT
   ss.`days`,
   ss.`start_time`,
   ss.`end_time`,
-  JSON_OBJECT('code1', CONCAT('AC-', LPAD(ss.`seed_id`, 4, '0'), '-1'), 'code1_used', FALSE, 'code2', CONCAT('AC-', LPAD(ss.`seed_id`, 4, '0'), '-2'), 'code2_used', FALSE, 'code3', CONCAT('AC-', LPAD(ss.`seed_id`, 4, '0'), '-3'), 'code3_used', FALSE)
+  JSON_OBJECT('code1', 'A3F1-9C4B', 'code1_used', FALSE, 'code2', '7D2E-1A8F', 'code2_used', FALSE, 'code3', 'C0B7-5E92', 'code3_used', FALSE)
 FROM `seed_sections` ss
 JOIN `courses` c ON c.`course_code` = ss.`course_code`
 JOIN `semesters` sem ON sem.`term` = ss.`term` AND sem.`year` = ss.`year`

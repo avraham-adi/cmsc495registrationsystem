@@ -3,8 +3,6 @@ info:
   title: Course Registration System - OpenAPI 3.1
   description: |-
     This is the Course Registration System developed by Group Delta for the CMSC495 Computer Science Capstone Project.
-  contact:
-    url: https://github.com/avraham-adi/cmsc495registrationsystem
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -26,54 +24,59 @@ tags:
       description: Read More
       url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
   - name: course
-    description: Course CRUD
+    description: Course operations
     externalDocs:
       description: Read More
       url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
   - name: prerequisite
-    description: View and add prerequisites
+    description: Prerequisite operations
     externalDocs:
       description: Read More
       url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
   - name: semester
-    description: View and add semesters
+    description: Semester operations
     externalDocs:
       description: Read More
       url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
   - name: section
-    description: Section CRUD and waitlist access codes
+    description: Section operations and waitlist access codes
     externalDocs:
       description: Read More
       url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
   - name: enrollment
-    description: Enrollment CRUD
+    description: Enrollment operations
     externalDocs:
       description: Read More
       url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
 paths:
-  /login:
+  /user/login:
     get:
       tags:
         - auth
-      summary: Logs user into the system
-      description: log user into the system
+      summary: Log in a user
+      description: Authenticate a user, create a server-side session, and set an HttpOnly session cookie.
       operationId: login
       parameters:
         - name: email
           in: query
-          description: The user email for login
+          description: User email address
           required: true
           schema:
             type: string
         - name: password
           in: query
-          description: The user password for login
+          description: User password
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: successful login
+          description: Login completed successfully and a session cookie was issued.
+          headers:
+            Set-Cookie:
+              description: HttpOnly session cookie for subsequent authenticated requests.
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -82,46 +85,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/Login'
         '400':
-          description: Missing credentials in body
+          description: Missing credentials in the request
         '401':
           description: Invalid email and/or password
-      security:
-        - type: oauth2
-        - flows:
-          - password:
-            - tokenUrl: https://example.com/api/oauth2/token
-            - refreshUrl: https://example.com/api/oauth2/login
-            - scopes:
-              - write: Modify own user account
-              - read: Read own user account
-  /logout:
+  /user/logout:
     get:
       tags:
         - auth
-      summary: Logs user out of the system
-      description: Log user out of the system
+      summary: Log out the current user
+      description: End the current authenticated session.
       operationId: logout
       parameters: []
       responses:
         '200':
-          description: successful operation
-  /user/{id}:
+          description: Logout completed successfully and the session cookie was cleared.
+          headers:
+            Set-Cookie:
+              description: Expired session cookie clearing the authenticated session.
+              schema:
+                type: string
+        '401':
+          description: Invalid or missing session
+      security:
+        - SessionAuth: []
+  /user/me:
     get:
       tags:
         - auth
-      summary: Gets an object containing the current user.
-      description: Get an object containing the current user.
-      operationId: getCurrentUser
-      parameters:
-        - name: id
-          in: path
-          description: User ID
-          required: true
-          schema:
-            type: integer
+      summary: Get the current user
+      description: Return the currently authenticated user for the active server-side session.
+      operationId: getSelf
       responses:
         '200':
-          description: successful operation
+          description: Current user returned successfully for the active session.
           content:
             application/json:
               schema:
@@ -130,29 +126,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthUser'
         '401':
-          description: Invalid or missing token
+          description: Invalid or missing session
         '404':
           description: User not found
       security:
-        - type: http
-        - scheme: bearer
-        - bearerFormat: JWT
+        - SessionAuth: []
     patch:
       tags:
         - auth
-      summary: Changes the password for the current user
-      description: Change the password for the current user
-      operationId: changePassword
+      summary: Change the current user's password
+      description: Update the password for the authenticated user within the active session.
+      operationId: updPass
       parameters:
-        - name: id
-          in: path
-          description: User ID
-          required: true
-          schema:
-            type: integer
         - name: password
           in: query
-          description: The new password
+          description: New password
           required: true
           schema:
             type: string
@@ -166,26 +154,23 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/AuthUser'
+        '400':
+          description: Invalid password or request body
+        '401':
+          description: Invalid or missing session
+        '404':
+          description: User not found
       security:
-        - type: http
-        - scheme: bearer
-        - bearerFormat: JWT
+        - SessionAuth: []
     put:
       tags:
         - auth
-      summary: Updates the current user
-      description: Update the current user
-      operationId: updateUser
-      parameters:
-        - name: id
-          in: path
-          description: User ID
-          required: true
-          schema:
-            type: integer
+      summary: Update the current user
+      description: Update the authenticated user's profile information within the active session.
+      operationId: updUser
       responses:
         '200':
-          description:
+          description: Updated user information returned successfully.
           content:
             application/json:
               schema:
@@ -193,17 +178,23 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/AuthUser'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Invalid or missing session
+        '404':
+          description: User not found
+        '409':
+          description: User with this email already exists
       security:
-        - type: http
-        - scheme: bearer
-        - bearerFormat: JWT
+        - SessionAuth: []
   /admin:
     get:
       tags:
         - admin
-      summary: Gets all users sorted into pages
-      description: Get all users sorted into pages
-      operationId: getAllUsers
+      summary: List users
+      description: Return a paginated list of users. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: getUsers
       parameters:
         - name: page
           in: query
@@ -213,40 +204,45 @@ paths:
             type: integer
         - name: limit
           in: query
-          description: number of items per page, default = 10
+          description: Items per page, default is 10
           required: true
           schema:
             type: integer
         - name: search
           in: query
-          description: Search string
+          description: Search term
           required: false
           schema:
             type: string
         - name: role
           in: query
-          description: role filter, one of ADMIN, STUDENT, PROFESSOR
+          description: "Role filter: ADMIN, STUDENT, or PROFESSOR"
           required: false
           schema:
             type: string
       responses:
         '200':
-          description:
+          description: Paginated user list returned successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/UserMeta'
             application/xml:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/UserMeta'
+        '400':
+          description: Invalid role filter
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
       security:
-        - auth:
-          - role: ADMIN
+        - SessionAuth: []
     post:
       tags:
         - admin
-      summary: Adds a new user
-      description: Add a new user
+      summary: Create a user
+      description: Create a new user account. Requires role ADMIN. Role is verified server-side for the session user.
       operationId: addUser
       parameters:
         - name: name
@@ -261,38 +257,45 @@ paths:
           required: true
           schema:
             type: string
-        - name: role
+        - name: detail
           in: query
-          description: role attribute (string)
+          description: Role-specific detail value
           required: true
           schema:
             type: string
         - name: type
           in: query
-          description: User role (one of ADMIN, STUDENT, PROFESSOR)
+          description: "User role: ADMIN, STUDENT, or PROFESSOR"
           required: true
           schema:
             type: string
       responses:
-        '200':
-          description:
+        '201':
+          description: User created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/User'
             application/xml:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '409':
+          description: User with this email already exists
       security:
-        - auth:
-          - role: ADMIN
+        - SessionAuth: []
   /admin/{id}:
     get:
       tags:
         - admin
-      summary: Gets User by ID
-      description: Get User by ID
-      operationId: getUserByID
+      summary: Get a user by ID
+      description: Return a user by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: getUser
       parameters:
         - name: id
           in: path
@@ -302,23 +305,28 @@ paths:
             type: integer
       responses:
         '200':
-          description:
+          description: User details returned successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/User'
             application/xml:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: User not found
       security:
-        - auth:
-          - role: ADMIN
+        - SessionAuth: []
     delete:
       tags:
         - admin
-      summary: Removes the selected user
-      description: Remove the selected user
-      operationId: removeUser
+      summary: Delete a user
+      description: Delete a user by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: rmvUser
       parameters:
         - name: id
           in: path
@@ -328,90 +336,995 @@ paths:
             type: integer
       responses:
         '200':
-          description:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Login'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Login'
+          description: User removed successfully.
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required, and admins cannot remove their own account or the last remaining admin"
+        '404':
+          description: User not found
       security:
-        - auth:
-          - role: ADMIN
+        - SessionAuth: []
   /admin/{id}/role:
     put:
       tags:
         - admin
-      summary: Sets the user role
-      description: Set the user role
-      operationId: setUserRole
+      summary: Update a user's role
+      description: Set the role and role details for a user. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: setRole
       parameters:
         - name: id
           in: path
-          description:
+          description: User ID
           required: true
           schema:
             type: integer
-        - name: userType
+        - name: type
           in: query
-          description:
+          description: Target role type
           required: true
           schema:
             type: string
-        - name: roleDetails
+        - name: detail
           in: query
-          description:
+          description: Role-specific detail value
           required: true
           schema:
             type: string
       responses:
         '200':
-          description:
+          description: User role updated successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/User'
             application/xml:
               schema:
-                $ref: '#/components/schemas/Login'
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid user type or request body
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required, and admins cannot remove their own admin role or the last remaining admin role"
+        '404':
+          description: User not found
       security:
-        - auth:
-          - role: ADMIN
-
+        - SessionAuth: []
   /course:
+    get:
+      tags:
+        - course
+      summary: List courses
+      description: Return a paginated list of courses.
+      operationId: getCourses
+      parameters:
+        - name: page
+          in: query
+          description: Page number, default = 1
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Items per page, default is 10
+          required: true
+          schema:
+            type: integer
+        - name: search
+          in: query
+          description: Search term
+          required: false
+          schema:
+            type: string
+        - name: subject
+          in: query
+          description: Subject code filter
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated course list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseMeta'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/CourseMeta'
+        '400':
+          description: Invalid query parameters
+    post:
+      tags:
+        - course
+      summary: Create a course
+      description: Create a new course. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: addCourse
+      parameters:
+        - name: code
+          in: query
+          description: Course code
+          required: true
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: Course title
+          required: true
+          schema:
+            type: string
+        - name: desc
+          in: query
+          description: Course description
+          required: true
+          schema:
+            type: string
+        - name: cred
+          in: query
+          description: Course credits
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Course created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '409':
+          description: Course with this course code already exists
+        '500':
+          description: Failed to retrieve newly created course
+      security:
+        - SessionAuth: []
+  /course/{id}:
+    get:
+      tags:
+        - course
+      summary: Get a course by ID
+      description: Return course details for a specific course.
+      operationId: getCourse
+      parameters:
+        - name: id
+          in: path
+          description: Course ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Course details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '404':
+          description: Course not found
+    put:
+      tags:
+        - course
+      summary: Update a course
+      description: Update course details. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: updCourse
+      parameters:
+        - name: id
+          in: path
+          description: Course ID
+          required: true
+          schema:
+            type: integer
+        - name: code
+          in: query
+          description: Course code
+          required: true
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: Course title
+          required: true
+          schema:
+            type: string
+        - name: desc
+          in: query
+          description: Course description
+          required: true
+          schema:
+            type: string
+        - name: cred
+          in: query
+          description: Course credits
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Course updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: Course not found
+        '409':
+          description: Course with this course code already exists
+        '500':
+          description: Failed to retrieve updated course
+      security:
+        - SessionAuth: []
+    delete:
+      tags:
+        - course
+      summary: Delete a course
+      description: Delete a course by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: rmvCourse
+      parameters:
+        - name: id
+          in: path
+          description: Course ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Course removed successfully.
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: Course not found
+        '400':
+          description: Cannot delete a course that has scheduled sections
+      security:
+        - SessionAuth: []
+  /prerequisite:
+    post:
+      tags:
+        - prerequisite
+      summary: Create a prerequisite
+      description: Add a prerequisite relationship to a course. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: addPrerequisite
+      parameters:
+        - name: cId
+          in: query
+          description: Course ID
+          required: true
+          schema:
+            type: integer
+        - name: pId
+          in: query
+          description: Prerequisite ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Prerequisite created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prerequisite'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Prerequisite'
+        '400':
+          description: Invalid request body or a course cannot be its own prerequisite
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: One or more courses not found
+        '409':
+          description: Prerequisite relationship already exists or would create a cycle
+        '500':
+          description: Failed to add prerequisite relationship
+      security:
+        - SessionAuth: []
+  /prerequisite/{id}:
+    get:
+      tags:
+        - prerequisite
+      summary: List course prerequisites
+      description: Return the prerequisites for a course.
+      operationId: getPrerequisites
+      parameters:
+        - name: id
+          in: path
+          description: Course ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Course prerequisites returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrerequisiteArray'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/PrerequisiteArray'
+        '404':
+          description: Course not found
+  /prerequisite/{cId}/{pId}:
+    delete:
+      tags:
+        - prerequisite
+      summary: Delete a prerequisite
+      description: Remove a prerequisite relationship from a course. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: rmvPrerequisite
+      parameters:
+        - name: cId
+          in: path
+          description: Course ID
+          required: true
+          schema:
+            type: integer
+        - name: pId
+          in: path
+          description: Prerequisite course ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Prerequisite removed successfully.
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: Prerequisite relationship not found
+      security:
+        - SessionAuth: []
+  /semester:
+    get:
+      tags:
+        - semester
+      summary: List semesters
+      description: Return all semesters.
+      operationId: getSemesters
+      parameters:
+      responses:
+        '200':
+          description: Semester list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemesterArray'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SemesterArray'
+    post:
+      tags:
+        - semester
+      summary: Create a semester
+      description: Create a new semester. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: addSemester
+      parameters:
+        - name: term
+          in: query
+          description: Semester term
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: query
+          description: Semester year
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Semester created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Semester'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Semester'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '409':
+          description: Semester already exists
+      security:
+        - SessionAuth: []
+  /semester/{id}:
+    get:
+      tags:
+        - semester
+      summary: Get a semester by ID
+      description: Return a semester by ID.
+      operationId: getSemester
+      parameters:
+        - name: id
+          in: path
+          description: Semester ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Semester details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Semester'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Semester'
+        '404':
+          description: Semester not found
+    delete:
+      tags:
+        - semester
+      summary: Delete a semester
+      description: Delete a semester by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: rmvSemester
+      parameters:
+        - name: id
+          in: path
+          description: Semester ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Semester removed successfully.
+        '400':
+          description: Cannot delete a semester that has scheduled sections
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: Semester not found
+      security:
+        - SessionAuth: []
+  /section:
+    get:
+      tags:
+        - section
+      summary: List sections
+      description: Return a paginated list of sections.
+      operationId: getSections
+      parameters:
+        - name: page
+          in: query
+          description: Page number, default = 1
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Items per page, default is 10
+          required: true
+          schema:
+            type: integer
+        - name: search
+          in: query
+          description: Search term
+          required: true
+          schema:
+            type: string
+        - name: crsId
+          in: query
+          description: Course ID, default = null
+          required: false
+          schema:
+            type: string
+        - name: semId
+          in: query
+          description: Semester ID, default = null
+          required: false
+          schema:
+            type: string
+        - name: profId
+          in: query
+          description: Professor ID, default = null
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated section list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionMeta'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SectionMeta'
+        '400':
+          description: Invalid query parameters
+  /section/{cId}:
+    post:
+      tags:
+        - section
+      summary: Create a section
+      description: Create a new section for a course. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: addSection
+      parameters:
+        - name: cId
+          in: path
+          description: Course ID
+          required: true
+          schema:
+            type: integer
+        - name: semId
+          in: query
+          description: Semester ID
+          required: true
+          schema:
+            type: integer
+        - name: profId
+          in: query
+          description: Professor ID
+          required: true
+          schema:
+            type: integer
+        - name: capacity
+          in: query
+          description: Section capacity
+          required: true
+          schema:
+            type: integer
+        - name: days
+          in: query
+          description: Section scheduled days
+          required: false
+          schema:
+            type: string
+        - name: startTm
+          in: query
+          description: Start time (HH:MM:SS)
+          required: false
+          schema:
+            type: string
+        - name: endTm
+          in: query
+          description: End time (HH:MM:SS)
+          required: false
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Section created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Section'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: Course, semester, or professor not found
+        '500':
+          description: Failed to retrieve newly created section
+      security:
+        - SessionAuth: []
+  /section/{id}:
+    get:
+      tags:
+        - section
+      summary: Get a section by ID
+      description: Return section details for a specific section.
+      operationId: getSection
+      parameters:
+        - name: id
+          in: path
+          description: Section ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Section details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Section'
+        '404':
+          description: Section not found
+    put:
+      tags:
+        - section
+      summary: Update a section
+      description: Update section details. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: updSection
+      parameters:
+        - name: id
+          in: path
+          description: Section ID
+          required: true
+          schema:
+            type: integer
+        - name: semId
+          in: query
+          description: Semester ID
+          required: true
+          schema:
+            type: integer
+        - name: profId
+          in: query
+          description: Professor ID
+          required: true
+          schema:
+            type: integer
+        - name: capacity
+          in: query
+          description: Section capacity
+          required: true
+          schema:
+            type: integer
+        - name: days
+          in: query
+          description: Section scheduled days
+          required: false
+          schema:
+            type: string
+        - name: startTm
+          in: query
+          description: Start time (HH:MM:SS)
+          required: false
+          schema:
+            type: string
+        - name: endTm
+          in: query
+          description: End time (HH:MM:SS)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Section updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Section'
+        '400':
+          description: Invalid request body or section capacity below current enrollment
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: Section, semester, or professor not found
+        '500':
+          description: Failed to retrieve updated section
+      security:
+        - SessionAuth: []
+    delete:
+      tags:
+        - section
+      summary: Delete a section
+      description: Delete a section by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: rmvSection
+      parameters:
+        - name: id
+          in: path
+          description: Section ID
+          required: true
+          schema: 
+            type: integer
+      responses:
+        '200':
+          description: Section removed successfully.
+        '400':
+          description: Cannot delete a section that has enrollments
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: Section not found
+      security:
+        - SessionAuth: []
+  /section/{id}/access-codes:
+    get:
+      tags:
+        - section
+      summary: List access codes
+      description: Return access codes for a section. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only access their own sections.
+      operationId: getAcCodes
+      parameters:
+        - name: id
+          in: path
+          description: Section ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Access codes returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessCode'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AccessCode'
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required, or PROFESSOR for the specified section"
+        '404':
+          description: Section not found
+      security:
+        - SessionAuth: []
+    post:
+      tags:
+        - section
+      summary: Generate access codes
+      description: Generate additional access codes for a section. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only manage their own sections.
+      operationId: genAcCodes
+      parameters:
+        - name: id
+          in: path
+          description: Section ID
+          required: true
+          schema:
+            type: integer
+        - name: numCodes
+          in: query
+          description: Number of codes to generate
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: New access codes generated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessCode'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/AccessCode'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required, or PROFESSOR for the specified section"
+        '404':
+          description: Section not found
+      security:
+        - SessionAuth: []
+    delete:
+      tags:
+        - section
+      summary: Revoke access codes
+      description: Revoke selected access codes for a section. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only manage their own sections.
+      operationId: revAcCodes
+      parameters:
+        - name: id
+          in: path
+          description: Section ID
+          required: true
+          schema: 
+            type: integer
+        - name: codes
+          in: query
+          description: Access codes to revoke
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Access codes revoked successfully.
+        '400':
+          description: Invalid request body
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required, or PROFESSOR for the specified section"
+        '404':
+          description: Section not found
+      security:
+        - SessionAuth: []
+  /enrollment:
+    post:
+      tags:
+        - enrollment
+      summary: Create an enrollment
+      description: Create a new enrollment record. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments.
+      operationId: addEnrollment
+      parameters:
+        - name: secId
+          in: query
+          description: Section ID
+          required: true
+          schema:
+            type: integer
+        - name: stuId
+          in: query
+          description: Student ID
+          required: true
+          schema:
+            type: integer
+        - name: code
+          in: query
+          description: Access Code
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Enrollment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+        '400':
+          description: Invalid request body or access code
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: STUDENT or ADMIN role required"
+        '404':
+          description: Student or section not found
+        '409':
+          description: Prerequisites not met, student already enrolled, or section is full
+      security:
+        - SessionAuth: []
+  /enrollment/{id}:
+    get:
+      tags:
+        - enrollment
+      summary: Get an enrollment by ID
+      description: Return enrollment details for a specific enrollment. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only view their own enrollments.
+      operationId: getEnrollment
+      parameters:
+        - name: id
+          in: path
+          description: Enrollment ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Enrollment details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: STUDENT or ADMIN role required, and students may only access their own enrollments"
+        '404':
+          description: Enrollment not found
+      security:
+        - SessionAuth: []
+    put:
+      tags:
+        - enrollment
+      summary: Update an enrollment
+      description: Update enrollment details or status. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments.
+      operationId: updEnrollment
+      parameters:
+        - name: id
+          in: path
+          description: Enrollment ID
+          required: true
+          schema:
+            type: integer
+        - name: status
+          in: query
+          description: Enrollment status
+          required: true
+          schema:
+            type: string
+        - name: code
+          in: query
+          description: Access Code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Enrollment updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+        '400':
+          description: Invalid request body, status transition, or access code
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: STUDENT or ADMIN role required, and students may only update their own enrollments"
+        '404':
+          description: Enrollment or section not found
+        '409':
+          description: Student already enrolled, prerequisites not met, or section is full
+      security:
+        - SessionAuth: []
+    delete:
+      tags:
+        - enrollment
+      summary: Delete an enrollment
+      description: Delete an enrollment by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      operationId: rmvEnrollment
+      parameters:
+        - name: id
+          in: path
+          description: Enrollment ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Enrollment removed successfully.
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: ADMIN role required"
+        '404':
+          description: Enrollment not found
+      security:
+        - SessionAuth: []
 
 components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: sid
+      description: HttpOnly session cookie containing a session identifier. The server resolves the user from the session and verifies role server-side for restricted operations.
   schemas:
-    Login:
-      type: object
-      properties:
-        message:
-          type: string
-        firstLogin:
-          type: boolean
-        token:
-          type: string
-          format: password
-        user:
-          type: object
-          properties:
-            id:
-              type: integer
-              format: int32
-            name:
-              type: string
-            email:
-              type: string
-              format: email
-            first_login:
-              type: boolean
-            role:
-              type: string
-            role_id:
-              type: integer
-            role_details:
-              type: string
     User:
       type: object
       properties:
@@ -431,28 +1344,173 @@ components:
           type: integer
         role_details:
           type: string
-    AuthUser:
+    Login:
+      description: Login response containing the authenticated user. The server also sets a session cookie.
       type: object
       properties:
-        token:
+        message:
           type: string
-          format: password
-        user:
+        firstLogin:
+          type: boolean
+        User:
           type: object
-          properties:
-            id:
-              type: integer
-              format: int32
-            name:
-              type: string
-            email:
-              type: string
-              format: email
-            first_login:
-              type: boolean
-            role:
-              type: string
-            role_id:
-              type: integer
-            role_details:
-              type: string
+          $ref: '#/components/schemas/User'
+    AuthUser:
+      description: Authenticated user response for a valid server-side session.
+      type: object
+      properties:
+        User:
+          type: object
+          $ref: '#/components/schemas/User'
+    UserArray:
+      type: array
+      items:
+        type: object
+        properties:
+          User:
+            $ref: '#/components/schemas/User'
+    UserMeta:
+      type: object
+      properties:
+        User:
+          type: object
+          $ref: '#/components/schemas/UserArray'
+        Meta:
+          type: object
+          $ref: '#/components/schemas/Meta'
+    Meta:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+    Course:
+      type: object
+      properties:
+        course_id:
+          type: integer
+        course_code:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        credits:
+          type: integer
+        subject:
+          type: string
+    CourseArray:
+      type: array
+      items:
+        type: object
+        properties:
+          Course:
+            $ref: '#/components/schemas/Course'
+    CourseMeta:
+      type: object
+      properties:
+        Course:
+          type: object
+          $ref: '#/components/schemas/CourseArray'
+        Meta:
+          type: object
+          $ref: '#/components/schemas/Meta'
+    Prerequisite:
+      type: object
+      properties:
+        courseId:
+          type: string
+        courseCode:
+          type: string
+        title:
+          type: string
+    PrerequisiteArray:
+      type: array
+      items:
+        type: object
+        properties:
+          Prerequisite:
+            $ref: '#/components/schemas/Prerequisite'
+    Semester:
+      type: object
+      properties:
+        semester_id:
+          type: integer
+        term:
+          type: string
+        year:
+          type: integer
+    SemesterArray:
+      type: array
+      items:
+        type: object
+        properties:
+          Semester:
+            $ref: '#/components/schemas/Semester'
+    Section:
+      type: object
+      properties:
+        section_id:
+          type: integer
+        course_id:
+          type: integer
+        semester_id:
+          type: integer
+        professor_id:
+          type: integer
+        capacity:
+          type: integer
+        days:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+    SectionArray:
+      type: array
+      items:
+        type: object
+        properties:
+          Section:
+            $ref: '#/components/schemas/Section'
+    SectionMeta:
+      type: object
+      properties:
+        Section:
+          type: object
+          $ref: '#/components/schemas/Section'
+        Meta:
+          type: object
+          $ref: '#/components/schemas/Meta'
+    Enrollment:
+      type: object
+      properties:
+        enrollment_id:
+          type: integer
+        student_id:
+          type: integer
+        section_id:
+          type: integer
+        status:
+          type: string
+          enum:
+            - enrolled
+            - waitlisted
+            - dropped
+            - completed
+    AccessCode:
+      type: object
+      properties:
+        code#:
+          type: string
+          examples:
+            - A3F1-9C4B
+        code#_used:
+          type: boolean
