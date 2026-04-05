@@ -15,9 +15,9 @@ class Section {
         this.#semester_id = semester_id;
         this.#professor_id = professor_id;
         this.#capacity = capacity;
-        this.#days = days;
-        this.#start_time = start_time;
-        this.#end_time = end_time;
+        this.#days = days || 'async';
+        this.#start_time = start_time || '';
+        this.#end_time = end_time || '';
         this.#access_codes = access_codes;
     }
 

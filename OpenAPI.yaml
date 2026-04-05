@@ -63,9 +63,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Health'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Health'
   /user/login:
     post:
       tags:
@@ -79,9 +76,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
           description: Login completed successfully and a session cookie was issued.
@@ -92,9 +86,6 @@ paths:
                 type: string
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Login'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/Login'
         '400':
@@ -135,9 +126,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthUser'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/AuthUser'
         '401':
           description: Invalid or missing session
         '404':
@@ -156,17 +144,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PasswordChangeRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/PasswordChangeRequest'
       responses:
         '200':
           description: Password changed successfully.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/AuthUser'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/AuthUser'
         '400':
@@ -189,17 +171,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserUpdateRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/UserUpdateRequest'
       responses:
         '200':
           description: Updated user information returned successfully.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/AuthUser'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/AuthUser'
         '400':
@@ -217,19 +193,19 @@ paths:
       tags:
         - admin
       summary: List users
-      description: Return a paginated list of users. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Return a paginated list of users. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: getUsers
       parameters:
         - name: page
           in: query
           description: Page number, default = 1
-          required: true
+          required: false
           schema:
             type: integer
         - name: limit
           in: query
           description: Items per page, default is 10
-          required: true
+          required: false
           schema:
             type: integer
         - name: search
@@ -251,30 +227,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserMeta'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/UserMeta'
         '400':
           description: Invalid role filter
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
       security:
         - SessionAuth: []
     post:
       tags:
         - admin
       summary: Create a user
-      description: Create a new user account. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Create a new user account. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: addUser
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/AdminUserCreateRequest'
-          application/xml:
             schema:
               $ref: '#/components/schemas/AdminUserCreateRequest'
       responses:
@@ -284,15 +254,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/User'
         '400':
-          description: Invalid query parameter
+          description: Invalid request body
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '409':
           description: User with this email already exists
       security:
@@ -302,7 +269,7 @@ paths:
       tags:
         - admin
       summary: Get a user by ID
-      description: Return a user by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Return a user by ID. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: getUser
       parameters:
         - name: id
@@ -318,13 +285,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/User'
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: User not found
       security:
@@ -333,7 +297,7 @@ paths:
       tags:
         - admin
       summary: Delete a user
-      description: Delete a user by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Delete a user by ID. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: rmvUser
       parameters:
         - name: id
@@ -348,7 +312,7 @@ paths:
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required, and admins cannot remove their own account or the last remaining admin"
+          description: "Forbidden: ADMIN role required, password change required on first login, or admins cannot remove their own account or the last remaining admin"
         '404':
           description: User not found
       security:
@@ -358,7 +322,7 @@ paths:
       tags:
         - admin
       summary: Update a user's role
-      description: Set the role and role details for a user. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Set the role and role details for a user. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: setRole
       parameters:
         - name: id
@@ -373,9 +337,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AdminUserRoleUpdateRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/AdminUserRoleUpdateRequest'
       responses:
         '200':
           description: User role updated successfully.
@@ -383,15 +344,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/User'
         '400':
           description: Invalid user type or request body
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required, and admins cannot remove their own admin role or the last remaining admin role"
+          description: "Forbidden: ADMIN role required, password change required on first login, or admins cannot remove their own admin role or the last remaining admin role"
         '404':
           description: User not found
       security:
@@ -407,13 +365,13 @@ paths:
         - name: page
           in: query
           description: Page number, default = 1
-          required: true
+          required: false
           schema:
             type: integer
         - name: limit
           in: query
           description: Items per page, default is 10
-          required: true
+          required: false
           schema:
             type: integer
         - name: search
@@ -435,24 +393,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CourseMeta'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/CourseMeta'
         '400':
           description: Invalid query parameters
     post:
       tags:
         - course
       summary: Create a course
-      description: Create a new course. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Create a new course. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: addCourse
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/CourseWriteRequest'
-          application/xml:
             schema:
               $ref: '#/components/schemas/CourseWriteRequest'
       responses:
@@ -462,15 +414,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Course'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Course'
         '400':
           description: Invalid request body
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '409':
           description: Course with this course code already exists
         '500':
@@ -498,16 +447,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Course'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Course'
         '404':
           description: Course not found
     put:
       tags:
         - course
       summary: Update a course
-      description: Update course details. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Update course details. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: updCourse
       parameters:
         - name: id
@@ -522,9 +468,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CourseWriteRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/CourseWriteRequest'
       responses:
         '200':
           description: Course updated successfully.
@@ -532,15 +475,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Course'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Course'
         '400':
           description: Invalid request body
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: Course not found
         '409':
@@ -553,7 +493,7 @@ paths:
       tags:
         - course
       summary: Delete a course
-      description: Delete a course by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Delete a course by ID. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: rmvCourse
       parameters:
         - name: id
@@ -568,7 +508,7 @@ paths:
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: Course not found
         '400':
@@ -580,15 +520,12 @@ paths:
       tags:
         - prerequisite
       summary: Create a prerequisite
-      description: Add a prerequisite relationship to a course. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Add a prerequisite relationship to a course. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: addPrerequisite
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/PrerequisiteCreateRequest'
-          application/xml:
             schema:
               $ref: '#/components/schemas/PrerequisiteCreateRequest'
       responses:
@@ -598,15 +535,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Prerequisite'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Prerequisite'
         '400':
           description: Invalid request body or a course cannot be its own prerequisite
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: One or more courses not found
         '409':
@@ -636,9 +570,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PrerequisiteArray'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/PrerequisiteArray'
         '404':
           description: Course not found
   /prerequisite/{cId}/{pId}:
@@ -646,7 +577,7 @@ paths:
       tags:
         - prerequisite
       summary: Delete a prerequisite
-      description: Remove a prerequisite relationship from a course. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Remove a prerequisite relationship from a course. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: rmvPrerequisite
       parameters:
         - name: cId
@@ -667,7 +598,7 @@ paths:
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: Prerequisite relationship not found
       security:
@@ -687,22 +618,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SemesterArray'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/SemesterArray'
     post:
       tags:
         - semester
       summary: Create a semester
-      description: Create a new semester. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Create a new semester. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: addSemester
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/SemesterWriteRequest'
-          application/xml:
             schema:
               $ref: '#/components/schemas/SemesterWriteRequest'
       responses:
@@ -712,15 +637,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Semester'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Semester'
         '400':
           description: Invalid request body
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '409':
           description: Semester already exists
       security:
@@ -746,16 +668,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Semester'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Semester'
         '404':
           description: Semester not found
     delete:
       tags:
         - semester
       summary: Delete a semester
-      description: Delete a semester by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Delete a semester by ID. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: rmvSemester
       parameters:
         - name: id
@@ -772,7 +691,7 @@ paths:
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: Semester not found
       security:
@@ -788,19 +707,19 @@ paths:
         - name: page
           in: query
           description: Page number, default = 1
-          required: true
+          required: false
           schema:
             type: integer
         - name: limit
           in: query
           description: Items per page, default is 10
-          required: true
+          required: false
           schema:
             type: integer
         - name: search
           in: query
           description: Search term
-          required: true
+          required: false
           schema:
             type: string
         - name: crsId
@@ -828,9 +747,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SectionMeta'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/SectionMeta'
         '400':
           description: Invalid query parameters
   /section/{cId}:
@@ -838,7 +754,7 @@ paths:
       tags:
         - section
       summary: Create a section
-      description: Create a new section for a course. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Create a new section for a course. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: addSection
       parameters:
         - name: cId
@@ -853,9 +769,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SectionWriteRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/SectionWriteRequest'
       responses:
         '201':
           description: Section created successfully.
@@ -863,15 +776,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Section'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Section'
         '400':
-          description: Invalid query parameter
+          description: Invalid request body
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: Course, semester, or professor not found
         '500':
@@ -899,16 +809,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Section'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Section'
         '404':
           description: Section not found
     put:
       tags:
         - section
       summary: Update a section
-      description: Update section details. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Update section details. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: updSection
       parameters:
         - name: id
@@ -923,9 +830,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SectionWriteRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/SectionWriteRequest'
       responses:
         '200':
           description: Section updated successfully.
@@ -933,15 +837,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Section'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Section'
         '400':
           description: Invalid request body or section capacity below current enrollment
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: Section, semester, or professor not found
         '500':
@@ -952,7 +853,7 @@ paths:
       tags:
         - section
       summary: Delete a section
-      description: Delete a section by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Delete a section by ID. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: rmvSection
       parameters:
         - name: id
@@ -969,7 +870,7 @@ paths:
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: Section not found
       security:
@@ -979,7 +880,7 @@ paths:
       tags:
         - section
       summary: List access codes
-      description: Return access codes for a section. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only access their own sections.
+      description: Return access codes for a section. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only access their own sections. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: getAcCodes
       parameters:
         - name: id
@@ -995,13 +896,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccessCode'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/AccessCode'
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required, or PROFESSOR for the specified section"
+          description: "Forbidden: ADMIN role required, PROFESSOR for the specified section, or password change required on first login"
         '404':
           description: Section not found
       security:
@@ -1010,7 +908,7 @@ paths:
       tags:
         - section
       summary: Generate access codes
-      description: Generate additional access codes for a section. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only manage their own sections.
+      description: Generate additional access codes for a section and return only the newly generated code pairs. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only manage their own sections. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: genAcCodes
       parameters:
         - name: id
@@ -1025,9 +923,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AccessCodeGenerateRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/AccessCodeGenerateRequest'
       responses:
         '200':
           description: New access codes generated successfully.
@@ -1035,15 +930,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccessCode'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/AccessCode'
         '400':
           description: Invalid request body
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required, or PROFESSOR for the specified section"
+          description: "Forbidden: ADMIN role required, PROFESSOR for the specified section, or password change required on first login"
         '404':
           description: Section not found
       security:
@@ -1052,7 +944,7 @@ paths:
       tags:
         - section
       summary: Revoke access codes
-      description: Revoke selected access codes for a section. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only manage their own sections.
+      description: Revoke selected access codes for a section. Requires role ADMIN or PROFESSOR. Role is verified server-side for the session user. Professors may only manage their own sections. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: revAcCodes
       parameters:
         - name: id
@@ -1071,11 +963,11 @@ paths:
         '200':
           description: Access codes revoked successfully.
         '400':
-          description: Invalid request body
+          description: Invalid query parameters
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required, or PROFESSOR for the specified section"
+          description: "Forbidden: ADMIN role required, PROFESSOR for the specified section, or password change required on first login"
         '404':
           description: Section not found
       security:
@@ -1085,15 +977,12 @@ paths:
       tags:
         - enrollment
       summary: Create an enrollment
-      description: Create a new enrollment record. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments.
+      description: Create a new enrollment record. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: addEnrollment
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/EnrollmentCreateRequest'
-          application/xml:
             schema:
               $ref: '#/components/schemas/EnrollmentCreateRequest'
       responses:
@@ -1103,15 +992,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Enrollment'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Enrollment'
         '400':
           description: Invalid request body or access code
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: STUDENT or ADMIN role required"
+          description: "Forbidden: STUDENT or ADMIN role required, or password change required on first login"
         '404':
           description: Student or section not found
         '409':
@@ -1123,7 +1009,7 @@ paths:
       tags:
         - enrollment
       summary: Get an enrollment by ID
-      description: Return enrollment details for a specific enrollment. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only view their own enrollments.
+      description: Return enrollment details for a specific enrollment. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only view their own enrollments. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: getEnrollment
       parameters:
         - name: id
@@ -1139,13 +1025,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Enrollment'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Enrollment'
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: STUDENT or ADMIN role required, and students may only access their own enrollments"
+          description: "Forbidden: STUDENT or ADMIN role required, password change required on first login, and students may only access their own enrollments"
         '404':
           description: Enrollment not found
       security:
@@ -1154,7 +1037,7 @@ paths:
       tags:
         - enrollment
       summary: Update an enrollment
-      description: Update enrollment details or status. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments.
+      description: Update enrollment details or status. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: updEnrollment
       parameters:
         - name: id
@@ -1169,9 +1052,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EnrollmentUpdateRequest'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/EnrollmentUpdateRequest'
       responses:
         '200':
           description: Enrollment updated successfully.
@@ -1179,15 +1059,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Enrollment'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Enrollment'
         '400':
           description: Invalid request body, status transition, or access code
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: STUDENT or ADMIN role required, and students may only update their own enrollments"
+          description: "Forbidden: STUDENT or ADMIN role required, password change required on first login, and students may only update their own enrollments"
         '404':
           description: Enrollment or section not found
         '409':
@@ -1198,7 +1075,7 @@ paths:
       tags:
         - enrollment
       summary: Delete an enrollment
-      description: Delete an enrollment by ID. Requires role ADMIN. Role is verified server-side for the session user.
+      description: Delete an enrollment by ID. Requires role ADMIN. Role is verified server-side for the session user. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: rmvEnrollment
       parameters:
         - name: id
@@ -1213,7 +1090,7 @@ paths:
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: ADMIN role required"
+          description: "Forbidden: ADMIN role required, or password change required on first login"
         '404':
           description: Enrollment not found
       security:
@@ -1328,14 +1205,12 @@ components:
         firstLogin:
           type: boolean
         User:
-          type: object
           $ref: '#/components/schemas/User'
     AuthUser:
       description: Authenticated user response for a valid server-side session.
       type: object
       properties:
         User:
-          type: object
           $ref: '#/components/schemas/User'
     UserArray:
       type: array
@@ -1348,10 +1223,8 @@ components:
       type: object
       properties:
         User:
-          type: array
           $ref: '#/components/schemas/UserArray'
         Meta:
-          type: object
           $ref: '#/components/schemas/Meta'
     Meta:
       type: object
@@ -1406,10 +1279,8 @@ components:
       type: object
       properties:
         Course:
-          type: array
           $ref: '#/components/schemas/CourseArray'
         Meta:
-          type: object
           $ref: '#/components/schemas/Meta'
     Prerequisite:
       type: object
@@ -1478,20 +1349,22 @@ components:
           type: integer
         days:
           type: string
+          description: Meeting-day code string such as MWF or TR, or `async` for asynchronous classes.
         start_time:
           type: string
-          description: Time of day in HH:MM:SS format.
-          pattern: '^\d{2}:\d{2}:\d{2}$'
+          description: Time of day in HH:MM:SS format, or an empty string for asynchronous classes.
+          pattern: '^(\d{2}:\d{2}:\d{2})?$'
         end_time:
           type: string
-          description: Time of day in HH:MM:SS format.
-          pattern: '^\d{2}:\d{2}:\d{2}$'
+          description: Time of day in HH:MM:SS format, or an empty string for asynchronous classes.
+          pattern: '^(\d{2}:\d{2}:\d{2})?$'
     SectionWriteRequest:
       type: object
       required:
         - semId
         - profId
         - capacity
+      description: Section write payload. `startTm` and `endTm` must either both be present or both be omitted, and `startTm` must be earlier than `endTm`.
       properties:
         semId:
           type: integer
@@ -1501,13 +1374,14 @@ components:
           type: integer
         days:
           type: string
+          description: Optional meeting-day code string such as MWF or TR. Omit for asynchronous classes.
         startTm:
           type: string
-          description: Time of day in HH:MM:SS format.
+          description: Optional time of day in HH:MM:SS format. If provided, `endTm` must also be provided. Omit both for asynchronous classes.
           pattern: '^\d{2}:\d{2}:\d{2}$'
         endTm:
           type: string
-          description: Time of day in HH:MM:SS format.
+          description: Optional time of day in HH:MM:SS format. If provided, `startTm` must also be provided and `endTm` must be later than `startTm`. Omit both for asynchronous classes.
           pattern: '^\d{2}:\d{2}:\d{2}$'
     SectionArray:
       type: array
@@ -1520,10 +1394,8 @@ components:
       type: object
       properties:
         Section:
-          type: array
           $ref: '#/components/schemas/SectionArray'
         Meta:
-          type: object
           $ref: '#/components/schemas/Meta'
     Enrollment:
       type: object
@@ -1579,6 +1451,7 @@ components:
         numCodes:
           type: integer
           minimum: 1
+          maximum: 25
     AccessCode:
       type: object
       description: >

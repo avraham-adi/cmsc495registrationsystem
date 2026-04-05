@@ -5,11 +5,23 @@ const s = new SessionService();
 
 export async function authMw(req, res, next) {
     try {
-        const id = req.session?.auth?.userId;
+        const a = req.session?.auth;
+        const id = a?.userId;
 
         if (!id) {
             return res.status(401).json({
                 error: 'Authentication required. No active session found.',
+            });
+        }
+
+        const p = await s.getPld(id);
+        const sv = Number(a?.sessVer ?? a?.sess_ver);
+
+        if (!Number.isFinite(sv) || sv !== Number(p.sessVer)) {
+            await s.destroy(req, res);
+
+            return res.status(401).json({
+                error: 'Session is no longer valid. Please log in again.',
             });
         }
 
