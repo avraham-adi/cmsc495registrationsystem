@@ -3,65 +3,50 @@ import SectionService from '../../services/section.service.js';
 class SectionController {
 	constructor() {
 		this.s = new SectionService();
+		this.getAcCodes = this.getAcCodes.bind(this);
+		this.genAcCodes = this.genAcCodes.bind(this);
+		this.revAcCodes = this.revAcCodes.bind(this);
 		this.addSection = this.addSection.bind(this);
-		this.getSectionInfo = this.getSectionInfo.bind(this);
-		this.updateSection = this.updateSection.bind(this);
-		this.removeSection = this.removeSection.bind(this);
-		this.getAllSections = this.getAllSections.bind(this);
-		this.getAccessCodes = this.getAccessCodes.bind(this);
-		this.generateAccessCodes = this.generateAccessCodes.bind(this);
-		this.revokeAccessCodes = this.revokeAccessCodes.bind(this);
+		this.getSection = this.getSection.bind(this);
+		this.updSection = this.updSection.bind(this);
+		this.rmvSection = this.rmvSection.bind(this);
+		this.getSections = this.getSections.bind(this);
 	}
 
 	// Express Add Section Method
 	async addSection(req, res, next) {
 		try {
-			const { courseId } = req.params;
-			const { semesterId, professorId, capacity, days, startTime, endTime } = req.body;
-			const section = await this.s.addSection(
-				courseId,
-				semesterId,
-				professorId,
-				capacity,
-				days,
-				startTime,
-				endTime
-			);
+			const { cId } = req.params;
+			const { semId, profId, capacity, days, startTm, endTm } = req.body;
+			const section = await this.s.addSection(cId, semId, profId, capacity, days, startTm, endTm);
 
-			return res.status(201).json({
-				message: 'Section added successfully.',
-				section: section,
-			});
+			return res.status(201).json(section);
 		} catch (err) {
 			next(err);
 		}
 	}
 
 	// Express Get Section Info Method
-	async getSectionInfo(req, res, next) {
+	async getSection(req, res, next) {
 		try {
-			const { sectionId } = req.params;
-			const section = await this.s.getSectionInfo(sectionId);
+			const { id } = req.params;
+			const section = await this.s.getSection(id);
 
-			return res.status(200).json({
-				message: 'Section info retrieved successfully.',
-				section: section,
-			});
+			return res.status(200).json(section);
 		} catch (err) {
 			next(err);
 		}
 	}
 
 	// Express Get All Sections Method
-	async getAllSections(req, res, next) {
+	async getSections(req, res, next) {
 		try {
-			const { courseId } = req.params;
-			const { page = 1, limit = 10, search = '', semesterId = null, professorId = null } = req.query;
-			const result = await this.s.getAllSections(page, limit, search, courseId ?? null, semesterId, professorId);
+			const { page = 1, limit = 10, search = '', crsId = null, semId = null, profId = null } = req.query;
+			const result = await this.s.getSections(page, limit, search, crsId, semId, profId);
 
 			return res.status(200).json({
-				sections: result.data,
-				meta: result.meta,
+				Section: result.data.map((s) => ({ Section: s })),
+				Meta: result.meta,
 			});
 		} catch (err) {
 			next(err);
@@ -69,79 +54,73 @@ class SectionController {
 	}
 
 	// Express Update Section Method
-	async updateSection(req, res, next) {
+	async updSection(req, res, next) {
 		try {
-			const { sectionId } = req.params;
-			const { semesterId, professorId, capacity, days, startTime, endTime } = req.body;
-			const section = await this.s.updateSection(sectionId, {
-				semesterId,
-				professorId,
+			const { id } = req.params;
+			const { semId, profId, capacity, days, startTm, endTm } = req.body;
+			const section = await this.s.updSection(id, {
+				semesterId: semId,
+				professorId: profId,
 				capacity,
 				days,
-				startTime,
-				endTime,
+				startTime: startTm,
+				endTime: endTm,
 			});
 
-			return res.status(200).json({
-				message: 'Section updated successfully.',
-				section: section,
-			});
+			return res.status(200).json(section);
 		} catch (err) {
 			next(err);
 		}
 	}
 
 	// Express Remove Section Method
-	async removeSection(req, res, next) {
+	async rmvSection(req, res, next) {
 		try {
-			const { sectionId } = req.params;
-			await this.s.removeSection(sectionId);
+			const { id } = req.params;
+			await this.s.rmvSection(id);
 
-			return res.status(200).json({ message: 'Section removed successfully.' });
+			return res.status(200).end();
 		} catch (err) {
 			next(err);
 		}
 	}
 
 	// Express Get Section Access Codes Method
-	async getAccessCodes(req, res, next) {
+	async getAcCodes(req, res, next) {
 		try {
-			const { sectionId } = req.params;
-			const accessCodes = await this.s.getAccessCodes(sectionId, req.user);
+			const { id } = req.params;
+			const accessCodes = await this.s.getAcCodes(id, req.user);
 
-			return res.status(200).json({
-				message: 'Section access codes retrieved successfully.',
-				accessCodes: accessCodes,
-			});
+			return res.status(200).json(accessCodes);
 		} catch (err) {
 			next(err);
 		}
 	}
 
 	// Express Generate More Access Codes Method
-	async generateAccessCodes(req, res, next) {
+	async genAcCodes(req, res, next) {
 		try {
-			const { sectionId } = req.params;
-			const { numCodes } = req.body ?? {};
-			const newAccessCodes = await this.s.generateAccessCodes(sectionId, numCodes, req.user);
+			const { id } = req.params;
+			const { numCodes } = req.body;
+			const newAccessCodes = await this.s.genAcCodes(id, numCodes, req.user);
 
-			return res.status(200).json({
-				message: 'New access codes generated successfully.',
-				newAccessCodes: newAccessCodes,
-			});
+			return res.status(200).json(newAccessCodes);
 		} catch (err) {
 			next(err);
 		}
 	}
 
 	// Express Revoke Section Access Codes Method
-	async revokeAccessCodes(req, res, next) {
+	async revAcCodes(req, res, next) {
 		try {
-			const { sectionId } = req.params;
-			const { codesToRevoke } = req.body ?? {};
-			await this.s.revokeAccessCodes(sectionId, codesToRevoke, req.user);
+			const { id } = req.params;
+			const codesToRevoke = req.query.codes
+				.split(',')
+				.map((c) => c.trim())
+				.filter(Boolean);
+			await this.s.revAcCodes(id, codesToRevoke, req.user);
 
-			return res.status(200).json({ message: 'Access codes revoked successfully.' });
+			return res.status(200).end();
 		} catch (err) {
 			next(err);
 		}

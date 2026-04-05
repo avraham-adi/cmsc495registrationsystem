@@ -3,21 +3,18 @@ import PrerequisiteService from '../../services/prerequisite.service.js';
 class PrerequisiteController {
 	constructor() {
 		this.p = new PrerequisiteService();
-		this.getPrerequisites = this.getPrerequisites.bind(this);
 		this.addPrerequisite = this.addPrerequisite.bind(this);
-		this.deletePrerequisite = this.deletePrerequisite.bind(this);
+		this.rmvPrerequisite = this.rmvPrerequisite.bind(this);
+		this.getPrerequisites = this.getPrerequisites.bind(this);
 	}
 
 	// Express Get Prerequisites Method
 	async getPrerequisites(req, res, next) {
 		try {
-			const courseId = req.params.courseId;
-			const result = await this.p.getPrerequisites(courseId);
+			const courseId = req.params.id;
+			const result = await this.p.getPrereqs(courseId);
 
-			return res.status(200).json({
-				message: 'Prerequisites retrieved successfully.',
-				data: result.data,
-			});
+			return res.status(200).json(result.data.map((p) => ({ Prerequisite: p })));
 		} catch (error) {
 			next(error);
 		}
@@ -26,26 +23,23 @@ class PrerequisiteController {
 	// Express Add Prerequisite Method
 	async addPrerequisite(req, res, next) {
 		try {
-			const courseId = req.body.courseId;
-			const prerequisiteId = req.body.prerequisiteId;
-			const prerequisite = await this.p.addPrerequisite(courseId, prerequisiteId);
+			const courseId = req.body.cId;
+			const prerequisiteId = req.body.pId;
+			const prerequisite = await this.p.addPrereq(courseId, prerequisiteId);
 
-			return res.status(201).json({
-				message: 'Prerequisite added successfully.',
-				prerequisite: prerequisite,
-			});
+			return res.status(201).json(prerequisite);
 		} catch (error) {
 			next(error);
 		}
 	}
 
 	// Express Delete Prerequisite Method
-	async deletePrerequisite(req, res, next) {
+	async rmvPrerequisite(req, res, next) {
 		try {
-			const { courseId, prerequisiteId } = req.params;
-			await this.p.removePrerequisite(courseId, prerequisiteId);
+			const { cId, pId } = req.params;
+			await this.p.rmvPrereq(cId, pId);
 
-			return res.status(200).json({ message: 'Prerequisite removed successfully.' });
+			return res.status(200).end();
 		} catch (error) {
 			next(error);
 		}

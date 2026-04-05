@@ -3,19 +3,19 @@ import CourseService from '../../services/course.service.js';
 class CourseController {
 	constructor() {
 		this.c = new CourseService();
-		this.getInfo = this.getInfo.bind(this);
+		this.getCourse = this.getCourse.bind(this);
 		this.addCourse = this.addCourse.bind(this);
-		this.updateCourse = this.updateCourse.bind(this);
-		this.removeCourse = this.removeCourse.bind(this);
+		this.updCourse = this.updCourse.bind(this);
+		this.rmvCourse = this.rmvCourse.bind(this);
 		this.getCourses = this.getCourses.bind(this);
 	}
 
-	async getInfo(req, res, next) {
+	async getCourse(req, res, next) {
 		try {
-			const { courseId } = req.params;
-			const course = await this.c.getCourseInfo(courseId);
+			const { id } = req.params;
+			const course = await this.c.getCourse(id);
 
-			return res.status(200).json(course.toObject());
+			return res.status(200).json(course);
 		} catch (err) {
 			next(err);
 		}
@@ -24,48 +24,42 @@ class CourseController {
 	async addCourse(req, res, next) {
 		try {
 			const { code, title, desc, cred } = req.body;
-			const course = await this.c.addNewCourse({
+			const course = await this.c.addCourse({
 				course_code: code,
 				title: title,
 				description: desc,
 				credits: cred,
 			});
 
-			return res.status(201).json({
-				message: 'Course added successfully.',
-				course: course.toObject(),
-			});
+			return res.status(201).json(course);
 		} catch (err) {
 			next(err);
 		}
 	}
 
-	async updateCourse(req, res, next) {
+	async updCourse(req, res, next) {
 		try {
 			const { id } = req.params;
 			const { code, title, desc, cred } = req.body;
-			const course = await this.c.updateCourse(id, {
+			const course = await this.c.updCourse(id, {
 				course_code: code,
 				title: title,
 				description: desc,
 				credits: cred,
 			});
 
-			return res.status(200).json({
-				message: 'Course updated successfully.',
-				course: course.toObject(),
-			});
+			return res.status(200).json(course);
 		} catch (err) {
 			next(err);
 		}
 	}
 
-	async removeCourse(req, res, next) {
+	async rmvCourse(req, res, next) {
 		try {
 			const { id } = req.params;
-			await this.c.removeCourse(id);
+			await this.c.rmvCourse(id);
 
-			return res.status(200).json({ message: 'Course deleted successfully.' });
+			return res.status(200).end();
 		} catch (err) {
 			next(err);
 		}
@@ -74,11 +68,11 @@ class CourseController {
 	async getCourses(req, res, next) {
 		try {
 			const { page = 1, limit = 10, search = '', subject = null } = req.query;
-			const result = await this.c.getAllCourses(page, limit, search, subject);
+			const result = await this.c.getCourses(page, limit, search, subject);
 
 			return res.status(200).json({
-				courses: result.data,
-				meta: result.meta,
+				Course: result.data.map((c) => ({ Course: c })),
+				Meta: result.meta,
 			});
 		} catch (err) {
 			next(err);

@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
 export const enrollmentCreateBodySchema = z.object({
-    studentId: z.coerce.number().int().positive(),
-    sectionId: z.coerce.number().int().positive(),
-    accessCode: z.string().trim().min(1).optional(),
+	stuId: z.coerce.number().int().positive(),
+	secId: z.coerce.number().int().positive(),
+	code: z.string().trim().min(1),
 });
 
 export const enrollmentUpdateBodySchema = z.object({
-    status: z.enum(['enrolled', 'dropped', 'completed', 'waitlisted']),
-    accessCode: z.string().trim().min(1).optional(),
+	status: z.enum(['enrolled', 'dropped', 'completed', 'waitlisted']),
+	code: z.string().trim().min(1),
 });

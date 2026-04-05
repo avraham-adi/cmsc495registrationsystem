@@ -6,196 +6,196 @@ import Enrollment from '../domain/enrollment.js';
 
 class EnrollmentService {
     constructor() {
-        this.sectionService = new SectionService();
-        this.prerequisiteService = new PrerequisiteService();
+        this.section = new SectionService();
+        this.pre = new PrerequisiteService();
     }
 
-    async addEnrollment(studentId, sectionId, actingUser, accessCode = null) {
-        this.verifyAccess(studentId, actingUser);
+    async addEnroll(studentId, sectionId, actingUser, accessCode = null) {
+        this.verifyOwn(studentId, actingUser);
 
-        const existingStudent = await db.query('SELECT * FROM students WHERE student_id = ?', [studentId]);
-        if (existingStudent.length === 0) {
+        const s = await db.query('SELECT * FROM students WHERE student_id = ?', [studentId]);
+        if (s.length === 0) {
             throw new Errors.NotFoundError('Student');
         }
 
-        const section = await this.sectionService.getSectionInfo(sectionId);
+        const sec = await this.section.getSection(sectionId);
 
-        const prerequisites = await this.prerequisiteService.getPrerequisites(section.course_id);
-        if (prerequisites.data.length > 0) {
-            const completedCourses = await db.query('SELECT s.course_id FROM enrollments e INNER JOIN sections s ON e.section_id = s.section_id WHERE e.student_id = ? AND e.status = ?', [studentId, 'completed']);
-            const completedCourseIds = new Set(completedCourses.map((row) => row.course_id));
-            const missingPrerequisites = prerequisites.data.filter((prereq) => !completedCourseIds.has(prereq.courseId));
+        const pre = await this.pre.getPrereqs(sec.course_id);
+        if (pre.data.length > 0) {
+            const c = await db.query('SELECT s.course_id FROM enrollments e INNER JOIN sections s ON e.section_id = s.section_id WHERE e.student_id = ? AND e.status = ?', [studentId, 'completed']);
+            const ids = new Set(c.map((row) => row.course_id));
+            const miss = pre.data.filter((prereq) => !ids.has(prereq.courseId));
 
-            if (missingPrerequisites.length > 0) {
+            if (miss.length > 0) {
                 throw new Errors.PrerequisiteNotMetError(
-                    section.course_id,
-                    missingPrerequisites.map((prereq) => prereq.courseCode)
+                    sec.course_id,
+                    miss.map((prereq) => prereq.courseCode)
                 );
             }
         }
 
-        const existingEnrollment = await db.query('SELECT * FROM enrollments WHERE student_id = ? AND section_id = ? LIMIT 1', [studentId, sectionId]);
-        if (existingEnrollment.length > 0) {
+        const e = await db.query('SELECT * FROM enrollments WHERE student_id = ? AND section_id = ? LIMIT 1', [studentId, sectionId]);
+        if (e.length > 0) {
             throw new Errors.ValidationError('Student already has an enrollment record for this section.');
         }
 
         if (accessCode) {
-            const insertResult = await this.enrollWithAccessCode(sectionId, studentId, null, accessCode);
-            const enrollments = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [insertResult]);
-            const enrollment = Enrollment.fromPersistence(enrollments[0]);
-            return enrollment.toObject();
+            const id = await this.enrollWithCode(sectionId, studentId, null, accessCode);
+            const r = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [id]);
+            const en = Enrollment.fromPersistence(r[0]);
+            return en.toObject();
         }
 
-        const insertResult = await this.enrollmentHelper(sectionId, studentId);
+        const id = await this.enrollHelp(sectionId, studentId);
 
-        const enrollments = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [insertResult]);
-        const enrollment = Enrollment.fromPersistence(enrollments[0]);
-        return enrollment.toObject();
+        const r = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [id]);
+        const en = Enrollment.fromPersistence(r[0]);
+        return en.toObject();
     }
 
-    async updateEnrollment(enrollmentId, status, actingUser, accessCode = null) {
-        const existingEnrollment = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
-        if (existingEnrollment.length === 0) {
+    async updEnroll(enrollmentId, status, actingUser, accessCode = null) {
+        const r = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Enrollment');
         }
 
-        const currentEnrollment = existingEnrollment[0];
-        this.verifyAccess(currentEnrollment.student_id, actingUser);
+        const cur = r[0];
+        this.verifyOwn(cur.student_id, actingUser);
         if (actingUser?.role === 'STUDENT' && !(status === 'dropped' || (status === 'enrolled' && accessCode))) {
             throw new Errors.AuthorizationError('Students may only drop their own enrollments or use a valid access code to enroll.');
         }
 
-        if (status === currentEnrollment.status) {
-            const enrollment = Enrollment.fromPersistence(currentEnrollment);
-            return enrollment.toObject();
+        if (status === cur.status) {
+            const en = Enrollment.fromPersistence(cur);
+            return en.toObject();
         }
 
         if (status === 'dropped') {
-            if (!['enrolled', 'waitlisted'].includes(currentEnrollment.status)) {
+            if (!['enrolled', 'waitlisted'].includes(cur.status)) {
                 throw new Errors.ValidationError('Only enrolled or waitlisted records can be dropped.');
             }
 
             await db.query('UPDATE enrollments SET status = ? WHERE enrollment_id = ?', [status, enrollmentId]);
 
-            if (currentEnrollment.status === 'enrolled') {
-                await this.enrollmentHelper(currentEnrollment.section_id);
+            if (cur.status === 'enrolled') {
+                await this.enrollHelp(cur.section_id);
             }
         } else if (status === 'completed') {
-            if (currentEnrollment.status !== 'enrolled') {
+            if (cur.status !== 'enrolled') {
                 throw new Errors.ValidationError('Only enrolled records can be marked completed.');
             }
 
             await db.query('UPDATE enrollments SET status = ? WHERE enrollment_id = ?', [status, enrollmentId]);
         } else if (status === 'enrolled') {
-            if (currentEnrollment.status !== 'waitlisted') {
+            if (cur.status !== 'waitlisted') {
                 throw new Errors.ValidationError('Only waitlisted records can be moved to enrolled.');
             }
 
             if (accessCode) {
-                await this.enrollWithAccessCode(currentEnrollment.section_id, null, enrollmentId, accessCode);
+                await this.enrollWithCode(cur.section_id, null, enrollmentId, accessCode);
             } else {
-                const connection = await db.getConnection();
+                const con = await db.getConnection();
                 try {
-                    await db.beginTransaction(connection);
+                    await db.beginTransaction(con);
 
-                    const sectionRows = await db.queryWithConnection(connection, 'SELECT capacity FROM sections WHERE section_id = ? FOR UPDATE', [currentEnrollment.section_id]);
-                    const enrollmentRows = await db.queryWithConnection(connection, 'SELECT enrollment_id, status FROM enrollments WHERE section_id = ? ORDER BY enrollment_id ASC FOR UPDATE', [currentEnrollment.section_id]);
-                    const enrolledCount = enrollmentRows.filter((row) => row.status === 'enrolled').length;
-                    const firstWaitlisted = enrollmentRows.find((row) => row.status === 'waitlisted');
+                    const s = await db.queryWithConnection(con, 'SELECT capacity FROM sections WHERE section_id = ? FOR UPDATE', [cur.section_id]);
+                    const e = await db.queryWithConnection(con, 'SELECT enrollment_id, status FROM enrollments WHERE section_id = ? ORDER BY enrollment_id ASC FOR UPDATE', [cur.section_id]);
+                    const cnt = e.filter((row) => row.status === 'enrolled').length;
+                    const first = e.find((row) => row.status === 'waitlisted');
 
-                    if (enrolledCount >= Number(sectionRows[0].capacity)) {
-                        throw new Errors.SectionFullError(currentEnrollment.section_id);
+                    if (cnt >= Number(s[0].capacity)) {
+                        throw new Errors.SectionFullError(cur.section_id);
                     }
 
-                    if (!firstWaitlisted || Number(firstWaitlisted.enrollment_id) !== Number(enrollmentId)) {
+                    if (!first || Number(first.enrollment_id) !== Number(enrollmentId)) {
                         throw new Errors.ValidationError('Only the next waitlisted student may be promoted.');
                     }
 
-                    await db.queryWithConnection(connection, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', [status, enrollmentId]);
-                    await db.commit(connection);
+                    await db.queryWithConnection(con, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', [status, enrollmentId]);
+                    await db.commit(con);
                 } catch (err) {
-                    await db.rollback(connection);
+                    await db.rollback(con);
                     throw err;
                 } finally {
-                    db.releaseConnection(connection);
+                    db.releaseConnection(con);
                 }
             }
         } else {
             throw new Errors.ValidationError('Manual transition to waitlisted is not allowed.');
         }
 
-        const rows = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
-        const enrollment = Enrollment.fromPersistence(rows[0]);
-        return enrollment.toObject();
+        const x = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
+        const en = Enrollment.fromPersistence(x[0]);
+        return en.toObject();
     }
 
-    async getEnrollmentInfo(enrollmentId, actingUser) {
-        const enrollments = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
+    async getEnroll(enrollmentId, actingUser) {
+        const r = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
 
-        if (!enrollments.length) {
+        if (!r.length) {
             throw new Errors.NotFoundError('Enrollment');
         }
 
-        const enrollment = Enrollment.fromPersistence(enrollments[0]);
+        const en = Enrollment.fromPersistence(r[0]);
 
-        this.verifyAccess(enrollment.getStudentID(), actingUser);
+        this.verifyOwn(en.getStudentID(), actingUser);
 
-        return enrollment.toObject();
+        return en.toObject();
     }
 
-    async removeEnrollment(enrollmentId, actingUser) {
-        const enrollments = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
-        if (enrollments.length === 0) {
+    async rmvEnroll(enrollmentId, actingUser) {
+        const r = await db.query('SELECT * FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Enrollment');
         }
 
-        const enrollment = Enrollment.fromPersistence(enrollments[0]);
+        const en = Enrollment.fromPersistence(r[0]);
 
-        this.verifyAccess(enrollment.getStudentID(), actingUser);
+        this.verifyOwn(en.getStudentID(), actingUser);
         await db.query('DELETE FROM enrollments WHERE enrollment_id = ?', [enrollmentId]);
 
-        await this.enrollmentHelper(enrollment.getSectionID());
+        await this.enrollHelp(en.getSectionID());
 
         return {
             message: 'Enrollment removed successfully.',
         };
     }
 
-    verifyAccess(studentId, actingUser) {
+    verifyOwn(studentId, actingUser) {
         if (actingUser?.role === 'STUDENT' && Number(actingUser.role_id) !== Number(studentId)) {
             throw new Errors.AuthorizationError('Students may only manage their own enrollments.');
         }
     }
 
-    async enrollWithAccessCode(sectionId, studentId = null, enrollmentId = null, accessCode) {
-        const connection = await db.getConnection();
+    async enrollWithCode(sectionId, studentId = null, enrollmentId = null, accessCode) {
+        const con = await db.getConnection();
         try {
-            await db.beginTransaction(connection);
+            await db.beginTransaction(con);
 
-            const sectionRows = await db.queryWithConnection(connection, 'SELECT access_codes FROM sections WHERE section_id = ? FOR UPDATE', [sectionId]);
-            if (sectionRows.length === 0) {
+            const s = await db.queryWithConnection(con, 'SELECT access_codes FROM sections WHERE section_id = ? FOR UPDATE', [sectionId]);
+            if (s.length === 0) {
                 throw new Errors.NotFoundError('Section');
             }
 
-            const accessCodes = { ...(sectionRows[0].access_codes ?? {}) };
-            const matchingKey = Object.keys(accessCodes).find((key) => /^code\d+$/.test(key) && accessCodes[key] === accessCode);
-            if (!matchingKey || accessCodes[matchingKey + '_used'] !== false) {
+            const codes = { ...(s[0].access_codes ?? {}) };
+            const key = Object.keys(codes).find((k) => /^code\d+$/.test(k) && codes[k] === accessCode);
+            if (!key || codes[key + '_used'] !== false) {
                 throw new Errors.ValidationError('Invalid or already used access code.');
             }
 
-            accessCodes[matchingKey + '_used'] = true;
-            await db.queryWithConnection(connection, 'UPDATE sections SET access_codes = ? WHERE section_id = ?', [JSON.stringify(accessCodes), sectionId]);
+            codes[key + '_used'] = true;
+            await db.queryWithConnection(con, 'UPDATE sections SET access_codes = ? WHERE section_id = ?', [JSON.stringify(codes), sectionId]);
 
             if (enrollmentId) {
-                await db.queryWithConnection(connection, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', ['enrolled', enrollmentId]);
-                await db.commit(connection);
+                await db.queryWithConnection(con, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', ['enrolled', enrollmentId]);
+                await db.commit(con);
                 return enrollmentId;
             }
 
             try {
-                const result = await db.queryWithConnection(connection, 'INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, ?)', [studentId, sectionId, 'enrolled']);
-                await db.commit(connection);
-                return result.insertId;
+                const r = await db.queryWithConnection(con, 'INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, ?)', [studentId, sectionId, 'enrolled']);
+                await db.commit(con);
+                return r.insertId;
             } catch (err) {
                 if (err.code === 'ER_DUP_ENTRY') {
                     throw new Errors.ValidationError('Student already has an enrollment record for this section.');
@@ -203,52 +203,52 @@ class EnrollmentService {
                 throw err;
             }
         } catch (err) {
-            await db.rollback(connection);
+            await db.rollback(con);
             throw err;
         } finally {
-            db.releaseConnection(connection);
+            db.releaseConnection(con);
         }
     }
 
-    async enrollmentHelper(sectionId, studentId = null) {
-        const connection = await db.getConnection();
+    async enrollHelp(sectionId, studentId = null) {
+        const con = await db.getConnection();
         try {
-            await db.beginTransaction(connection);
+            await db.beginTransaction(con);
 
-            const capacityRows = await db.queryWithConnection(connection, 'SELECT capacity FROM sections WHERE section_id = ? FOR UPDATE', [sectionId]);
-            if (capacityRows.length === 0) {
+            const c = await db.queryWithConnection(con, 'SELECT capacity FROM sections WHERE section_id = ? FOR UPDATE', [sectionId]);
+            if (c.length === 0) {
                 throw new Errors.NotFoundError('Section');
             }
 
-            const capacity = Number(capacityRows[0].capacity);
-            const enrollmentRows = await db.queryWithConnection(connection, 'SELECT enrollment_id, status FROM enrollments WHERE section_id = ? ORDER BY enrollment_id ASC FOR UPDATE', [sectionId]);
+            const cap = Number(c[0].capacity);
+            const e = await db.queryWithConnection(con, 'SELECT enrollment_id, status FROM enrollments WHERE section_id = ? ORDER BY enrollment_id ASC FOR UPDATE', [sectionId]);
 
-            let enrolledCount = enrollmentRows.filter((row) => row.status === 'enrolled').length;
-            const waitlistedRows = enrollmentRows.filter((row) => row.status === 'waitlisted');
-            let waitlistCount = waitlistedRows.length;
+            let cnt = e.filter((row) => row.status === 'enrolled').length;
+            const wait = e.filter((row) => row.status === 'waitlisted');
+            let wc = wait.length;
 
-            if (waitlistedRows.length > 0 && enrolledCount < capacity) {
-                for (const row of waitlistedRows) {
-                    if (enrolledCount >= capacity) {
+            if (wait.length > 0 && cnt < cap) {
+                for (const row of wait) {
+                    if (cnt >= cap) {
                         break;
                     }
 
-                    await db.queryWithConnection(connection, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', ['enrolled', row.enrollment_id]);
-                    enrolledCount += 1;
-                    waitlistCount -= 1;
+                    await db.queryWithConnection(con, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', ['enrolled', row.enrollment_id]);
+                    cnt += 1;
+                    wc -= 1;
                 }
             }
 
             if (!studentId) {
-                await db.commit(connection);
+                await db.commit(con);
                 return;
             }
 
-            if (enrolledCount < capacity) {
+            if (cnt < cap) {
                 try {
-                    const result = await db.queryWithConnection(connection, 'INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, ?)', [studentId, sectionId, 'enrolled']);
-                    await db.commit(connection);
-                    return result.insertId;
+                    const r = await db.queryWithConnection(con, 'INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, ?)', [studentId, sectionId, 'enrolled']);
+                    await db.commit(con);
+                    return r.insertId;
                 } catch (err) {
                     if (err.code === 'ER_DUP_ENTRY') {
                         throw new Errors.ValidationError('Student already has an enrollment record for this section.');
@@ -257,11 +257,11 @@ class EnrollmentService {
                 }
             }
 
-            if (waitlistCount < 3) {
+            if (wc < 3) {
                 try {
-                    const result = await db.queryWithConnection(connection, 'INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, ?)', [studentId, sectionId, 'waitlisted']);
-                    await db.commit(connection);
-                    return result.insertId;
+                    const r = await db.queryWithConnection(con, 'INSERT INTO enrollments (student_id, section_id, status) VALUES (?, ?, ?)', [studentId, sectionId, 'waitlisted']);
+                    await db.commit(con);
+                    return r.insertId;
                 } catch (err) {
                     if (err.code === 'ER_DUP_ENTRY') {
                         throw new Errors.ValidationError('Student already has an enrollment record for this section.');
@@ -272,10 +272,10 @@ class EnrollmentService {
 
             throw new Errors.SectionFullError(sectionId);
         } catch (err) {
-            await db.rollback(connection);
+            await db.rollback(con);
             throw err;
         } finally {
-            db.releaseConnection(connection);
+            db.releaseConnection(con);
         }
     }
 }

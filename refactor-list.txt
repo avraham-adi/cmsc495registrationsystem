@@ -1,4 +1,0 @@
- - access_level should be a String for consistency so that role_details returns the same type every time.
- - PUT vs PATCH logic consistency issues in routes
- - Documentation is inconsistent, rewrite with OpenAPI standards
- - GitHub Commits not linked to my user -> FIXED

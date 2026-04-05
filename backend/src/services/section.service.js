@@ -6,257 +6,257 @@ import crypto from 'crypto';
 class SectionService {
     constructor() {}
 
-    async getContext(sectionId, actingUser) {
-        const rows = await db.query('SELECT section_id, professor_id, access_codes FROM sections WHERE section_id = ?', [sectionId]);
+    async getCtx(sectionId, actingUser) {
+        const r = await db.query('SELECT section_id, professor_id, access_codes FROM sections WHERE section_id = ?', [sectionId]);
 
-        if (rows.length === 0) {
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Section not found.');
         }
 
-        const section = rows[0];
+        const sec = r[0];
 
         if (actingUser?.role === 'ADMIN') {
-            return section;
+            return sec;
         }
 
-        if (actingUser?.role === 'PROFESSOR' && actingUser.role_id === section.professor_id) {
-            return section;
+        if (actingUser?.role === 'PROFESSOR' && actingUser.role_id === sec.professor_id) {
+            return sec;
         }
 
         throw new Errors.AuthorizationError('Professors may only manage access codes for their own sections.');
     }
 
-    getHighestIndex(accessCodes) {
-        return Object.keys(accessCodes).reduce((max, key) => {
-            const match = key.match(/^code(\d+)$/);
-            return match ? Math.max(max, Number(match[1])) : max;
+    getHighIdx(codes) {
+        return Object.keys(codes).reduce((m, k) => {
+            const match = k.match(/^code(\d+)$/);
+            return match ? Math.max(m, Number(match[1])) : m;
         }, 0);
     }
 
     // Check Semester Exists
-    async semesterExists(semesterId) {
-        const rows = await db.query('SELECT semester_id FROM semesters WHERE semester_id = ?', [semesterId]);
+    async semExists(semesterId) {
+        const r = await db.query('SELECT semester_id FROM semesters WHERE semester_id = ?', [semesterId]);
 
-        if (rows.length === 0) {
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Semester not found.');
         }
     }
 
     // Check Professor Exists
-    async professorExists(professorId) {
-        const rows = await db.query('SELECT professor_id FROM professors WHERE professor_id = ?', [professorId]);
+    async profExists(professorId) {
+        const r = await db.query('SELECT professor_id FROM professors WHERE professor_id = ?', [professorId]);
 
-        if (rows.length === 0) {
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Professor not found.');
         }
     }
 
     // Get Existing Section Info
-    async getSectionInfo(sectionId) {
-        const rows = await db.query('SELECT * FROM sections WHERE section_id = ?', [sectionId]);
+    async getSection(sectionId) {
+        const r = await db.query('SELECT * FROM sections WHERE section_id = ?', [sectionId]);
 
-        if (rows.length === 0) {
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Section not found.');
         }
 
-        const section = Section.fromPersistence(rows[0]);
-        return section.toSafeObject();
+        const s = Section.fromPersistence(r[0]);
+        return s.toSafeObject();
     }
 
     // Check if Access Code exists and has already been used, and mark it as used if valid
-    async useAccessCode(sectionId, code) {
-        const rows = await db.query('SELECT access_codes FROM sections WHERE section_id = ?', [sectionId]);
+    async useCode(sectionId, code) {
+        const r = await db.query('SELECT access_codes FROM sections WHERE section_id = ?', [sectionId]);
 
-        if (rows.length === 0) {
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Section not found.');
         }
 
-        const accessCodes = { ...rows[0].access_codes };
-        const matchingKey = Object.keys(accessCodes).find((key) => /^code\d+$/.test(key) && accessCodes[key] === code);
+        const codes = { ...r[0].access_codes };
+        const key = Object.keys(codes).find((k) => /^code\d+$/.test(k) && codes[k] === code);
 
-        if (!matchingKey || accessCodes[matchingKey + '_used'] !== false) {
+        if (!key || codes[key + '_used'] !== false) {
             throw new Errors.ValidationError('Invalid or already used access code.');
         }
 
-        accessCodes[matchingKey + '_used'] = true;
-        await db.query('UPDATE sections SET access_codes = ? WHERE section_id = ?', [JSON.stringify(accessCodes), sectionId]);
+        codes[key + '_used'] = true;
+        await db.query('UPDATE sections SET access_codes = ? WHERE section_id = ?', [JSON.stringify(codes), sectionId]);
         return true;
     }
 
     // Get All Access Codes for a Section
-    async getAccessCodes(sectionId, actingUser) {
-        const section = await this.getContext(sectionId, actingUser);
-        return section.access_codes;
+    async getAcCodes(sectionId, actingUser) {
+        const s = await this.getCtx(sectionId, actingUser);
+        return s.access_codes;
     }
 
     // Generate More Access Codes for a Section
-    async generateAccessCodes(sectionId, numCodes = 3, actingUser) {
-        const section = await this.getContext(sectionId, actingUser);
-        const existingCodes = section.access_codes;
-        const newCodes = {};
-        const highestCodeIndex = this.getHighestIndex(existingCodes);
+    async genAcCodes(sectionId, numCodes = 3, actingUser) {
+        const s = await this.getCtx(sectionId, actingUser);
+        const codes = s.access_codes;
+        const add = {};
+        const hi = this.getHighIdx(codes);
 
         for (let i = 1; i <= numCodes; i++) {
-            const string1 = crypto.randomBytes(2).toString('hex').toUpperCase();
-            const string2 = crypto.randomBytes(2).toString('hex').toUpperCase();
-            const code = string1 + '-' + string2;
-            const keyName = 'code' + (highestCodeIndex + i);
-            const keyNameUsed = keyName + '_used';
-            newCodes[keyName] = code;
-            newCodes[keyNameUsed] = false;
+            const a = crypto.randomBytes(2).toString('hex').toUpperCase();
+            const b = crypto.randomBytes(2).toString('hex').toUpperCase();
+            const code = a + '-' + b;
+            const key = 'code' + (hi + i);
+            const used = key + '_used';
+            add[key] = code;
+            add[used] = false;
         }
 
-        const updatedCodes = { ...existingCodes, ...newCodes };
-        const updatedCodesString = JSON.stringify(updatedCodes);
+        const next = { ...codes, ...add };
+        const json = JSON.stringify(next);
 
-        await db.query('UPDATE sections SET access_codes = ? WHERE section_id = ?', [updatedCodesString, sectionId]);
+        await db.query('UPDATE sections SET access_codes = ? WHERE section_id = ?', [json, sectionId]);
 
-        return newCodes;
+        return add;
     }
 
     // Revoke Selected Access Codes for a Section
-    async revokeAccessCodes(sectionId, codesToRevoke, actingUser) {
-        const section = await this.getContext(sectionId, actingUser);
-        const existingCodes = section.access_codes;
-        const updatedCodes = { ...existingCodes };
+    async revAcCodes(sectionId, codesToRevoke, actingUser) {
+        const s = await this.getCtx(sectionId, actingUser);
+        const codes = s.access_codes;
+        const next = { ...codes };
 
         codesToRevoke.forEach((code) => {
-            const keyName = Object.keys(updatedCodes).find((key) => updatedCodes[key] === code);
-            if (keyName) {
-                delete updatedCodes[keyName];
-                const keyNameUsed = keyName + '_used';
-                delete updatedCodes[keyNameUsed];
+            const key = Object.keys(next).find((k) => next[k] === code);
+            if (key) {
+                delete next[key];
+                const used = key + '_used';
+                delete next[used];
             }
         });
 
-        const updatedCodesString = JSON.stringify(updatedCodes);
-        await db.query('UPDATE sections SET access_codes = ? WHERE section_id = ?', [updatedCodesString, sectionId]);
+        const json = JSON.stringify(next);
+        await db.query('UPDATE sections SET access_codes = ? WHERE section_id = ?', [json, sectionId]);
     }
 
     // Get All Sections with Pagination, Search, and Filtering
-    async getAllSections(page, limit, search, courseId = null, semesterId = null, professorId = null) {
-        const normalizedPage = Number.isInteger(Number(page)) && Number(page) > 0 ? Number(page) : 1;
-        const normalizedLimit = Number.isInteger(Number(limit)) && Number(limit) > 0 ? Math.min(Number(limit), 100) : 10;
-        const offset = (normalizedPage - 1) * normalizedLimit;
+    async getSections(page, limit, search, courseId = null, semesterId = null, professorId = null) {
+        const np = Number.isInteger(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+        const l = Number.isInteger(Number(limit)) && Number(limit) > 0 ? Math.min(Number(limit), 100) : 10;
+        const o = (np - 1) * l;
 
-        let where = [];
-        let params = [];
+        // Where and Params arrays
+        let w = [];
+        let p = [];
 
         if (search) {
-            where.push('(section_id LIKE ? OR professor_id LIKE ?)');
-            params.push('%' + search + '%', '%' + search + '%');
+            w.push('(section_id LIKE ? OR professor_id LIKE ?)');
+            p.push('%' + search + '%', '%' + search + '%');
         }
 
         if (courseId) {
-            where.push('course_id = ?');
-            params.push(courseId);
+            w.push('course_id = ?');
+            p.push(courseId);
         }
 
         if (semesterId) {
-            where.push('semester_id = ?');
-            params.push(semesterId);
+            w.push('semester_id = ?');
+            p.push(semesterId);
         }
 
         if (professorId) {
-            where.push('professor_id = ?');
-            params.push(professorId);
+            w.push('professor_id = ?');
+            p.push(professorId);
         }
 
-        const whereClause = where.length > 0 ? ' WHERE ' + where.join(' AND ') : '';
-        const countResult = await db.query('SELECT COUNT(*) AS count FROM sections' + whereClause, params);
-        const rows = await db.query('SELECT * FROM sections' + whereClause + ' ORDER BY section_id DESC LIMIT ? OFFSET ?', [...params, normalizedLimit, offset]);
+        const q = w.length > 0 ? ' WHERE ' + w.join(' AND ') : '';
+        const c = await db.query('SELECT COUNT(*) AS count FROM sections' + q, p);
+        const r = await db.query('SELECT * FROM sections' + q + ' ORDER BY section_id DESC LIMIT ? OFFSET ?', [...p, l, o]);
 
-        const results = rows.map((row) => Section.fromPersistence(row));
+        const data = r.map((row) => Section.fromPersistence(row));
 
         return {
-            data: results.map((section) => section.toSafeObject()),
+            data: data.map((s) => s.toSafeObject()),
             meta: {
-                page: normalizedPage,
-                limit: normalizedLimit,
-                total: countResult[0].count,
-                totalPages: Math.ceil(countResult[0].count / normalizedLimit),
+                page: np,
+                limit: l,
+                total: c[0].count,
+                totalPages: Math.ceil(c[0].count / l),
             },
         };
     }
 
     async addSection(courseId, semesterId, professorId, capacity, days, start_time, end_time, numCodes = 3) {
-        const course = await db.query('SELECT course_id FROM courses WHERE course_id = ?', [courseId]);
+        const c = await db.query('SELECT course_id FROM courses WHERE course_id = ?', [courseId]);
 
-        if (course.length === 0) {
+        if (c.length === 0) {
             throw new Errors.NotFoundError('Course not found.');
         }
 
-        await this.semesterExists(semesterId);
-        await this.professorExists(professorId);
+        await this.semExists(semesterId);
+        await this.profExists(professorId);
 
-        const access_codes = {};
+        const codes = {};
 
         for (let i = 1; i <= numCodes; i++) {
-            const string1 = crypto.randomBytes(2).toString('hex').toUpperCase();
-            const string2 = crypto.randomBytes(2).toString('hex').toUpperCase();
-            const code = string1 + '-' + string2;
-            const keyName = 'code' + i;
-            const keyNameUsed = keyName + '_used';
-            access_codes[keyName] = code;
-            access_codes[keyNameUsed] = false;
+            const a = crypto.randomBytes(2).toString('hex').toUpperCase();
+            const b = crypto.randomBytes(2).toString('hex').toUpperCase();
+            const code = a + '-' + b;
+            const key = 'code' + i;
+            const used = key + '_used';
+            codes[key] = code;
+            codes[used] = false;
         }
 
-        const accessCodesString = JSON.stringify(access_codes);
+        const json = JSON.stringify(codes);
 
-        const result = await db.query('INSERT INTO sections (course_id, semester_id, professor_id, capacity, days, start_time, end_time, access_codes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [courseId, semesterId, professorId, capacity, days || null, start_time || null, end_time || null, accessCodesString]);
-        const rows = await db.query('SELECT * FROM sections WHERE section_id = ?', [result.insertId]);
+        const x = await db.query('INSERT INTO sections (course_id, semester_id, professor_id, capacity, days, start_time, end_time, access_codes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [courseId, semesterId, professorId, capacity, days ?? 'async', start_time || null, end_time || null, json]);
+        const r = await db.query('SELECT * FROM sections WHERE section_id = ?', [x.insertId]);
 
-        if (rows.length === 0) {
+        if (r.length === 0) {
             throw new Errors.InternalServerError('Failed to retrieve newly created section.');
         }
 
-        const section = Section.fromPersistence(rows[0]);
-        return section.toObject();
+        const s = Section.fromPersistence(r[0]);
+        return s.toSafeObject();
     }
 
-    async updateSection(sectionId, updatedData) {
+    async updSection(sectionId, updatedData) {
         const { semesterId, professorId, capacity, days, startTime, endTime } = updatedData;
-        const existingRows = await db.query('SELECT * FROM sections WHERE section_id = ?', [sectionId]);
+        const r = await db.query('SELECT * FROM sections WHERE section_id = ?', [sectionId]);
 
-        if (existingRows.length === 0) {
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Section not found.');
         }
 
-        await this.semesterExists(semesterId);
-        await this.professorExists(professorId);
+        await this.semExists(semesterId);
+        await this.profExists(professorId);
 
-        const enrolledRows = await db.query('SELECT COUNT(*) AS count FROM enrollments WHERE section_id = ? AND status = ?', [sectionId, 'enrolled']);
-        if (Number(enrolledRows[0].count) > Number(capacity)) {
+        const e = await db.query('SELECT COUNT(*) AS count FROM enrollments WHERE section_id = ? AND status = ?', [sectionId, 'enrolled']);
+        if (Number(e[0].count) > Number(capacity)) {
             throw new Errors.ValidationError('Section capacity cannot be set below current enrolled count.');
         }
 
-        const existing = existingRows[0];
+        const sec = r[0];
+        const c = sec.course_id;
 
-        const courseId = existing.course_id;
+        await db.query('UPDATE sections SET course_id = ?, semester_id = ?, professor_id = ?, capacity = ?, days = ?, start_time = ?, end_time = ? WHERE section_id = ?', [c, semesterId, professorId, capacity, days ?? 'async', startTime ?? null, endTime ?? null, sectionId]);
 
-        await db.query('UPDATE sections SET course_id = ?, semester_id = ?, professor_id = ?, capacity = ?, days = ?, start_time = ?, end_time = ? WHERE section_id = ?', [courseId, semesterId, professorId, capacity, days, startTime ?? null, endTime ?? null, sectionId]);
+        const x = await db.query('SELECT * FROM sections WHERE section_id = ?', [sectionId]);
 
-        const rows = await db.query('SELECT * FROM sections WHERE section_id = ?', [sectionId]);
-
-        if (rows.length === 0) {
+        if (x.length === 0) {
             throw new Errors.InternalServerError('Failed to retrieve existing section data.');
         }
 
-        const section = Section.fromPersistence(rows[0]);
+        const s = Section.fromPersistence(x[0]);
 
-        return section.toSafeObject();
+        return s.toSafeObject();
     }
 
-    async removeSection(sectionId) {
-        const exists = await db.query('SELECT COUNT(*) as count FROM sections WHERE section_id = ?', [sectionId]);
+    async rmvSection(sectionId) {
+        const e = await db.query('SELECT COUNT(*) as count FROM sections WHERE section_id = ?', [sectionId]);
 
-        if (exists[0].count === 0) {
+        if (e[0].count === 0) {
             throw new Errors.NotFoundError('Section not found.');
         }
 
-        const dependentEnrollments = await db.query('SELECT COUNT(*) AS count FROM enrollments WHERE section_id = ?', [sectionId]);
+        const d = await db.query('SELECT COUNT(*) AS count FROM enrollments WHERE section_id = ?', [sectionId]);
 
-        if (dependentEnrollments[0].count > 0) {
+        if (d[0].count > 0) {
             throw new Errors.ValidationError('Cannot delete a section that has enrollments. Remove or archive its enrollments first.');
         }
 

@@ -4,16 +4,16 @@ import * as Errors from '../errors/index.js';
 class PrerequisiteService {
     constructor() {}
 
-    async getPrerequisites(courseId) {
-        const courseExists = await db.query('SELECT COUNT(*) as count FROM courses WHERE course_id = ?', [courseId]);
-        if (Number(courseExists[0].count) === 0) {
+    async getPrereqs(courseId) {
+        const c = await db.query('SELECT COUNT(*) as count FROM courses WHERE course_id = ?', [courseId]);
+        if (Number(c[0].count) === 0) {
             throw new Errors.CourseNotFoundError(courseId);
         }
 
-        const rows = await db.query('SELECT c.course_id, c.course_code, c.title FROM prerequisites p INNER JOIN courses c ON p.prerequisite_course_id = c.course_id WHERE p.course_id = ? ORDER BY c.course_code ASC', [courseId]);
+        const r = await db.query('SELECT c.course_id, c.course_code, c.title FROM prerequisites p INNER JOIN courses c ON p.prerequisite_course_id = c.course_id WHERE p.course_id = ? ORDER BY c.course_code ASC', [courseId]);
 
         return {
-            data: rows.map((row) => ({
+            data: r.map((row) => ({
                 courseId: row.course_id,
                 courseCode: row.course_code,
                 title: row.title,
@@ -21,19 +21,19 @@ class PrerequisiteService {
         };
     }
 
-    async addPrerequisite(courseId, prerequisiteId) {
-        const courseExists = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_id = ?', [courseId]);
-        if (courseExists[0].count === 0) {
+    async addPrereq(courseId, prerequisiteId) {
+        const c = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_id = ?', [courseId]);
+        if (c[0].count === 0) {
             throw new Errors.CourseNotFoundError(courseId);
         }
 
-        const prerequisiteExists = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_id = ?', [prerequisiteId]);
-        if (prerequisiteExists[0].count === 0) {
+        const p = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_id = ?', [prerequisiteId]);
+        if (p[0].count === 0) {
             throw new Errors.CourseNotFoundError(prerequisiteId);
         }
 
-        const existingRelationship = await db.query('SELECT COUNT(*) AS count FROM prerequisites WHERE course_id = ? AND prerequisite_course_id = ?', [courseId, prerequisiteId]);
-        if (existingRelationship[0].count > 0) {
+        const e = await db.query('SELECT COUNT(*) AS count FROM prerequisites WHERE course_id = ? AND prerequisite_course_id = ?', [courseId, prerequisiteId]);
+        if (e[0].count > 0) {
             throw new Errors.DuplicatePrerequisiteError(courseId, prerequisiteId);
         }
 
@@ -41,7 +41,7 @@ class PrerequisiteService {
             throw new Errors.ValidationError('A course cannot be a prerequisite of itself.');
         }
 
-        await this.ensureNoCycle(prerequisiteId, courseId);
+        await this.ensureNoCyc(prerequisiteId, courseId);
         try {
             await db.query('INSERT INTO prerequisites (course_id, prerequisite_course_id) VALUES (?, ?)', [courseId, prerequisiteId]);
         } catch (err) {
@@ -51,61 +51,64 @@ class PrerequisiteService {
             throw new Errors.DatabaseError('Failed to add prerequisite relationship.', err);
         }
 
+        const r = await db.query('SELECT course_id, course_code, title FROM courses WHERE course_id = ?', [prerequisiteId]);
+
         return {
-            courseId: courseId,
-            prerequisiteId: prerequisiteId,
+            courseId: r[0].course_id,
+            courseCode: r[0].course_code,
+            title: r[0].title,
         };
     }
 
-    async removePrerequisite(courseId, prerequisiteId) {
-        const prerequisiteExists = await db.query('SELECT COUNT(*) AS count FROM prerequisites WHERE course_id = ? AND prerequisite_course_id = ?', [courseId, prerequisiteId]);
-        if (Number(prerequisiteExists[0].count) === 0) {
+    async rmvPrereq(courseId, prerequisiteId) {
+        const p = await db.query('SELECT COUNT(*) AS count FROM prerequisites WHERE course_id = ? AND prerequisite_course_id = ?', [courseId, prerequisiteId]);
+        if (Number(p[0].count) === 0) {
             throw new Errors.PrerequisiteRelationshipNotFoundError(courseId, prerequisiteId);
         }
 
         await db.query('DELETE FROM prerequisites WHERE course_id = ? AND prerequisite_course_id = ?', [courseId, prerequisiteId]);
     }
 
-    async ensureNoCycle(newPrerequisiteId, targetCourseId) {
-        const allEdges = await db.query('SELECT prerequisite_course_id, course_id FROM prerequisites', []);
+    async ensureNoCyc(newPrerequisiteId, targetCourseId) {
+        const e = await db.query('SELECT prerequisite_course_id, course_id FROM prerequisites', []);
 
-        const adjacency = new Map();
+        const a = new Map();
 
-        for (const edge of allEdges) {
-            if (!adjacency.has(edge.course_id)) {
-                adjacency.set(edge.course_id, []);
+        for (const edge of e) {
+            if (!a.has(edge.course_id)) {
+                a.set(edge.course_id, []);
             }
-            adjacency.get(edge.course_id).push(edge.prerequisite_course_id);
+            a.get(edge.course_id).push(edge.prerequisite_course_id);
         }
 
-        if (!adjacency.has(targetCourseId)) {
-            adjacency.set(targetCourseId, []);
+        if (!a.has(targetCourseId)) {
+            a.set(targetCourseId, []);
         }
-        adjacency.get(targetCourseId).push(newPrerequisiteId);
+        a.get(targetCourseId).push(newPrerequisiteId);
 
-        const visited = new Set();
-        const visiting = new Set();
+        const seen = new Set();
+        const path = new Set();
 
         const dfs = (courseId) => {
-            if (visiting.has(courseId)) {
+            if (path.has(courseId)) {
                 return true;
             }
 
-            if (visited.has(courseId)) {
+            if (seen.has(courseId)) {
                 return false;
             }
 
-            visiting.add(courseId);
+            path.add(courseId);
 
-            const prereqs = adjacency.get(courseId) || [];
-            for (const prereqId of prereqs) {
-                if (dfs(prereqId)) {
+            const pre = a.get(courseId) || [];
+            for (const id of pre) {
+                if (dfs(id)) {
                     return true;
                 }
             }
 
-            visiting.delete(courseId);
-            visited.add(courseId);
+            path.delete(courseId);
+            seen.add(courseId);
             return false;
         };
 
