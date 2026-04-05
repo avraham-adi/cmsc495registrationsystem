@@ -2,7 +2,14 @@
 
 Course Registration System is a CMSC 495 Group Delta project for managing users, courses, prerequisites, semesters, sections, and enrollments. The repository contains the backend API, the frontend client, database schema/seed data, and a published OpenAPI contract.
 
-This README is intentionally focused on local setup and environment. API documentation should live on the separate GitHub Pages docs site.
+## API Documentation
+
+[API Documentation](https://avraham-adi.github.io/cmsc495registrationsystem/#/) hosted on GitHub Pages.
+
+## Notes
+
+- The backend was updated to use server-side sessions instead of JWT to strengthen security.
+- The [OpenAPI contract](https://avraham-adi.github.io/cmsc495registrationsystem/#/) is the API source of truth.
 
 ## Repository Layout
 
@@ -93,17 +100,3 @@ npm run test
 npm run lint
 npm run build
 ```
-
-## API Documentation
-
-Interactive API documentation is not maintained in this README.
-
-Use this instead:
-
-- [API Documentation](https://avraham-adi.github.io/cmsc495registrationsystem/#/) hosted on GitHub Pages.
-
-## Notes
-
-- The backend uses server-side sessions, not JWT bearer auth.
-- The [OpenAPI contract](https://avraham-adi.github.io/cmsc495registrationsystem/#/) is the API source of truth.
-- The `docs/` folder is intended for static publishing through GitHub Pages.
