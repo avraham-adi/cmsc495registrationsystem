@@ -4,38 +4,38 @@ import * as Errors from '../errors/index.js';
 class SemesterService {
     constructor() {}
 
-    async getAllSemesters() {
+    async getSems() {
         return db.query('SELECT semester_id, term, year FROM semesters ORDER BY year DESC, semester_id DESC', []);
     }
 
-    async getSemesterInfo(semesterId) {
-        const rows = await db.query('SELECT semester_id, term, year FROM semesters WHERE semester_id = ?', [semesterId]);
+    async getSem(semesterId) {
+        const r = await db.query('SELECT semester_id, term, year FROM semesters WHERE semester_id = ?', [semesterId]);
 
-        if (rows.length === 0) {
+        if (r.length === 0) {
             throw new Errors.NotFoundError('Semester');
         }
 
-        return rows[0];
+        return r[0];
     }
 
-    async addSemester(term, year) {
-        const existing = await db.query('SELECT COUNT(*) AS count FROM semesters WHERE term = ? AND year = ?', [term, year]);
-        if (Number(existing[0].count) > 0) {
+    async addSem(term, year) {
+        const e = await db.query('SELECT COUNT(*) AS count FROM semesters WHERE term = ? AND year = ?', [term, year]);
+        if (Number(e[0].count) > 0) {
             throw new Errors.DuplicateEntryError('Semester already exists.');
         }
 
-        const result = await db.query('INSERT INTO semesters (term, year) VALUES (?, ?)', [term, year]);
-        return this.getSemesterInfo(result.insertId);
+        const r = await db.query('INSERT INTO semesters (term, year) VALUES (?, ?)', [term, year]);
+        return this.getSem(r.insertId);
     }
 
-    async removeSemester(semesterId) {
-        const existing = await db.query('SELECT COUNT(*) AS count FROM semesters WHERE semester_id = ?', [semesterId]);
-        if (Number(existing[0].count) === 0) {
+    async rmvSemester(semesterId) {
+        const e = await db.query('SELECT COUNT(*) AS count FROM semesters WHERE semester_id = ?', [semesterId]);
+        if (Number(e[0].count) === 0) {
             throw new Errors.NotFoundError('Semester');
         }
 
-        const dependentSections = await db.query('SELECT COUNT(*) AS count FROM sections WHERE semester_id = ?', [semesterId]);
-        if (Number(dependentSections[0].count) > 0) {
+        const d = await db.query('SELECT COUNT(*) AS count FROM sections WHERE semester_id = ?', [semesterId]);
+        if (Number(d[0].count) > 0) {
             throw new Errors.ValidationError('Cannot delete a semester that has scheduled sections.');
         }
 

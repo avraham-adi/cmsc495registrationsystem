@@ -1,137 +1,130 @@
 import SectionService from '../../services/section.service.js';
 
 class SectionController {
-    constructor() {
-        this.sectionService = new SectionService();
-        this.addSection = this.addSection.bind(this);
-        this.getSectionInfo = this.getSectionInfo.bind(this);
-        this.updateSection = this.updateSection.bind(this);
-        this.removeSection = this.removeSection.bind(this);
-        this.getAllSections = this.getAllSections.bind(this);
-        this.getAccessCodes = this.getAccessCodes.bind(this);
-        this.generateAccessCodes = this.generateAccessCodes.bind(this);
-        this.revokeAccessCodes = this.revokeAccessCodes.bind(this);
-    }
+	constructor() {
+		this.s = new SectionService();
+		this.getAcCodes = this.getAcCodes.bind(this);
+		this.genAcCodes = this.genAcCodes.bind(this);
+		this.revAcCodes = this.revAcCodes.bind(this);
+		this.addSection = this.addSection.bind(this);
+		this.getSection = this.getSection.bind(this);
+		this.updSection = this.updSection.bind(this);
+		this.rmvSection = this.rmvSection.bind(this);
+		this.getSections = this.getSections.bind(this);
+	}
 
-    // Express Add Section Method
-    async addSection(req, res, next) {
-        try {
-            const { courseId } = req.params;
-            const { semesterId, professorId, capacity, days, startTime, endTime } = req.body;
+	// Express Add Section Method
+	async addSection(req, res, next) {
+		try {
+			const { cId } = req.params;
+			const { semId, profId, capacity, days, startTm, endTm } = req.body;
+			const section = await this.s.addSection(cId, semId, profId, capacity, days, startTm, endTm);
 
-            const section = await this.sectionService.addSection(courseId, semesterId, professorId, capacity, days, startTime, endTime);
+			return res.status(201).json(section);
+		} catch (err) {
+			next(err);
+		}
+	}
 
-            return res.status(201).json({
-                message: 'Section added successfully.',
-                section: section,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+	// Express Get Section Info Method
+	async getSection(req, res, next) {
+		try {
+			const { id } = req.params;
+			const section = await this.s.getSection(id);
 
-    // Express Get Section Info Method
-    async getSectionInfo(req, res, next) {
-        try {
-            const { sectionId } = req.params;
-            const section = await this.sectionService.getSectionInfo(sectionId);
-            return res.status(200).json({
-                message: 'Section info retrieved successfully.',
-                section: section,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+			return res.status(200).json(section);
+		} catch (err) {
+			next(err);
+		}
+	}
 
-    // Express Get All Sections Method
-    async getAllSections(req, res, next) {
-        try {
-            const { courseId } = req.params;
-            const { page = 1, limit = 10, search = '', semesterId = null, professorId = null } = req.query;
-            const result = await this.sectionService.getAllSections(page, limit, search, courseId ?? null, semesterId, professorId);
+	// Express Get All Sections Method
+	async getSections(req, res, next) {
+		try {
+			const { page = 1, limit = 10, search = '', crsId = null, semId = null, profId = null } = req.query;
+			const result = await this.s.getSections(page, limit, search, crsId, semId, profId);
 
-            return res.status(200).json({
-                sections: result.data,
-                meta: result.meta,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+			return res.status(200).json({
+				Section: result.data.map((s) => ({ Section: s })),
+				Meta: result.meta,
+			});
+		} catch (err) {
+			next(err);
+		}
+	}
 
-    // Express Update Section Method
-    async updateSection(req, res, next) {
-        try {
-            const { sectionId } = req.params;
-            const { semesterId, professorId, capacity, days, startTime, endTime } = req.body;
+	// Express Update Section Method
+	async updSection(req, res, next) {
+		try {
+			const { id } = req.params;
+			const { semId, profId, capacity, days, startTm, endTm } = req.body;
+			const section = await this.s.updSection(id, {
+				semesterId: semId,
+				professorId: profId,
+				capacity,
+				days,
+				startTime: startTm,
+				endTime: endTm,
+			});
 
-            const section = await this.sectionService.updateSection(sectionId, { semesterId, professorId, capacity, days, startTime, endTime });
+			return res.status(200).json(section);
+		} catch (err) {
+			next(err);
+		}
+	}
 
-            return res.status(200).json({
-                message: 'Section updated successfully.',
-                section: section,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+	// Express Remove Section Method
+	async rmvSection(req, res, next) {
+		try {
+			const { id } = req.params;
+			await this.s.rmvSection(id);
 
-    // Express Remove Section Method
-    async removeSection(req, res, next) {
-        try {
-            const { sectionId } = req.params;
-            await this.sectionService.removeSection(sectionId);
-            return res.status(200).json({
-                message: 'Section removed successfully.',
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+			return res.status(200).end();
+		} catch (err) {
+			next(err);
+		}
+	}
 
-    // Express Get Section Access Codes Method
-    async getAccessCodes(req, res, next) {
-        try {
-            const { sectionId } = req.params;
-            const accessCodes = await this.sectionService.getAccessCodes(sectionId, req.user);
-            return res.status(200).json({
-                message: 'Section access codes retrieved successfully.',
-                accessCodes: accessCodes,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+	// Express Get Section Access Codes Method
+	async getAcCodes(req, res, next) {
+		try {
+			const { id } = req.params;
+			const accessCodes = await this.s.getAcCodes(id, req.user);
 
-    // Express Generate More Access Codes Method
-    async generateAccessCodes(req, res, next) {
-        try {
-            const { sectionId } = req.params;
-            const { numCodes } = req.body ?? {};
-            const newAccessCodes = await this.sectionService.generateAccessCodes(sectionId, numCodes, req.user);
-            return res.status(200).json({
-                message: 'New access codes generated successfully.',
-                newAccessCodes: newAccessCodes,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+			return res.status(200).json(accessCodes);
+		} catch (err) {
+			next(err);
+		}
+	}
 
-    // Express Revoke Section Access Codes Method
-    async revokeAccessCodes(req, res, next) {
-        try {
-            const { sectionId } = req.params;
-            const { codesToRevoke } = req.body ?? {};
-            await this.sectionService.revokeAccessCodes(sectionId, codesToRevoke, req.user);
-            return res.status(200).json({
-                message: 'Access codes revoked successfully.',
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+	// Express Generate More Access Codes Method
+	async genAcCodes(req, res, next) {
+		try {
+			const { id } = req.params;
+			const { numCodes } = req.body;
+			const newAccessCodes = await this.s.genAcCodes(id, numCodes, req.user);
+
+			return res.status(200).json(newAccessCodes);
+		} catch (err) {
+			next(err);
+		}
+	}
+
+	// Express Revoke Section Access Codes Method
+	async revAcCodes(req, res, next) {
+		try {
+			const { id } = req.params;
+			const codesToRevoke = req.query.codes
+				.split(',')
+				.map((c) => c.trim())
+				.filter(Boolean);
+			await this.s.revAcCodes(id, codesToRevoke, req.user);
+
+			return res.status(200).end();
+		} catch (err) {
+			next(err);
+		}
+	}
 }
 
 export default SectionController;

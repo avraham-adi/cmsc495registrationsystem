@@ -1,76 +1,63 @@
 import EnrollmentService from '../../services/enrollment.service.js';
 
 class EnrollmentController {
-    constructor() {
-        this.enrollmentService = new EnrollmentService();
-        this.addEnrollment = this.addEnrollment.bind(this);
-        this.updateEnrollment = this.updateEnrollment.bind(this);
-        this.getEnrollmentInfo = this.getEnrollmentInfo.bind(this);
-        this.removeEnrollment = this.removeEnrollment.bind(this);
-    }
+	constructor() {
+		this.e = new EnrollmentService();
+		this.addEnrollment = this.addEnrollment.bind(this);
+		this.updEnrollment = this.updEnrollment.bind(this);
+		this.getEnrollment = this.getEnrollment.bind(this);
+		this.rmvEnrollment = this.rmvEnrollment.bind(this);
+	}
 
-    // Express Add Enrollment Method
-    // Missing Prerequisite Check, Section Capacity Check, and Waitlist Handling for now - will be added in future iterations
-    async addEnrollment(req, res, next) {
-        try {
-            const { studentId, sectionId, accessCode } = req.body;
+	// Express Add Enrollment Method
+	// Missing Prerequisite Check, Section Capacity Check, and Waitlist Handling for now - will be added in future iterations
+	async addEnrollment(req, res, next) {
+		try {
+			const { stuId, secId, code } = req.body;
+			const enrollment = await this.e.addEnroll(stuId, secId, req.user, code);
 
-            const enrollment = await this.enrollmentService.addEnrollment(studentId, sectionId, req.user, accessCode);
+			return res.status(201).json(enrollment);
+		} catch (err) {
+			next(err);
+		}
+	}
 
-            return res.status(201).json({
-                message: 'Enrollment added successfully.',
-                enrollment,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+	// Express update Enrollment Method
+	async updEnrollment(req, res, next) {
+		try {
+			const { id } = req.params;
+			const { status, code } = req.body;
+			const enrollment = await this.e.updEnroll(id, status, req.user, code);
 
-    // Express update Enrollment Method
-    async updateEnrollment(req, res, next) {
-        try {
-            const { enrollmentId } = req.params;
-            const { status, accessCode } = req.body;
+			return res.status(200).json(enrollment);
+		} catch (err) {
+			next(err);
+		}
+	}
 
-            const enrollment = await this.enrollmentService.updateEnrollment(enrollmentId, status, req.user, accessCode);
+	// Express Get Enrollment Info Method
+	async getEnrollment(req, res, next) {
+		try {
+			const { id } = req.params;
+			const enrollment = await this.e.getEnroll(id, req.user);
 
-            return res.status(200).json({
-                message: 'Enrollment updated successfully.',
-                enrollment,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+			return res.status(200).json(enrollment);
+		} catch (err) {
+			next(err);
+		}
+	}
 
-    // Express Get Enrollment Info Method
-    async getEnrollmentInfo(req, res, next) {
-        try {
-            const { enrollmentId } = req.params;
-            const enrollment = await this.enrollmentService.getEnrollmentInfo(enrollmentId, req.user);
-            return res.status(200).json({
-                message: 'Enrollment info retrieved successfully.',
-                enrollment,
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+	// Express Remove Enrollment Method
+	async rmvEnrollment(req, res, next) {
+		try {
+			const { id } = req.params;
+			await this.e.rmvEnroll(id, req.user);
 
-    // Express Remove Enrollment Method
-    async removeEnrollment(req, res, next) {
-        try {
-            const { enrollmentId } = req.params;
-
-            await this.enrollmentService.removeEnrollment(enrollmentId, req.user);
-
-            return res.status(200).json({
-                message: 'Enrollment removed successfully.',
-            });
-        } catch (err) {
-            next(err);
-        }
-    }
+			return res.status(200).end();
+		} catch (err) {
+			next(err);
+		}
+	}
 }
 
 export default EnrollmentController;

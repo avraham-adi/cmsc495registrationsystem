@@ -1,26 +1,34 @@
 import { Router } from 'express';
 import SectionController from '../controllers/section.controller.js';
-import authMiddleware, { firstLoginMiddleware } from '../../middleware/auth.middleware.js';
-import authorizeRoles from '../../middleware/rbac.middleware.js';
-import { validateBody, validateParams, validateQuery } from '../middleware/validateRequest.middleware.js';
-import { generateAccessCodesBodySchema, getAllSectionsQuerySchema, revokeAccessCodesBodySchema, sectionBodySchema } from '../schemas/section.schemas.js';
-import { courseIdParamSchema, sectionIdParamSchema } from '../schemas/common.schema.js';
+import auth, { flMw as flm } from '../../middleware/session.middleware.js';
+import { default as roles } from '../../middleware/rbac.middleware.js';
+import {
+	validateBody as body,
+	validateParams as params,
+	validateQuery as query,
+} from '../middleware/validateRequest.middleware.js';
+import {
+	generateAccessCodesBodySchema as gen,
+	getAllSectionsQuerySchema as sections,
+	revokeAccessCodesQuerySchema as rev,
+	sectionBodySchema as section,
+} from '../schemas/section.schemas.js';
+import { cIdParamSchema as courseId, idParamSchema as id } from '../schemas/common.schema.js';
 
-const router = Router();
-const sectionController = new SectionController();
+const r = Router();
+const c = new SectionController();
 
 // Public Section Routes
-router.get('/courses/:courseId/sections', validateParams(courseIdParamSchema), validateQuery(getAllSectionsQuerySchema), sectionController.getAllSections);
-router.get('/sections', validateQuery(getAllSectionsQuerySchema), sectionController.getAllSections);
-router.get('/sections/:sectionId', validateParams(sectionIdParamSchema), sectionController.getSectionInfo);
+r.get('/', query(sections), c.getSections);
+r.get('/:id', params(id), c.getSection);
 
 // Protected Section Routes (Requires ADMIN authorization)
-router.post('/courses/:courseId/sections', authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN'), validateParams(courseIdParamSchema), validateBody(sectionBodySchema), sectionController.addSection);
-router.patch('/sections/:sectionId', authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN'), validateParams(sectionIdParamSchema), validateBody(sectionBodySchema), sectionController.updateSection);
-router.delete('/sections/:sectionId', authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN'), validateParams(sectionIdParamSchema), sectionController.removeSection);
+r.post('/:cId', auth, flm(), roles('ADMIN'), params(courseId), body(section), c.addSection);
+r.put('/:id', auth, flm(), roles('ADMIN'), params(id), body(section), c.updSection);
+r.delete('/:id', auth, flm(), roles('ADMIN'), params(id), c.rmvSection);
 
 // Protected Section Routes (Requires PROFESSOR or ADMIN authorization)
-router.get('/sections/:sectionId/access-codes', authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN', 'PROFESSOR'), validateParams(sectionIdParamSchema), sectionController.getAccessCodes);
-router.post('/sections/:sectionId/access-codes', authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN', 'PROFESSOR'), validateParams(sectionIdParamSchema), validateBody(generateAccessCodesBodySchema), sectionController.generateAccessCodes);
-router.delete('/sections/:sectionId/access-codes', authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN', 'PROFESSOR'), validateParams(sectionIdParamSchema), validateBody(revokeAccessCodesBodySchema), sectionController.revokeAccessCodes);
-export default router;
+r.get('/:id/access-codes', auth, flm(), roles('ADMIN', 'PROFESSOR'), params(id), c.getAcCodes);
+r.post('/:id/access-codes', auth, flm(), roles('ADMIN', 'PROFESSOR'), params(id), body(gen), c.genAcCodes);
+r.delete('/:id/access-codes', auth, flm(), roles('ADMIN', 'PROFESSOR'), params(id), query(rev), c.revAcCodes);
+export default r;

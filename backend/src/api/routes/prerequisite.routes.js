@@ -1,21 +1,21 @@
 import { Router } from 'express';
 import PrerequisiteController from '../controllers/prerequisite.controller.js';
-import authMiddleware, { firstLoginMiddleware } from '../../middleware/auth.middleware.js';
-import authorizeRoles from '../../middleware/rbac.middleware.js';
-import { validateBody, validateParams } from '../middleware/validateRequest.middleware.js';
-import { courseIdParamSchema, prerequisiteIdParamSchema } from '../schemas/common.schema.js';
-import { prerequisiteBodySchema } from '../schemas/prerequisite.schema.js';
+import auth, { flMw as flm } from '../../middleware/session.middleware.js';
+import { default as roles } from '../../middleware/rbac.middleware.js';
+import { validateBody as body, validateParams as params } from '../middleware/validateRequest.middleware.js';
+import { idParamSchema as id, prereqParamSchema as preId } from '../schemas/common.schema.js';
+import { prerequisiteBodySchema as pre } from '../schemas/prerequisite.schema.js';
 
-const router = Router();
-const prerequisiteController = new PrerequisiteController();
+const r = Router();
+const c = new PrerequisiteController();
 
 // Public Routes
-router.get('/:courseId', validateParams(courseIdParamSchema), prerequisiteController.getPrerequisites);
+r.get('/:id', params(id), c.getPrerequisites);
 
 // Protected Routes (Admin Only)
-router.use(authMiddleware, firstLoginMiddleware(), authorizeRoles('ADMIN'));
+r.use(auth, flm(), roles('ADMIN'));
 
-router.post('/', validateBody(prerequisiteBodySchema), prerequisiteController.addPrerequisite);
-router.delete('/:courseId/:prerequisiteId', validateParams(prerequisiteIdParamSchema), prerequisiteController.deletePrerequisite);
+r.post('/', body(pre), c.addPrerequisite);
+r.delete('/:cId/:pId', params(preId), c.rmvPrerequisite);
 
-export default router;
+export default r;

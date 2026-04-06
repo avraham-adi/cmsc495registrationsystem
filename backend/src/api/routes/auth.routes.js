@@ -1,19 +1,19 @@
 import { Router } from 'express';
 import AuthController from '../controllers/auth.controller.js';
-import authMiddleware, { firstLoginMiddleware } from '../../middleware/auth.middleware.js';
-import { validateBody } from '../middleware/validateRequest.middleware.js';
-import { loginSchema, changePasswordSchema, updateUserSchema } from '../schemas/auth.schemas.js';
+import auth, { flMw as flm } from '../../middleware/session.middleware.js';
+import { validateBody as body } from '../middleware/validateRequest.middleware.js';
+import { loginSchema as login, changePasswordSchema as pass, updateUserSchema as user } from '../schemas/auth.schemas.js';
 
-const router = Router();
-const authController = new AuthController();
+const r = Router();
+const c = new AuthController();
 
 // Public Auth Routes
-router.post('/login', validateBody(loginSchema), authController.login);
+r.post('/login', body(login), c.login);
 
-// Protected Auth/User Routes (Requires a valid token)
-router.post('/logout', authMiddleware, firstLoginMiddleware(), authController.logout);
-router.get('/me', authMiddleware, firstLoginMiddleware(), authController.getCurrentUser);
-router.post('/change-password', authMiddleware, firstLoginMiddleware(), validateBody(changePasswordSchema), authController.changePassword);
-router.post('/update-user', authMiddleware, firstLoginMiddleware(), validateBody(updateUserSchema), authController.updateUserInfo);
+// Protected Auth/User Routes (Requires an authenticated session)
+r.get('/logout', auth, flm(), c.logout);
+r.get('/me', auth, flm(), c.getSelf);
+r.patch('/me', auth, flm(), body(pass), c.updPass);
+r.put('/me', auth, flm(), body(user), c.updUser);
 
-export default router;
+export default r;

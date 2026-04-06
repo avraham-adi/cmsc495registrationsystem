@@ -6,17 +6,19 @@ class User {
     #email;
     #password_hash;
     #first_login;
+    #sess_ver;
     #role;
     #role_id;
     #role_details;
 
     // Default Constructor
-    constructor({ id, name, email, password_hash = null, first_login, role = null, role_id = null, role_details = null }) {
+    constructor({ id, name, email, password_hash = null, first_login, sess_ver = 0, role = null, role_id = null, role_details = null }) {
         this.#id = id;
         this.#name = name;
         this.#email = email;
         this.#password_hash = password_hash;
         this.#first_login = first_login;
+        this.#sess_ver = sess_ver;
         this.#role = role;
         this.#role_id = role_id;
         this.#role_details = role_details;
@@ -34,6 +36,7 @@ class User {
             email: row.email,
             password_hash: row.password_hash ?? null,
             first_login: row.first_login,
+            sess_ver: row.sess_ver ?? 0,
             role: row.role ?? null,
             role_id: row.role_id ?? null,
             role_details: row.role_details ?? null,
@@ -53,6 +56,7 @@ class User {
             name: data.name,
             email: data.email,
             first_login: data.first_login,
+            sess_ver: data.sess_ver ?? data.sessVer ?? 0,
             role: data.role ?? null,
             role_id: data.role_id ?? null,
             role_details: data.role_details ?? null,
@@ -82,6 +86,10 @@ class User {
     // Get User First Login Status
     getFirstLogin() {
         return this.#first_login === 1;
+    }
+
+    getSessVer() {
+        return this.#sess_ver;
     }
 
     // Get User Role
@@ -136,6 +144,7 @@ class User {
             email: this.#email,
             password_hash: this.#password_hash,
             first_login: this.#first_login,
+            sess_ver: this.#sess_ver,
             role,
             role_id,
             role_details,
@@ -149,6 +158,7 @@ class User {
             name: this.#name,
             email: this.#email,
             first_login: this.#first_login,
+            sess_ver: this.#sess_ver,
             role: this.#role,
             role_id: this.#role_id,
             role_details: this.#role_details,
@@ -176,6 +186,7 @@ class User {
             email: this.#email,
             password_hash: this.#password_hash,
             first_login: this.#first_login,
+            sess_ver: this.#sess_ver,
             role: this.#role,
             role_id: this.#role_id,
             role_details: this.#role_details,

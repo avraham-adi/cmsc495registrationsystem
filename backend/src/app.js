@@ -2,6 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import session from 'express-session';
 
 import authRoutes from './api/routes/auth.routes.js';
 import courseRoutes from './api/routes/course.routes.js';
@@ -10,13 +11,20 @@ import prerequisiteRoutes from './api/routes/prerequisite.routes.js';
 import sectionRoutes from './api/routes/section.routes.js';
 import adminRoutes from './api/routes/admin.routes.js';
 import semesterRoutes from './api/routes/semester.routes.js';
+import { config as sessionConfig } from './config/session.config.js';
 
 const app = express();
 
 // Core middleware
-app.use(cors());
+app.use(
+    cors({
+        origin: true,
+        credentials: true,
+    })
+);
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(session(sessionConfig()));
 
 // Health Check
 app.get('/api/health', (req, res) => {
@@ -24,13 +32,13 @@ app.get('/api/health', (req, res) => {
 });
 
 // Route Mounting
-app.use('/api/auth', authRoutes);
-app.use('/api', sectionRoutes);
-app.use('/api/courses', courseRoutes);
-app.use('/api/enrollments', enrollmentRoutes);
-app.use('/api/prerequisites', prerequisiteRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/semesters', semesterRoutes);
+app.use('/user', authRoutes);
+app.use('/section', sectionRoutes);
+app.use('/course', courseRoutes);
+app.use('/enrollment', enrollmentRoutes);
+app.use('/prerequisite', prerequisiteRoutes);
+app.use('/admin', adminRoutes);
+app.use('/semester', semesterRoutes);
 
 // 404 Handler
 app.use((req, res) => {

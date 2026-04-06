@@ -15,143 +15,156 @@ import * as db from '../db/connection.js';
 const saltRounds = 10;
 
 class AuthService {
-    constructor() {}
+	constructor() {}
 
-    // Initialize User
-    async loginUser(email, password) {
-        const rows = await db.query('SELECT user_id AS id, name, email, password_hash, first_login FROM users WHERE email = ?', [email]);
+	// Initialize User
+	async login(email, password) {
+		// TODO(SESSION_AUTH_MIGRATION): after credential verification, return the user payload needed to seed req.session.auth.
+		const r = await db.query(
+			'SELECT user_id AS id, name, email, password_hash, first_login, sess_ver FROM users WHERE email = ?',
+			[email]
+		);
 
-        if (rows.length === 0) {
-            throw new Errors.AuthenticationError('Invalid email and/or password.');
-        }
+		if (r.length === 0) {
+			throw new Errors.AuthenticationError('Invalid email and/or password.');
+		}
 
-        const user = User.fromPersistence(rows[0]);
+		const u = User.fromPersistence(r[0]);
 
-        const passwordCheck = await bcrypt.compare(password, user.getPasswordHash());
+		const p = await bcrypt.compare(password, u.getPasswordHash());
 
-        if (passwordCheck === false) {
-            throw new Errors.AuthenticationError('Invalid email and/or password.');
-        }
+		if (p === false) {
+			throw new Errors.AuthenticationError('Invalid email and/or password.');
+		}
 
-        const safeUser = user.withoutPasswordHash();
-        const roleUser = await this.getCurrentUserInfo(safeUser.toSafeObject());
-        const isFirstLogin = user.getFirstLogin();
+		const usr = await this.getUser(u.toSafeObject());
+		const fl = usr.getFirstLogin();
 
-        if (isFirstLogin === true) {
-            return {
-                user: roleUser,
-                firstLogin: isFirstLogin,
-            };
-        }
-        return {
-            user: roleUser,
-            firstLogin: isFirstLogin,
-        };
-    }
+		if (fl === true) {
+			return {
+				user: usr.toSafeObject(),
+				firstLogin: fl,
+			};
+		}
+		return {
+			user: usr.toSafeObject(),
+			firstLogin: fl,
+		};
+	}
 
-    // Change Password enforces Password Policy, Hashing, and persistence
-    async changePassword(authUser = null, password) {
-        if (authUser === null) {
-            throw new Errors.AuthenticationError('Authentication required.');
-        }
-        this.validatePasswordPolicy(password, authUser);
+	// Change Password enforces Password Policy, Hashing, and persistence
+	async updPass(authUser = null, password) {
+		if (authUser === null) {
+			throw new Errors.AuthenticationError('Authentication required.');
+		}
+		this.validatePasswordPolicy(password, authUser);
 
-        const hash = await bcrypt.hash(password, saltRounds);
-        await this.setPassword(authUser.id, hash);
-    }
+		const hash = await bcrypt.hash(password, saltRounds);
+		const r = await this.setPass(authUser.id, hash);
 
-    validatePasswordPolicy(password, user = null) {
-        if (!password || typeof password !== 'string') {
-            throw new Errors.ValidationError('Password is required.');
-        }
+		return {
+			user: r.toSafeObject(),
+			firstLogin: r.getFirstLogin(),
+		};
+	}
 
-        if (password === 'Password') {
-            throw new Errors.ValidationError('Password cannot be the default password.');
-        }
+	validatePasswordPolicy(password, user = null) {
+		if (!password || typeof password !== 'string') {
+			throw new Errors.ValidationError('Password is required.');
+		}
 
-        if (password.length < 8) {
-            throw new Errors.ValidationError('Password must be at least 8 characters long.');
-        }
+		if (password === 'Password') {
+			throw new Errors.ValidationError('Password cannot be the default password.');
+		}
 
-        if (!/[A-Z]/.test(password)) {
-            throw new Errors.ValidationError('Password must contain at least one uppercase letter.');
-        }
+		if (password.length < 8) {
+			throw new Errors.ValidationError('Password must be at least 8 characters long.');
+		}
 
-        if (!/[a-z]/.test(password)) {
-            throw new Errors.ValidationError('Password must contain at least one lowercase letter.');
-        }
+		if (!/[A-Z]/.test(password)) {
+			throw new Errors.ValidationError('Password must contain at least one uppercase letter.');
+		}
 
-        if (!/[0-9]/.test(password)) {
-            throw new Errors.ValidationError('Password must contain at least one number.');
-        }
+		if (!/[a-z]/.test(password)) {
+			throw new Errors.ValidationError('Password must contain at least one lowercase letter.');
+		}
 
-        if (!/[^A-Za-z0-9]/.test(password)) {
-            throw new Errors.ValidationError('Password must contain at least one special character.');
-        }
+		if (!/[0-9]/.test(password)) {
+			throw new Errors.ValidationError('Password must contain at least one number.');
+		}
 
-        if (user) {
-            const email = user.email?.toLowerCase() ?? '';
-            const localPart = email.split('@')[0] ?? '';
+		if (!/[^A-Za-z0-9]/.test(password)) {
+			throw new Errors.ValidationError('Password must contain at least one special character.');
+		}
 
-            if (localPart && password.toLowerCase().includes(localPart)) {
-                throw new Errors.ValidationError('Password cannot contain the email local-part.');
-            }
-        }
-    }
+		if (user) {
+			const e = user.email?.toLowerCase() ?? '';
+			const lp = e.split('@')[0] ?? '';
 
-    // Set Password in Database
-    async setPassword(id, password) {
-        await db.query('UPDATE users SET password_hash = ?, first_login = ? WHERE user_id = ?', [password, false, id]);
-    }
+			if (lp && password.toLowerCase().includes(lp)) {
+				throw new Errors.ValidationError('Password cannot contain the email local-part.');
+			}
+		}
+	}
 
-    // Get User Type
-    async updateUserType(user) {
-        const id = user.getUserID();
+	// Set Password in Database
+	async setPass(id, password) {
+		await db.query('UPDATE users SET password_hash = ?, first_login = ?, sess_ver = sess_ver + 1 WHERE user_id = ?', [password, false, id]);
+		const r = await this.getUser({ id: id });
+		return r;
+	}
 
-        const existsStudent = await db.query('SELECT student_id, major FROM students WHERE user_id = ?', [id]);
-        const existsProfessor = await db.query('SELECT professor_id, department FROM professors WHERE user_id = ?', [id]);
-        const existsAdmin = await db.query('SELECT employee_id, access_level FROM admins WHERE user_id = ?', [id]);
+	async getUser(authUser) {
+		if (!authUser) {
+			throw new Errors.AuthenticationError('Authentication required.');
+		}
+		// TODO(SESSION_AUTH_MIGRATION): preserve this lookup path; session auth should still hydrate the full user from the database.
 
-        if (existsAdmin.length > 0) {
-            return { role: 'ADMIN', role_id: existsAdmin[0].employee_id, role_details: existsAdmin[0].access_level };
-        }
+		const r = await db.query(
+			'SELECT user_id AS id, name, email, password_hash, first_login, sess_ver FROM users WHERE user_id = ?',
+			[authUser.id]
+		);
+		const u = User.fromPersistence(r[0]);
+		const role = await this.updType(u.getUserID());
+		const ru = u.withRole(role);
 
-        if (existsProfessor.length > 0) {
-            return { role: 'PROFESSOR', role_id: existsProfessor[0].professor_id, role_details: existsProfessor[0].department };
-        }
+		return ru;
+	}
 
-        if (existsStudent.length > 0) {
-            return { role: 'STUDENT', role_id: existsStudent[0].student_id, role_details: existsStudent[0].major };
-        }
+	async updUser(name, email, id) {
+		const e = await db.query('SELECT COUNT(*) AS count FROM users WHERE email = ? AND user_id <> ?', [email, id]);
+		if (e[0].count > 0) {
+			throw new Errors.DuplicateEntryError('User with this email already exists.');
+		}
+		await db.query('UPDATE users SET name = ?, email = ? WHERE user_id = ?', [name, email, id]);
+		const r = await db.query('SELECT user_id AS id, name, email, first_login, sess_ver FROM users WHERE user_id = ?', [id]);
+		const u = User.fromPersistence(r[0]);
 
-        throw new Errors.NotFoundError('User does not have an assigned role type.');
-    }
+		const usr = await this.getUser(u.toSafeObject());
+		return usr.toSafeObject();
+	}
 
-    async getCurrentUserInfo(authUser) {
-        if (!authUser) {
-            throw new Errors.AuthenticationError('Authentication required.');
-        }
+	// Get User Type
+	async updType(id) {
+		// TODO(SESSION_AUTH_MIGRATION): role is intentionally reloaded from the database and should not be trusted from the session cookie.
+		const s = await db.query('SELECT student_id, major FROM students WHERE user_id = ?', [id]);
+		const p = await db.query('SELECT professor_id, department FROM professors WHERE user_id = ?', [id]);
+		const a = await db.query('SELECT employee_id, access_level FROM admins WHERE user_id = ?', [id]);
 
-        const rows = await db.query('SELECT user_id AS id, name, email, password_hash, first_login FROM users WHERE user_id = ?', [authUser.id]);
-        const user = User.fromPersistence(rows[0]);
+		if (a.length > 0) {
+			return { role: 'ADMIN', role_id: a[0].employee_id, role_details: a[0].access_level };
+		}
 
-        const roleRows = await this.updateUserType(user);
-        const roleUser = user.withRole(roleRows).withoutPasswordHash();
+		if (p.length > 0) {
+			return { role: 'PROFESSOR', role_id: p[0].professor_id, role_details: p[0].department };
+		}
 
-        return roleUser;
-    }
+		if (s.length > 0) {
+			return { role: 'STUDENT', role_id: s[0].student_id, role_details: s[0].major };
+		}
 
-    async updateUserInfo(name, email, id) {
-        const existingRows = await db.query('SELECT COUNT(*) AS count FROM users WHERE email = ? AND user_id <> ?', [email, id]);
-
-        if (existingRows[0].count > 0) {
-            throw new Errors.DuplicateEntryError('User with this email already exists.');
-        }
-
-        await db.query('UPDATE users SET name = ?, email = ? WHERE user_id = ?', [name, email, id]);
-
-        return this.getCurrentUserInfo({ id });
-    }
+		throw new Errors.NotFoundError('User does not have an assigned role type.');
+	}
 }
 
 export default AuthService;
