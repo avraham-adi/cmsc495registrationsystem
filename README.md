@@ -90,6 +90,21 @@ GET /api/health
 
 Not yet implemented. Check back later!
 
+## API Test Suite
+
+This project includes a contract-aligned automated API test suite that exercises the backend end to end against the live HTTP server and supplements that with focused service/domain unit-style checks.
+
+Running `npm test` resets the database, starts the server, executes all suites, and generates a Markdown report at `Test Report.md`.
+
+Suite Coverage:
+- session-based authentication, session rotation, logout invalidation, and stale-session rejection
+- first-login password-change gating across protected route families
+- positive and negative validation for admin, course, prerequisite, semester, section, and enrollment workflows
+- role-based authorization and ownership restrictions
+- enrollment lifecycle behavior including waitlisting, promotion, drops, deletes, prerequisite enforcement, and access-code handling
+- concurrency-sensitive behavior such as simultaneous enrollments, profile updates, role changes, and access-code operations
+- regression checks for error response shape, service-layer guards, domain normalization, and transactional role updates
+
 ## Useful Commands
 
 ```bash
