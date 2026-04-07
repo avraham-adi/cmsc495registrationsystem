@@ -7,6 +7,7 @@ class EnrollmentController {
 		this.updEnrollment = this.updEnrollment.bind(this);
 		this.getEnrollment = this.getEnrollment.bind(this);
 		this.rmvEnrollment = this.rmvEnrollment.bind(this);
+		this.getEnrollments = this.getEnrollments.bind(this);
 	}
 
 	// Express Add Enrollment Method
@@ -42,6 +43,18 @@ class EnrollmentController {
 			const enrollment = await this.e.getEnroll(id, req.user);
 
 			return res.status(200).json(enrollment);
+		} catch (err) {
+			next(err);
+		}
+	}
+
+	// Express Get Enrollments Method
+	async getEnrollments(req, res, next) {
+		try {
+			const { stuId } = req.query;
+			const enrollments = await this.e.getEnrollments(stuId, req.user);
+
+			return res.status(200).json(enrollments.map((enrollment) => ({ Enrollment: enrollment })));
 		} catch (err) {
 			next(err);
 		}

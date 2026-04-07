@@ -973,6 +973,36 @@ paths:
       security:
         - SessionAuth: []
   /enrollment:
+    get:
+      tags:
+        - enrollment
+      summary: List enrollments for a student
+      description: Return all enrollments for a specific student. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only view their own enrollments. If the authenticated user is still on first login, access is blocked until they change their password.
+      operationId: getEnrollments
+      parameters:
+        - name: stuId
+          in: query
+          description: Student ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Enrollment list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentArray'
+        '400':
+          description: Invalid query parameters
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: STUDENT or ADMIN role required, password change required on first login, and students may only access their own enrollments"
+        '404':
+          description: Student not found
+      security:
+        - SessionAuth: []
     post:
       tags:
         - enrollment
@@ -1413,6 +1443,13 @@ components:
             - waitlisted
             - dropped
             - completed
+    EnrollmentArray:
+      type: array
+      items:
+        type: object
+        properties:
+          Enrollment:
+            $ref: '#/components/schemas/Enrollment'
     EnrollmentCreateRequest:
       type: object
       required:
