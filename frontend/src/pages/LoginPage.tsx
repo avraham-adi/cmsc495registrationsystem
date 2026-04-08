@@ -34,7 +34,7 @@ export function LoginPage() {
 
 		try {
 			const user = await loginAction({ email, password });
-			navigate(user.first_login ? '/chabnge-password' : targetPath, { replace: true });
+			navigate(user.first_login ? '/change-password' : targetPath, { replace: true });
 		} catch (err) {
 			if (err instanceof ApiError) {
 				setError(err.message);

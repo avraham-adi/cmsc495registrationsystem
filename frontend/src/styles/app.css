@@ -1,0 +1,264 @@
+:root {
+  --bg: #eef2f6;
+  --surface: #fff;
+  --surface-alt: #f2f5f8;
+  --text: #17212b;
+  --muted: #5f6b7a;
+  --border: #cfd7e2;
+  --primary: #0f5fa8;
+  --primary-dark: #0b4b84;
+  --accent: #d9e9f8;
+  --success: #dff5e8;
+  --warning: #fff4d6;
+  --shadow: 0 10px 24px rgb(16 24 40 / 6%);
+  --radius: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background:
+    linear-gradient(135deg, rgb(15 95 168 / 5%) 0, transparent 28%),
+    linear-gradient(180deg, #edf1f5 0%, #f8fafc 100%);
+  color: var(--text);
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+.app-frame {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+}
+
+.sidebar {
+  background:
+    linear-gradient(180deg, #10293d 0%, #163d5d 100%);
+  color: white;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgb(255 255 255 / 10%);
+}
+
+.sidebar-copy,
+.sidebar-meta,
+.hint,
+.info-label,
+.eyebrow {
+  color: var(--muted);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.nav-list {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: white;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border-left: 3px solid transparent;
+  background: rgb(255 255 255 / 5%);
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background: rgb(255 255 255 / 12%);
+  border-left-color: #fff;
+}
+
+.content {
+  padding: 32px;
+}
+
+.top-status-bar,
+.info-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.top-status-bar {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 24px;
+}
+
+.info-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.top-status-item,
+.info-card,
+.panel,
+.subpanel,
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.top-status-item,
+.info-card {
+  padding: 16px;
+}
+
+.panel,
+.auth-card {
+  padding: 24px;
+}
+
+.subpanel {
+  padding: 20px;
+  background: var(--surface-alt);
+  border-left: 4px solid var(--primary);
+}
+
+.panel-header,
+.pill-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 2px;
+  background: var(--accent);
+  color: var(--primary-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pill.subtle {
+  background: #eef2f7;
+  color: #4b5563;
+}
+
+.primary-button,
+.secondary-button {
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-button {
+  border: 1px solid var(--primary-dark);
+  background: var(--primary);
+  color: white;
+}
+
+.primary-button:hover {
+  background: var(--primary-dark);
+}
+
+.secondary-button {
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: white;
+}
+
+.field input:focus {
+  outline: 2px solid rgb(15 95 168 / 18%);
+  border-color: var(--primary);
+}
+
+.banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px 18px;
+  border: 1px solid #ead7a2;
+  border-left: 4px solid #c89d23;
+  background: var(--warning);
+}
+
+.banner-link {
+  color: var(--primary-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.messageerror,
+.messagesuccess,
+.messageinfo {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+}
+
+.messageerror {
+  border-left-color: #c23b3b;
+  background: #fff0f0;
+  color: #7a1f1f;
+}
+
+.messagesuccess {
+  border-left-color: #2e8b57;
+  background: var(--success);
+  color: #1d5a39;
+}
+
+.messageinfo {
+  border-left-color: var(--primary);
+  background: #edf5fd;
+  color: var(--primary-dark);
+}
+
+.auth-layout {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: min(100%, 420px);
+}
+
+@media (width <= 900px) {
+  .app-frame {
+    grid-template-columns: 1fr;
+  }
+
+  .top-status-bar {
+    grid-template-columns: 1fr;
+  }
+}
