@@ -27,7 +27,7 @@ export function AppShell() {
 	}).format(now);
 
 	return (
-		<div className="app=-frame">
+		<div className="app-frame">
 			<aside className="sidebar">
 				<div>
 					<p className="eyebrow">Group Golf Course Registration System</p>
