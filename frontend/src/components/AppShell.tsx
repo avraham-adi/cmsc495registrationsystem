@@ -32,28 +32,29 @@ export function AppShell() {
 				<div>
 					<p className="eyebrow">Group Golf Course Registration System</p>
 					<h1>Golf University Registration Utility</h1>
-					<p className="sidebar-copy">
-						Session-based React client wired against the OpenAPI-authenticated backend.
-					</p>
+					<p className="sidebar-copy">Session-based React client wired against the OpenAPI-authenticated backend.</p>
 				</div>
 
 				<nav className="nav-list" aria-label="Primary">
-					{user?.role === 'STUDENT' ? (
-						<>
-							<NavLink to="/" end className="nav-item">
-								Course Catalog
-							</NavLink>
-						</>
-					) : null}
 					<NavLink to="/" end className="nav-item">
+						Dashboard
+					</NavLink>
+					<NavLink to="/profile" end className="nav-item">
 						Profile
 					</NavLink>
 					<NavLink to="/change-password" className="nav-item">
 						Change Password
 					</NavLink>
+					{user?.role === 'STUDENT' ? (
+						<>
+							<NavLink to="/catalog" end className="nav-item">
+								Course Catalog
+							</NavLink>
+						</>
+					) : null}
 					{user?.role === 'ADMIN' ? (
 						<>
-							<NavLink to="/" end className="nav-item">
+							<NavLink to="/admin/users" end className="nav-item">
 								Manage Users
 							</NavLink>
 						</>
@@ -78,15 +79,15 @@ export function AppShell() {
 				{user ? (
 					<section className="top-status-bar">
 						<div className="top-status-item">
-							<span className="info-label">{user.role === 'STUDENT' ? 'Student Name' : 'User Name'}</span>
+							<span className="info-label">{user.role === 'STUDENT' ? 'Student Name' : 'User Name'} </span>
 							<strong>{user.name}</strong>
 						</div>
 						<div className="top-status-item">
-							<span className="info-label">{user.role === 'STUDENT' ? 'Student ID' : 'User ID'}</span>
+							<span className="info-label">{user.role === 'STUDENT' ? 'Student ID' : 'User ID'} </span>
 							<strong>{user.role_id}</strong>
 						</div>
 						<div className="top-status-item">
-							<span className="info-label">Date / Time</span>
+							<span className="info-label">Date / Time </span>
 							<strong>{formattedTimestamp}</strong>
 						</div>
 					</section>
@@ -95,8 +96,7 @@ export function AppShell() {
 				{requiresPasswordChange ? (
 					<section className="banner warning persistent-banner">
 						<div>
-							<strong>Password update required.</strong> Your account is still on first login, and most
-							protected backend routes stay blocked until you change your password.
+							<strong>Password update required.</strong> Your account is still on first login, and most protected backend routes stay blocked until you change your password.
 						</div>
 						<NavLink to="/change-password" className="banner-link">
 							Change Password
@@ -104,7 +104,9 @@ export function AppShell() {
 					</section>
 				) : null}
 
-				<Outlet />
+				<div className="content-body">
+					<Outlet />
+				</div>
 			</main>
 		</div>
 	);

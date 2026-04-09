@@ -12,29 +12,22 @@ export function DashboardPage() {
 						<p className="eyebrow">Student Workflow</p>
 						<h2>Dashboard</h2>
 					</div>
-					<span className="pill subtle">Scaffold</span>
 				</div>
-
-				<p className="sidebar-copy">
-					This is a dashboard for the authenticated student.
-				</p>
 
 				<div className="info-grid">
 					<div className="info-card">
-						<span className="info-label">Student Name</span>
+						<span className="info-label">Student Name </span>
 						<strong>{user?.name ?? 'Unknown user'}</strong>
 					</div>
 					<div className="info-card">
-						<span className="info-label">Student ID</span>
-						<strong>{user?.role_id ?? 'N/A'}</strong>
+						<span className="info-label">User ID </span>
+						<strong>{user?.id ?? 'N/A'}</strong>
 					</div>
 				</div>
 
 				<section className="subpanel stack">
 					<h3>Next Development Targets</h3>
-					<p className="sidebar-copy">
-						Enrollment summary, weekly schedule, and recent registration activity.
-					</p>
+					<p className="sidebar-copy">Enrollment summary, weekly schedule, and recent registration activity.</p>
 				</section>
 			</section>
 		</StudentOnly>

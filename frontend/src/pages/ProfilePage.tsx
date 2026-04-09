@@ -52,26 +52,7 @@ export function ProfilePage() {
 
 			<form className="stack" onSubmit={submit}>
 				<FormField id="name" label="Name" value={name} onChange={setName} required />
-				<FormField
-					id="profile-email"
-					label="Email"
-					type="email"
-					value={email}
-					onChange={setEmail}
-					autoComplete="email"
-					required
-				/>
-
-				<div className="info-grid">
-					<div className="info-card">
-						<span className="info-label">User ID</span>
-						<strong>{user?.id}</strong>
-					</div>
-					<div className="info-card">
-						<span className="info-label">Role ID</span>
-						<strong>{user?.role_id}</strong>
-					</div>
-				</div>
+				<FormField id="profile-email" label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" required />
 
 				{message ? <StatusMessage kind="success" message={message} /> : null}
 				{error ? <StatusMessage kind="error" message={error} /> : null}

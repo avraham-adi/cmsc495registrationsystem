@@ -9,28 +9,11 @@ type FormFieldProps = {
 	placeholder?: string,
 };
 
-export function FormField({
-	id,
-	label,
-	type = 'text',
-	value,
-	onChange,
-	autoComplete,
-	required,
-	placeholder,
-}: FormFieldProps) {
+export function FormField({ id, label, type = 'text', value, onChange, autoComplete, required, placeholder }: FormFieldProps) {
 	return (
 		<label className="field" htmlFor={id}>
 			<span>{label}</span>
-			<input
-				id={id}
-				type={type}
-				value={value}
-				onChange={(event) => onChange(event.target.value)}
-				autoComplete={autoComplete}
-				required={required}
-				placeholder={placeholder}
-			/>
+			<input id={id} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} required={required} placeholder={placeholder} />
 		</label>
 	);
 }

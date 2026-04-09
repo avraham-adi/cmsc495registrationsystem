@@ -75,13 +75,27 @@ export type CourseListResponse = {
 // Section Object
 export type Section = {
 	section_id: number,
-	course_id: number,
-	semester_id: number,
-	professor_id: number,
 	capacity: number,
 	days: string,
 	start_time: string | null,
 	end_time: string | null,
+	course: {
+		course_id: number,
+		course_code: string,
+		title: string,
+		description: string,
+		subject: string,
+		credits: number,
+	},
+	professor: {
+		professor_id: number,
+		professor_name: string,
+	},
+	semester: {
+		semester_id: number,
+		term: string,
+		year: number,
+	},
 };
 
 // Section List Response

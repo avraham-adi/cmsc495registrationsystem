@@ -49,36 +49,19 @@ export function ChangePasswordPage() {
 				</div>
 			</div>
 
-			{requiresPasswordChange ? (
-				<StatusMessage
-					kind="info"
-					message="The backend marks this account as first-login. Change your password to unlock the rest of the protected routes."
-				/>
-			) : null}
+			{requiresPasswordChange ? <StatusMessage kind="info" message="It appears to be your first time logging in. Password change is mandatory." /> : null}
 
 			<form className="stack" onSubmit={submit}>
-				<FormField
-					id="new-password"
-					label="New Password"
-					type="password"
-					value={password}
-					onChange={setPassword}
-					autoComplete="new-password"
-					required
-				/>
-				<FormField
-					id="confirm-password"
-					label="Confirm Password"
-					type="password"
-					value={confirmPassword}
-					onChange={setConfirmPassword}
-					autoComplete="new-password"
-					required
-				/>
+				<FormField id="new-password" label="New Password" type="password" value={password} onChange={setPassword} autoComplete="new-password" required />
+				<FormField id="confirm-password" label="Confirm Password" type="password" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" required />
 
 				<p className="hint">
-					Backend password policy requires at least 8 characters, upper/lowercase, a number, a special
-					character, and it cannot contain the email local-part.
+					Password requires:
+					<br /> - at least 8 characters
+					<br /> - 1 upper/lowercase
+					<br /> - 1 number
+					<br /> - 1 special character
+					<br /> - cannot contain the email address
 				</p>
 
 				{message ? <StatusMessage kind="success" message={message} /> : null}

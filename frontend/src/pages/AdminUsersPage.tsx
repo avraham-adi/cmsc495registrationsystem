@@ -15,9 +15,7 @@ export function AdminUsersPage() {
 					<span className="pill subtle">Scaffold</span>
 				</div>
 
-				<p className="sidebar-copy">
-					This is a user management admin-only page.
-				</p>
+				<p className="sidebar-copy">This is a user management admin-only page.</p>
 
 				<div className="info-grid">
 					<div className="info-card">

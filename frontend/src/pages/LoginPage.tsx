@@ -51,30 +51,11 @@ export function LoginPage() {
 			<section className="auth-card">
 				<p className="eyebrow">Course Registration System</p>
 				<h1>Sign in</h1>
-				<p className="auth-copy">
-					Welcome to the Golf University Course Registration System. Please log in to access system.
-				</p>
+				<p className="auth-copy">Welcome to the Golf University Course Registration System. Please log in to access system.</p>
 
 				<form className="stack" onSubmit={submit}>
-					<FormField
-						id="email"
-						label="Email"
-						type="email"
-						value={email}
-						onChange={setEmail}
-						autoComplete="email"
-						required
-						placeholder="you@example.edu"
-					/>
-					<FormField
-						id="password"
-						label="Password"
-						type="password"
-						value={password}
-						onChange={setPassword}
-						autoComplete="current-password"
-						required
-					/>
+					<FormField id="email" label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" required placeholder="you@example.edu" />
+					<FormField id="password" label="Password" type="password" value={password} onChange={setPassword} autoComplete="current-password" required />
 
 					{error ? <StatusMessage kind="error" message={error} /> : null}
 

@@ -1,11 +1,5 @@
 import { request } from './client.ts';
-import type {
-	AuthUserResponse,
-	ChangePasswordPayload,
-	LoginPayload,
-	LoginResponse,
-	UpdateUserPayload,
-} from '../types/api';
+import type { AuthUserResponse, ChangePasswordPayload, LoginPayload, LoginResponse, UpdateUserPayload } from '../types/api';
 
 // Login Function
 export function login(payload: LoginPayload) {
