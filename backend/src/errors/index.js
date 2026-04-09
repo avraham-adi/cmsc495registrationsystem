@@ -18,6 +18,7 @@ export { default as InvalidCourseDataError } from './course/invalidCourseData.er
 
 export { default as EnrollmentError } from './enrollment/enrollment.error.js';
 export { default as AlreadyEnrolledError } from './enrollment/alreadyEnrolled.error.js';
+export { default as ScheduleConflictError } from './enrollment/scheduleConflict.error.js';
 
 export { default as SectionError } from './section/section.error.js';
 export { default as SectionFullError } from './section/sectionFull.error.js';

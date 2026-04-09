@@ -5,6 +5,10 @@ export const enrollmentCreateBodySchema = z.object({
 	secId: z.coerce.number().int().positive(),
 });
 
+export const enrollmentListQuerySchema = z.object({
+	stuId: z.coerce.number().int().positive(),
+});
+
 export const enrollmentUpdateBodySchema = z
 	.object({
 		status: z.enum(['enrolled', 'dropped', 'completed', 'waitlisted']),

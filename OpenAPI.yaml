@@ -746,7 +746,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SectionMeta'
+                $ref: '#/components/schemas/ReadableSectionMeta'
         '400':
           description: Invalid query parameters
   /section/{cId}:
@@ -775,7 +775,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Section'
+                $ref: '#/components/schemas/SectionSafe'
         '400':
           description: Invalid request body
         '401':
@@ -808,7 +808,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Section'
+                $ref: '#/components/schemas/SectionSafe'
         '404':
           description: Section not found
     put:
@@ -836,7 +836,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Section'
+                $ref: '#/components/schemas/SectionSafe'
         '400':
           description: Invalid request body or section capacity below current enrollment
         '401':
@@ -973,6 +973,36 @@ paths:
       security:
         - SessionAuth: []
   /enrollment:
+    get:
+      tags:
+        - enrollment
+      summary: List enrollments for a student
+      description: Return all enrollments for a specific student. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only view their own enrollments. If the authenticated user is still on first login, access is blocked until they change their password.
+      operationId: getEnrollments
+      parameters:
+        - name: stuId
+          in: query
+          description: Student ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Enrollment list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentArray'
+        '400':
+          description: Invalid query parameters
+        '401':
+          description: Invalid or missing session
+        '403':
+          description: "Forbidden: STUDENT or ADMIN role required, password change required on first login, and students may only access their own enrollments"
+        '404':
+          description: Student not found
+      security:
+        - SessionAuth: []
     post:
       tags:
         - enrollment
@@ -1334,7 +1364,7 @@ components:
         properties:
           Semester:
             $ref: '#/components/schemas/Semester'
-    Section:
+    SectionSafe:
       type: object
       properties:
         section_id:
@@ -1358,6 +1388,52 @@ components:
           type: string
           description: Time of day in HH:MM:SS format, or an empty string for asynchronous classes.
           pattern: '^(\d{2}:\d{2}:\d{2})?$'
+    SectionCourseSummary:
+      type: object
+      properties:
+        course_id:
+          type: integer
+        course_code:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        subject:
+          type: string
+        credits:
+          type: integer
+    SectionProfessorSummary:
+      type: object
+      properties:
+        professor_id:
+          type: integer
+        professor_name:
+          type: string
+    ReadableSection:
+      type: object
+      properties:
+        section_id:
+          type: integer
+        capacity:
+          type: integer
+        days:
+          type: string
+          description: Meeting-day code string such as MWF or TR, or `async` for asynchronous classes.
+        start_time:
+          type: string
+          description: Time of day in HH:MM:SS format, or an empty string for asynchronous classes.
+          pattern: '^(\d{2}:\d{2}:\d{2})?$'
+        end_time:
+          type: string
+          description: Time of day in HH:MM:SS format, or an empty string for asynchronous classes.
+          pattern: '^(\d{2}:\d{2}:\d{2})?$'
+        course:
+          $ref: '#/components/schemas/SectionCourseSummary'
+        professor:
+          $ref: '#/components/schemas/SectionProfessorSummary'
+        semester:
+          $ref: '#/components/schemas/Semester'
     SectionWriteRequest:
       type: object
       required:
@@ -1389,12 +1465,26 @@ components:
         type: object
         properties:
           Section:
-            $ref: '#/components/schemas/Section'
+            $ref: '#/components/schemas/SectionSafe'
     SectionMeta:
       type: object
       properties:
         Section:
           $ref: '#/components/schemas/SectionArray'
+        Meta:
+          $ref: '#/components/schemas/Meta'
+    ReadableSectionArray:
+      type: array
+      items:
+        type: object
+        properties:
+          Section:
+            $ref: '#/components/schemas/ReadableSection'
+    ReadableSectionMeta:
+      type: object
+      properties:
+        Section:
+          $ref: '#/components/schemas/ReadableSectionArray'
         Meta:
           $ref: '#/components/schemas/Meta'
     Enrollment:
@@ -1413,6 +1503,13 @@ components:
             - waitlisted
             - dropped
             - completed
+    EnrollmentArray:
+      type: array
+      items:
+        type: object
+        properties:
+          Enrollment:
+            $ref: '#/components/schemas/Enrollment'
     EnrollmentCreateRequest:
       type: object
       required:

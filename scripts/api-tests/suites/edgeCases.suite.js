@@ -1,4 +1,4 @@
-import { assert, assertHasKeys, assertStatus, CookieClient } from '../shared.js';
+import { assert, assertStatus, CookieClient } from '../shared.js';
 
 export async function runEdgeCasesSuite(env) {
     const { harness, clients, ctx } = env;

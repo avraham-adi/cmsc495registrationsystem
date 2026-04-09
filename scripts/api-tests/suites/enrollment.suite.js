@@ -74,12 +74,99 @@ export async function runEnrollmentSuite(env) {
     );
 
     await harness.run(
+        'Enrollment creation rejects schedule conflicts',
+        'PUT /section + POST /course + POST /section + POST /enrollment',
+        { method: 'MULTI', client: 'student' },
+        { status: 409 },
+        async () => {
+            const sectionUpdate = await admin.request(`/section/${ctx.section.section_id}`, {
+                method: 'PUT',
+                body: {
+                    semId: ctx.semester.semester_id,
+                    profId: ctx.users.professor.user.role_id,
+                    capacity: 1,
+                    days: 'MW',
+                    startTm: '09:00:00',
+                    endTm: '10:15:00',
+                },
+            });
+            assertStatus(sectionUpdate, 200);
+            ctx.section = sectionUpdate.body;
+
+            const courseResponse = await admin.request('/course', {
+                method: 'POST',
+                body: {
+                    code: 'CMSC998',
+                    title: 'Conflict Course',
+                    desc: 'Conflict testing course',
+                    cred: 3,
+                },
+            });
+            assertStatus(courseResponse, 201);
+            ctx.extraCourses.push(courseResponse.body);
+
+            const sectionResponse = await admin.request(`/section/${courseResponse.body.course_id}`, {
+                method: 'POST',
+                body: {
+                    semId: ctx.semester.semester_id,
+                    profId: ctx.users.professor.user.role_id,
+                    capacity: 5,
+                    days: 'MW',
+                    startTm: '09:30:00',
+                    endTm: '10:45:00',
+                },
+            });
+            assertStatus(sectionResponse, 201);
+            ctx.extraSections.push(sectionResponse.body);
+
+            const response = await student.request('/enrollment', {
+                method: 'POST',
+                body: {
+                    stuId: ctx.users.student.user.role_id,
+                    secId: sectionResponse.body.section_id,
+                },
+            });
+            assertStatus(response, 409);
+            return harness.responseSummary(response);
+        }
+    );
+
+    await harness.run(
+        'Students can list their own enrollments',
+        `GET /enrollment?stuId=${ctx.users.student.user?.role_id ?? ':id'}`,
+        { method: 'GET', client: 'student', query: { stuId: ctx.users.student.user?.role_id } },
+        { status: 200 },
+        async () => {
+            const response = await student.request(`/enrollment?stuId=${ctx.users.student.user.role_id}`);
+            assertStatus(response, 200);
+            assert(Array.isArray(response.body), 'Enrollment list response should be an array.');
+            assert(
+                response.body.some((entry) => entry?.Enrollment?.enrollment_id === ctx.enrollment1.enrollment_id),
+                'Enrollment list should include the student enrollment.'
+            );
+            return harness.responseSummary(response);
+        }
+    );
+
+    await harness.run(
         'Second student cannot fetch another student enrollment',
         `GET /enrollment/${ctx.enrollment1?.enrollment_id ?? ':id'}`,
         { method: 'GET', client: 'otherStudent' },
         { status: 403 },
         async () => {
             const response = await otherStudent.request(`/enrollment/${ctx.enrollment1.enrollment_id}`);
+            assertStatus(response, 403);
+            return harness.responseSummary(response);
+        }
+    );
+
+    await harness.run(
+        'Second student cannot list another student enrollments',
+        `GET /enrollment?stuId=${ctx.users.student.user?.role_id ?? ':id'}`,
+        { method: 'GET', client: 'otherStudent', query: { stuId: ctx.users.student.user?.role_id } },
+        { status: 403 },
+        async () => {
+            const response = await otherStudent.request(`/enrollment?stuId=${ctx.users.student.user.role_id}`);
             assertStatus(response, 403);
             return harness.responseSummary(response);
         }
