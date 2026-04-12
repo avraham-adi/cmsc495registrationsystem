@@ -1,6 +1,6 @@
 # Course Registration System
 
-Course Registration System is a CMSC 495 Group Delta project for managing users, courses, prerequisites, semesters, sections, and enrollments. The repository contains the backend API, the Vite/React frontend client, database schema and seed data, automated API and GUI test runners, and a published OpenAPI contract.
+Course Registration System is a CMSC 495 Group Golf project for managing users, courses, prerequisites, semesters, sections, and enrollments. The repository contains the backend API, the frontend client, database schema/seed data, and a published OpenAPI contract.
 
 ## API Documentation
 
