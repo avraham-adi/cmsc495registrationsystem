@@ -16,7 +16,8 @@ Course Registration System is a CMSC 495 Group Delta project for managing users,
 - `backend/`: Express backend and session-based authentication
 - `frontend/`: Vite/React frontend
 - `database/`: schema and seed SQL
-- `scripts/`: setup, schema, seed, reset, and test helpers
+- `scripts/`: setup, schema, seed, reset, enrollment/demo data, and automated test helpers
+- `scripts/gui-tests/`: Vitest and React Testing Library GUI test suites and shared test support
 - `docs/`: static Swagger UI site for GitHub Pages
 - `docs/OpenAPI.yaml`: source-of-truth API contract
 
@@ -57,10 +58,17 @@ Create the schema and seed the database:
 npm run db:reset
 ```
 
-This uses:
+This resets the schema, seeds the base users/courses/sections data, and then applies the enrollment/demo occupancy seed used for transcript history and first-step waitlist scenarios.
+
+Core reset inputs:
 
 - [database/schema.sql](/Users/adiavraham/Documents/UMGC/CMSC495/cmsc495registrationsystem/cmsc495registrationsystem/database/schema.sql)
 - [database/seeding_data.sql](/Users/adiavraham/Documents/UMGC/CMSC495/cmsc495registrationsystem/cmsc495registrationsystem/database/seeding_data.sql)
+
+Enrollment/demo occupancy inputs:
+
+- [database/seed_student_histories.sql](/Users/adiavraham/Documents/UMGC/CMSC495/cmsc495registrationsystem/cmsc495registrationsystem/database/seed_student_histories.sql)
+- [database/fill_first_step_waitlists.sql](/Users/adiavraham/Documents/UMGC/CMSC495/cmsc495registrationsystem/cmsc495registrationsystem/database/fill_first_step_waitlists.sql)
 
 You can also run the setup helper:
 
@@ -100,10 +108,12 @@ http://127.0.0.1:5173
 
 The frontend includes:
 
-- student dashboard, schedule, profile, password-change, and registration workflows
+- student dashboard, schedule, profile, standalone password-change, and registration workflows
 - professor profile, password-change, teaching-section, and access-code management workflows
 - routed admin workflows for users, courses, prerequisites, semesters, and sections
 - the admin UI mounted under `/console/admin` to avoid collisions with backend `/admin` API routes
+- first-login users routed to a standalone `/change-password` workflow before protected pages unlock
+- student password changes triggered from the `Profile` view rather than a dashboard password tab
 - developer-only student transcript/completion controls hidden behind `Ctrl+Shift+D` on the dashboard
 
 Seeded demo logins after `npm run db:reset`:
@@ -133,9 +143,11 @@ This project also includes a Vitest + React Testing Library GUI test runner for 
 
 Running `npm run test:gui` executes component and routed workflow tests and generates a Markdown report at `GUI Test Report.md`.
 
+The GUI suite lives under `scripts/gui-tests/`, with shared setup and support helpers colocated there.
+
 GUI coverage includes:
 
-- auth and shell rendering behavior
+- auth, shell, and first-login standalone password workflow behavior
 - student login flow handling
 - student enrollment, schedule, and catalog helper behavior
 - admin navigation and routed administration views
@@ -148,6 +160,7 @@ GUI coverage includes:
 ```bash
 npm run db:schema
 npm run db:seed
+npm run db:enrollment
 npm run db:reset
 npm run test
 npm run test:api
@@ -160,11 +173,11 @@ npm run dev
 
 ## Helper SQL Scripts
 
-The `database/` folder also contains reusable demo and testing helpers such as waitlist-fill and student-history SQL scripts. These are optional utilities for manual validation and demos; they are not required for the main setup flow.
+The `database/` folder also contains reusable demo and testing helpers such as waitlist-fill and student-history SQL scripts. `db:reset` already uses the core enrollment/demo seed helpers; the files remain useful if you want to rerun those scenarios manually.
 
 ## Final QA Checklist
 
-- Student: first login, password change, schedule view, catalog filtering, register, waitlist, drop
+- Student: first login, standalone password change, schedule view, catalog filtering, register, waitlist, drop
 - Professor: first login, profile update, section grouping, access-code generation, access-code revocation
 - Admin: first login, routed admin tools, user/course/prerequisite/semester/section CRUD
 - Database: `npm run db:reset` completes successfully against a live MySQL instance and recreates the seeded demo users
