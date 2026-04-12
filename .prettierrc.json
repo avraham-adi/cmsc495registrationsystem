@@ -10,5 +10,17 @@
 	"objectWrap": "preserve",
 	"arrowParens": "always",
 	"parser": "flow",
-	"endOfLine": "lf"
+	"endOfLine": "lf",
+	"overrides": [
+		{
+			"files": ["*.css", "*.scss", "*.less"],
+			"options": {
+				"parser": "css",
+				"printWidth": 80,
+				"tabWidth": 4,
+				"useTabs": true,
+				"singleQuote": false
+			}
+		}
+	]
 }

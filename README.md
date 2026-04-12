@@ -1,6 +1,6 @@
 # Course Registration System
 
-Course Registration System is a CMSC 495 Group Delta project for managing users, courses, prerequisites, semesters, sections, and enrollments. The repository contains the backend API, the frontend client, database schema/seed data, and a published OpenAPI contract.
+Course Registration System is a CMSC 495 Group Delta project for managing users, courses, prerequisites, semesters, sections, and enrollments. The repository contains the backend API, the Vite/React frontend client, database schema and seed data, automated API and GUI test runners, and a published OpenAPI contract.
 
 ## API Documentation
 
@@ -9,7 +9,7 @@ Course Registration System is a CMSC 495 Group Delta project for managing users,
 ## Notes
 
 - The backend was updated to use server-side sessions instead of JWT to strengthen security.
-- The [OpenAPI contract](https://avraham-adi.github.io/cmsc495registrationsystem/#/) is the API source of truth.
+- `docs/OpenAPI.yaml` is the canonical API contract and the file used by the GitHub Pages Swagger UI.
 
 ## Repository Layout
 
@@ -18,7 +18,7 @@ Course Registration System is a CMSC 495 Group Delta project for managing users,
 - `database/`: schema and seed SQL
 - `scripts/`: setup, schema, seed, reset, and test helpers
 - `docs/`: static Swagger UI site for GitHub Pages
-- `OpenAPI.yaml`: source-of-truth API contract
+- `docs/OpenAPI.yaml`: source-of-truth API contract
 
 ## Prerequisites
 
@@ -88,7 +88,29 @@ GET /api/health
 
 ## Run The Frontend
 
-Not yet implemented. Check back later!
+```bash
+npm run dev
+```
+
+Default frontend URL:
+
+```text
+http://127.0.0.1:5173
+```
+
+The frontend includes:
+
+- student dashboard, schedule, profile, password-change, and registration workflows
+- professor profile, password-change, teaching-section, and access-code management workflows
+- routed admin workflows for users, courses, prerequisites, semesters, and sections
+- the admin UI mounted under `/console/admin` to avoid collisions with backend `/admin` API routes
+- developer-only student transcript/completion controls hidden behind `Ctrl+Shift+D` on the dashboard
+
+Seeded demo logins after `npm run db:reset`:
+
+- Student: `kuros_ichi001@guru.edu` / `Ichigo Kurosakikuros_ichi001@guru.edu`
+- Professor: `butch_bill301@guru.edu` / `Billy Butcherbutch_bill301@guru.edu`
+- Admin: `horne_chri201@guru.edu` / `Christian Hornerhorne_chri201@guru.edu`
 
 ## API Test Suite
 
@@ -105,6 +127,22 @@ Suite Coverage:
 - concurrency-sensitive behavior such as simultaneous enrollments, profile updates, role changes, and access-code operations
 - regression checks for error response shape, service-layer guards, domain normalization, and transactional role updates
 
+## GUI Test Suite
+
+This project also includes a Vitest + React Testing Library GUI test runner for the frontend.
+
+Running `npm run test:gui` executes component and routed workflow tests and generates a Markdown report at `GUI Test Report.md`.
+
+GUI coverage includes:
+
+- auth and shell rendering behavior
+- student login flow handling
+- student enrollment, schedule, and catalog helper behavior
+- admin navigation and routed administration views
+- admin create/update flows for users, courses, semesters, and sections
+- professor section and access-code workflows
+- failure-state rendering for duplicate, validation, and dependency-blocked backend responses
+
 ## Useful Commands
 
 ```bash
@@ -112,6 +150,22 @@ npm run db:schema
 npm run db:seed
 npm run db:reset
 npm run test
+npm run test:api
+npm run test:gui
+npm run test:all
 npm run lint
 npm run build
+npm run dev
 ```
+
+## Helper SQL Scripts
+
+The `database/` folder also contains reusable demo and testing helpers such as waitlist-fill and student-history SQL scripts. These are optional utilities for manual validation and demos; they are not required for the main setup flow.
+
+## Final QA Checklist
+
+- Student: first login, password change, schedule view, catalog filtering, register, waitlist, drop
+- Professor: first login, profile update, section grouping, access-code generation, access-code revocation
+- Admin: first login, routed admin tools, user/course/prerequisite/semester/section CRUD
+- Database: `npm run db:reset` completes successfully against a live MySQL instance and recreates the seeded demo users
+- Docs: `README.md` and `docs/OpenAPI.yaml` remain aligned before publishing GitHub Pages

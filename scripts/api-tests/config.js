@@ -6,6 +6,6 @@ export const RUN_SECTION_SUITE = process.env.API_TEST_RUN_SECTIONS || 'true';
 export const API_TEST_VERBOSE = process.env.API_TEST_VERBOSE === 'true';
 
 export const ADMIN_USER = {
-    email: process.env.API_TEST_ADMIN_EMAIL || 'horne_chri87@gmail.com',
-    password: process.env.API_TEST_ADMIN_PASSWORD || 'R@k4RGAd9j9CcV@rfvCzX3CeLZo-',
+    email: process.env.API_TEST_ADMIN_EMAIL || 'horne_chri201@guru.edu',
+    password: process.env.API_TEST_ADMIN_PASSWORD || 'Christian Hornerhorne_chri201@guru.edu',
 };
