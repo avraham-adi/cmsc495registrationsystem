@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+user.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the user domain model, role hydration, and safe serialization helpers.
+*/
+
 import * as Errors from '../errors/index.js';
 
 class User {

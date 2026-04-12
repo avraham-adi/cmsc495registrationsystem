@@ -1,11 +1,14 @@
-/**
- * CourseService
- *
- * Responsibilities:
- * Retrieve course catalog data
- * Retrieve sections for a given course
- * Support simple filtering by semester
- */
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+course.service.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Implements course catalog creation, reads, updates, deletes, and subject-filter validation.
+*/
 
 import * as db from '../db/connection.js';
 import Course from '../domain/course.js';

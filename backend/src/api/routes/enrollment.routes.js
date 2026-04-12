@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+enrollment.routes.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the enrollment API routes for student enrollment reads and mutations.
+*/
+
 import { Router } from 'express';
 import EnrollmentController from '../controllers/enrollment.controller.js';
 import auth, { flMw as flm } from '../../middleware/session.middleware.js';

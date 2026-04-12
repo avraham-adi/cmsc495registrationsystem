@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+common.schema.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines shared Zod schema fragments reused across API validation modules.
+*/
+
 import { z } from 'zod';
 
 // Validation schema for common parameters and query options used across multiple endpoints

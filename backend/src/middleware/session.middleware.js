@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+session.middleware.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Hydrates authenticated requests, enforces session access, and exposes first-login middleware helpers.
+*/
+
 import SessionService from '../services/session.service.js';
 import * as db from '../db/connection.js';
 

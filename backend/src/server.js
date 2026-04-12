@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+server.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Starts the backend HTTP server and binds the Express application to the configured port.
+*/
+
 import dotenv from 'dotenv';
 import app from './app.js';
 import { close } from './db/connection.js';

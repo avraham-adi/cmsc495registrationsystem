@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+app.error.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the common application error base class used by backend error types.
+*/
+
 export default class AppError extends Error {
     constructor(message = 'Application error.', options = {}) {
         super(message);

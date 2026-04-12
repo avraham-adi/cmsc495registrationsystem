@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+connection.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Creates and exports the shared MySQL connection helpers used across backend services.
+*/
+
 import mysql from 'mysql2';
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });

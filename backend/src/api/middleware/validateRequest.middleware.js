@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+validateRequest.middleware.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Validates request params, query strings, and bodies against Zod schemas before controllers run.
+*/
+
 // Middleware to validate incoming requests using Zod schemas to simplify validation logic across routes.
 export function validateRequest(schema, source = 'body') {
 	return (req, res, next) => {

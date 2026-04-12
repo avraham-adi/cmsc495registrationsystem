@@ -1,48 +1,63 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+session.service.js
+input
+request session objects, response objects, and authenticated user identifiers
+output
+session payloads, saved sessions, and session teardown side effects
+description
+Creates, refreshes, hydrates, and destroys server-side session state for authenticated users.
+*/
+
 import AuthService from './auth.service.js';
 import * as Errors from '../errors/index.js';
 
 class SessionService {
 	constructor() {
-		this.a = new AuthService();
+		this.authService = new AuthService();
 	}
 
-	createPld(u) {
-		const id = u.getUserID();
-		const ver = u.getSessVer();
+	// Builds the minimal session payload stored on req.session.auth.
+	createPld(user) {
+		const userId = user.getUserID();
+		const sessionVersion = user.getSessVer();
 
 		return {
-			userId: id,
-			sess_ver: ver,
-			sessVer: ver,
+			userId,
+			sess_ver: sessionVersion,
+			sessVer: sessionVersion,
 		};
 	}
 
+	// Recomputes the current session payload from the latest database-backed user state.
 	async getPld(id) {
-		const u = await this.a.getUser({ id });
-		return this.createPld(u);
+		const user = await this.authService.getUser({ id });
+		return this.createPld(user);
 	}
 
+	// Hydrates the request user shape from the server-authoritative session user id.
 	async hydrate(id) {
 		if (!id) {
 			throw new Errors.AuthenticationError('Authentication required.');
 		}
 
-		// TODO(SESSION_AUTH_MIGRATION): use this lookup from session middleware to build req.user for each request.
-		const u = await this.a.getUser({ id: id });
+		const user = await this.authService.getUser({ id });
 
 		return {
-			id: u.getUserID(),
-			name: u.getName(),
-			email: u.getEmail(),
-			first_login: u.getFirstLogin(),
-			role: u.getRole(),
-			role_id: u.getRoleID(),
-			role_details: u.getRoleDetails(),
+			id: user.getUserID(),
+			name: user.getName(),
+			email: user.getEmail(),
+			first_login: user.getFirstLogin(),
+			role: user.getRole(),
+			role_id: user.getRoleID(),
+			role_details: user.getRoleDetails(),
 		};
 	}
 
+	// Regenerates the session id and stores fresh auth metadata after login.
 	async establish(req, id) {
-		const p = await this.getPld(id);
+		const payload = await this.getPld(id);
 
 		await new Promise((resolve, reject) => {
 			req.session.regenerate((err) => {
@@ -55,7 +70,7 @@ class SessionService {
 			});
 		});
 
-		req.session.auth = p;
+		req.session.auth = payload;
 		req.session.metadata = {
 			ipAddress: req.ip ?? null,
 			userAgent: req.get('user-agent') ?? null,
@@ -72,13 +87,14 @@ class SessionService {
 			});
 		});
 
-		return p;
+		return payload;
 	}
 
+	// Rewrites the existing session payload after profile or password updates.
 	async refresh(req, id) {
-		const p = await this.getPld(id);
+		const payload = await this.getPld(id);
 
-		req.session.auth = p;
+		req.session.auth = payload;
 		req.session.metadata = {
 			...(req.session?.metadata ?? {}),
 			ipAddress: req.ip ?? req.session?.metadata?.ipAddress ?? null,
@@ -96,9 +112,10 @@ class SessionService {
 			});
 		});
 
-		return p;
+		return payload;
 	}
 
+	// Destroys the backing session row and clears the client cookie.
 	async destroy(req, res) {
 		await new Promise((resolve, reject) => {
 			req.session.destroy((err) => {

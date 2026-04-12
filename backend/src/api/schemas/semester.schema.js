@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+semester.schema.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines request validation schemas for semester reads and mutations.
+*/
+
 import { z } from 'zod';
 
 export const semesterBodySchema = z.object({

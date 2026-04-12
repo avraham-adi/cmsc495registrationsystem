@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+section.schemas.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines request validation schemas for section filters, mutations, and access-code actions.
+*/
+
 import { z } from 'zod';
 import { paginationQuerySchema } from './common.schema.js';
 
@@ -109,6 +121,13 @@ export const getAllSectionsQuerySchema = paginationQuerySchema.extend({
 	crsId: z.coerce.number().int().positive().optional(),
 	semId: z.coerce.number().int().positive().optional(),
 	profId: z.coerce.number().int().positive().optional(),
+	subject: z.string().trim().toUpperCase().min(1).max(10).optional(),
+	days: z
+		.string()
+		.trim()
+		.toUpperCase()
+		.refine(isCanonicalDaysValue, 'Days must use unique canonical day codes in order, such as MWF or TR.')
+		.optional(),
 });
 
 export const generateAccessCodesBodySchema = z.object({
