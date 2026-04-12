@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+courseSubjects.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the supported subject-code mappings used by the course catalog and validation logic.
+*/
+
 export const COURSE_SUBJECTS = {
     CMSC: 'Computer Science',
     MATH: 'Mathematics',

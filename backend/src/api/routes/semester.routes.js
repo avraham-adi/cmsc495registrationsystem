@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+semester.routes.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the semester API routes for public reads and admin management.
+*/
+
 import { Router } from 'express';
 import SemesterController from '../controllers/semester.controller.js';
 import auth, { flMw as flm } from '../../middleware/session.middleware.js';

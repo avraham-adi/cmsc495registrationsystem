@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+course.schemas.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines request validation schemas for course reads, filters, and mutations.
+*/
+
 import { z } from 'zod';
 import { paginationQuerySchema } from './common.schema.js';
 import { COURSE_SUBJECTS } from '../../utils/courseSubjects.js';

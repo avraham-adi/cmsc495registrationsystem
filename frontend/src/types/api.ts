@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+api.ts
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the shared frontend TypeScript types for API payloads, entities, and responses.
+*/
+
 // Possible User Roles
 export type UserRole = 'ADMIN' | 'PROFESSOR' | 'STUDENT';
 
@@ -46,6 +58,14 @@ export type UserListResponse = {
 	Meta: Meta,
 };
 
+export type Prerequisite = {
+	courseId: number,
+	courseCode: string,
+	title: string,
+};
+
+export type PrerequisiteListResponse = Array<{ Prerequisite: Prerequisite }>;
+
 // Semester Object
 export type Semester = {
 	semester_id: number,
@@ -72,10 +92,20 @@ export type CourseListResponse = {
 	Meta: Meta,
 };
 
+export type CourseCreatePayload = {
+	code: string,
+	title: string,
+	desc: string,
+	cred: number,
+};
+
 // Section Object
 export type Section = {
 	section_id: number,
 	capacity: number,
+	enrolled_count: number,
+	waitlisted_count: number,
+	seats_available: number,
 	days: string,
 	start_time: string | null,
 	end_time: string | null,
@@ -104,6 +134,19 @@ export type SectionListResponse = {
 	Meta: Meta,
 };
 
+export type SectionCreatePayload = {
+	semId: number,
+	profId: number,
+	capacity: number,
+	days?: string,
+	startTm?: string,
+	endTm?: string,
+};
+
+export type SectionUpdatePayload = SectionCreatePayload;
+
+export type SectionAccessCodeMap = Record<string, string | boolean>;
+
 // Enrollment Object
 export type Enrollment = {
 	enrollment_id: number,
@@ -127,7 +170,7 @@ export type EnrollmentCreatePayload = {
 // Enrollment Update Payload
 export type EnrollmentUpdatePayload = {
 	status: EnrollmentStatus,
-	accessCode?: string,
+	code?: string,
 };
 
 // User Update Payload

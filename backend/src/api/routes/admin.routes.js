@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+admin.routes.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the admin API routes for user and administrative resource management.
+*/
+
 import { Router } from 'express';
 import AdminController from '../controllers/admin.controller.js';
 import auth, { flMw as flm } from '../../middleware/session.middleware.js';

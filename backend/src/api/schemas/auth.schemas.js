@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+auth.schemas.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines request validation schemas for login, profile, and password-change requests.
+*/
+
 import { z } from 'zod';
 
 // Validation schema for user login

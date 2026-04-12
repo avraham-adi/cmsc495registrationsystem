@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+section.service.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Implements section reads, mutation rules, access-code workflows, and seat availability calculations.
+*/
+
 import * as db from '../db/connection.js';
 import * as Errors from '../errors/index.js';
 import Section from '../domain/section.js';
@@ -62,6 +74,66 @@ class SectionService {
 
 		const s = Section.fromPersistence(r[0]);
 		return s.toSafeObject();
+	}
+
+	async getReadableSection(sectionId) {
+		const rows = await db.query(
+			`SELECT
+				s.*,
+				c.course_code,
+				c.title,
+				c.description,
+				c.credits,
+				u.name AS professor_name,
+				sem.term,
+				sem.year,
+				COALESCE(ec.enrolled_count, 0) AS enrolled_count,
+				COALESCE(wc.waitlisted_count, 0) AS waitlisted_count
+			FROM sections s
+			INNER JOIN courses c ON c.course_id = s.course_id
+			INNER JOIN professors prof ON prof.professor_id = s.professor_id
+			INNER JOIN users u ON u.user_id = prof.user_id
+			INNER JOIN semesters sem ON sem.semester_id = s.semester_id
+			LEFT JOIN (
+				SELECT section_id, COUNT(*) AS enrolled_count
+				FROM enrollments
+				WHERE status = 'enrolled'
+				GROUP BY section_id
+			) ec ON ec.section_id = s.section_id
+			LEFT JOIN (
+				SELECT section_id, COUNT(*) AS waitlisted_count
+				FROM enrollments
+				WHERE status = 'waitlisted'
+				GROUP BY section_id
+			) wc ON wc.section_id = s.section_id
+			WHERE s.section_id = ?`,
+			[sectionId]
+		);
+
+		if (rows.length === 0) {
+			throw new Errors.NotFoundError('Section not found.');
+		}
+
+		const row = rows[0];
+		const section = Section.fromPersistence(row);
+		const subjectName = getSubjectNameFromCourseCode(row.course_code);
+
+		return section.toReadableObject(
+			{
+				course_code: row.course_code,
+				title: row.title,
+				description: row.description,
+				credits: row.credits,
+			},
+			subjectName,
+			{ name: row.professor_name },
+			{ term: row.term, year: row.year },
+			{
+				enrolled_count: Number(row.enrolled_count ?? 0),
+				waitlisted_count: Number(row.waitlisted_count ?? 0),
+				seats_available: Math.max(Number(row.capacity) - Number(row.enrolled_count ?? 0), 0),
+			}
+		);
 	}
 
 	// Check if Access Code exists and has already been used, and mark it as used if valid
@@ -135,7 +207,7 @@ class SectionService {
 	}
 
 	// Get All Sections with Pagination, Search, and Filtering
-	async getSections(page, limit, search, courseId = null, semesterId = null, professorId = null) {
+	async getSections(page, limit, search, courseId = null, semesterId = null, professorId = null, subject = null, days = null) {
 		const np = Number.isInteger(Number(page)) && Number(page) > 0 ? Number(page) : 1;
 		const l = Number.isInteger(Number(limit)) && Number(limit) > 0 ? Math.min(Number(limit), 100) : 10;
 		const o = (np - 1) * l;
@@ -145,62 +217,100 @@ class SectionService {
 		let p = [];
 
 		if (courseId) {
-			w.push('course_id = ?');
+			w.push('s.course_id = ?');
 			p.push(courseId);
 		}
 
 		if (semesterId) {
-			w.push('semester_id = ?');
+			w.push('s.semester_id = ?');
 			p.push(semesterId);
 		}
 
 		if (professorId) {
-			w.push('professor_id = ?');
+			w.push('s.professor_id = ?');
 			p.push(professorId);
 		}
 
+		if (subject) {
+			w.push('LEFT(c.course_code, 4) = ?');
+			p.push(String(subject).trim().toUpperCase());
+		}
+
+		if (days) {
+			w.push('s.days = ?');
+			p.push(String(days).trim().toUpperCase());
+		}
+
+		if (search) {
+			w.push('(c.course_code LIKE ? OR c.title LIKE ? OR c.description LIKE ? OR u.name LIKE ?)');
+			const term = `%${String(search).trim()}%`;
+			p.push(term, term, term, term);
+		}
+
+		const fromClause = `
+			FROM sections s
+			INNER JOIN courses c ON c.course_id = s.course_id
+			INNER JOIN professors prof ON prof.professor_id = s.professor_id
+			INNER JOIN users u ON u.user_id = prof.user_id
+			INNER JOIN semesters sem ON sem.semester_id = s.semester_id
+			LEFT JOIN (
+				SELECT section_id, COUNT(*) AS enrolled_count
+				FROM enrollments
+				WHERE status = 'enrolled'
+				GROUP BY section_id
+			) ec ON ec.section_id = s.section_id
+			LEFT JOIN (
+				SELECT section_id, COUNT(*) AS waitlisted_count
+				FROM enrollments
+				WHERE status = 'waitlisted'
+				GROUP BY section_id
+			) wc ON wc.section_id = s.section_id
+		`;
+
 		const q = w.length > 0 ? ' WHERE ' + w.join(' AND ') : '';
-		const c = await db.query('SELECT COUNT(*) AS count FROM sections' + q, p);
-		const r = await db.query('SELECT * FROM sections' + q + ' ORDER BY section_id DESC LIMIT ? OFFSET ?', [...p, l, o]);
-
-		const data = r.map((row) => Section.fromPersistence(row));
-
-		const readable = await Promise.all(
-			data.map(async (s) => {
-				const cRow = await db.query('SELECT course_code, title, description, credits FROM courses WHERE course_id = ?', [s.getCourseID()]);
-				const pId = await db.query('SELECT user_id FROM professors WHERE professor_id = ?', [s.getProfessorID()]);
-				const sRow = await db.query('SELECT term, year FROM semesters WHERE semester_id = ?', [s.getSemesterID()]);
-
-				if (cRow.length === 0) {
-					throw new Errors.CourseNotFoundError('');
-				}
-
-				if (pId.length === 0) {
-					throw new Errors.NotFoundError('');
-				}
-
-				if (sRow.length === 0) {
-					throw new Errors.NotFoundError('');
-				}
-
-				const pRow = await db.query('SELECT name FROM users WHERE user_id = ?', [pId[0].user_id]);
-
-				const subject = getSubjectNameFromCourseCode(cRow[0].course_code);
-
-				if (search === '') {
-					return s.toReadableObject(cRow[0], subject, pRow[0], sRow[0]);
-				}
-
-				if (search !== '') {
-					if (subject.toLowerCase().includes(search.toLowerCase())) {
-						return s.toReadableObject(cRow[0], subject, pRow[0], sRow[0]);
-					}
-				}
-			})
+		const c = await db.query('SELECT COUNT(*) AS count ' + fromClause + q, p);
+		const r = await db.query(
+			`SELECT
+				s.*,
+				c.course_code,
+				c.title,
+				c.description,
+				c.credits,
+				u.name AS professor_name,
+				sem.term,
+				sem.year,
+				COALESCE(ec.enrolled_count, 0) AS enrolled_count,
+				COALESCE(wc.waitlisted_count, 0) AS waitlisted_count
+			` +
+				fromClause +
+				q +
+				' ORDER BY c.course_code ASC, s.section_id ASC LIMIT ? OFFSET ?',
+			[...p, l, o]
 		);
 
+		const readable = r.map((row) => {
+			const s = Section.fromPersistence(row);
+			const subjectName = getSubjectNameFromCourseCode(row.course_code);
+			return s.toReadableObject(
+				{
+					course_code: row.course_code,
+					title: row.title,
+					description: row.description,
+					credits: row.credits,
+				},
+				subjectName,
+				{ name: row.professor_name },
+				{ term: row.term, year: row.year },
+				{
+					enrolled_count: Number(row.enrolled_count ?? 0),
+					waitlisted_count: Number(row.waitlisted_count ?? 0),
+					seats_available: Math.max(Number(row.capacity) - Number(row.enrolled_count ?? 0), 0),
+				}
+			);
+		});
+
 		return {
-			data: readable.filter(Boolean),
+			data: readable,
 			meta: {
 				page: np,
 				limit: l,

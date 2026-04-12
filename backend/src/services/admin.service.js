@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+admin.service.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Implements admin-facing user, course, prerequisite, semester, and section management operations.
+*/
+
 import * as db from '../db/connection.js';
 import * as Errors from '../errors/index.js';
 import User from '../domain/user.js';

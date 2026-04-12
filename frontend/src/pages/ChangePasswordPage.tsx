@@ -1,55 +1,83 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+ChangePasswordPage.tsx
+input
+authenticated user state and editable password form values
+output
+role-aware password routing and password update UI feedback
+description
+Renders the standalone password screen and redirects role-based users into their integrated password workflows.
+*/
+
 import { useState, type SubmitEvent } from 'react';
-import { ApiError } from '../api/client';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { FormField } from '../components/FormField';
 import { StatusMessage } from '../components/StatusMessage';
 import { useAuth } from '../context/AuthContext';
+import { useFormFeedback } from '../lib/useFormFeedback';
 
 export function ChangePasswordPage() {
-	const { changePasswordAction, requiresPasswordChange } = useAuth();
+	const { changePasswordAction, requiresPasswordChange, user } = useAuth();
+	const navigate = useNavigate();
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
-	const [message, setMessage] = useState('');
-	const [error, setError] = useState('');
+	const feedback = useFormFeedback();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
+	if (!user) {
+		return <Navigate to="/login" replace />;
+	}
+
+	// Updates the current password and routes the user into the correct role home after success.
 	async function submit(event: SubmitEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setMessage('');
-		setError('');
+		feedback.reset();
+		const wasFirstLogin = requiresPasswordChange;
 
 		if (password !== confirmPassword) {
-			setError('Passwords do not match.');
+			feedback.setError('Passwords do not match.');
 			return;
 		}
 
 		setIsSubmitting(true);
 
 		try {
-			await changePasswordAction({ password });
+			const refreshedUser = await changePasswordAction({ password });
 			setPassword('');
 			setConfirmPassword('');
-			setMessage('Password updated successfully.');
-		} catch (err) {
-			if (err instanceof ApiError) {
-				setError(err.message);
-			} else {
-				setError('Unable to change password right now.');
+			feedback.setSuccess('Password updated successfully.');
+			const nextPath = refreshedUser.role === 'ADMIN' ? '/console/admin' : '/';
+
+			if (wasFirstLogin) {
+				if (window.location.pathname === nextPath) {
+					window.location.reload();
+				} else {
+					window.location.assign(nextPath);
+				}
+				return;
 			}
+
+			navigate(nextPath, { replace: true });
+			return;
+		} catch (err) {
+			feedback.setErrorFromUnknown(err, 'Unable to change password right now.');
 		} finally {
 			setIsSubmitting(false);
 		}
 	}
 
 	return (
-		<section className="panel">
+		<div className="auth-layout">
+			<section className="auth-card auth-card-wide">
 			<div className="panel-header">
 				<div>
 					<p className="eyebrow">Authentication</p>
-					<h2>Change Password</h2>
+					<h1>Change Password</h1>
 				</div>
 			</div>
 
-			{requiresPasswordChange ? <StatusMessage kind="info" message="It appears to be your first time logging in. Password change is mandatory." /> : null}
+			{requiresPasswordChange ? <StatusMessage kind="info" message="It appears to be your first time logging in. Password change is required before other workflows become available." /> : null}
 
 			<form className="stack" onSubmit={submit}>
 				<FormField id="new-password" label="New Password" type="password" value={password} onChange={setPassword} autoComplete="new-password" required />
@@ -64,13 +92,14 @@ export function ChangePasswordPage() {
 					<br /> - cannot contain the email address
 				</p>
 
-				{message ? <StatusMessage kind="success" message={message} /> : null}
-				{error ? <StatusMessage kind="error" message={error} /> : null}
+				{feedback.feedback.message ? <StatusMessage kind="success" message={feedback.feedback.message} /> : null}
+				{feedback.feedback.error ? <StatusMessage kind="error" message={feedback.feedback.error} /> : null}
 
 				<button type="submit" className="primary-button" disabled={isSubmitting}>
 					{isSubmitting ? 'Updating...' : 'Update Password'}
 				</button>
 			</form>
-		</section>
+			</section>
+		</div>
 	);
 }

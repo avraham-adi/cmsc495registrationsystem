@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+prerequisite.routes.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the prerequisite API routes for course prerequisite management.
+*/
+
 import { Router } from 'express';
 import PrerequisiteController from '../controllers/prerequisite.controller.js';
 import auth, { flMw as flm } from '../../middleware/session.middleware.js';

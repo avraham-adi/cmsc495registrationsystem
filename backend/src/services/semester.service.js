@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+semester.service.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Implements semester creation, listing, lookup, and guarded deletion rules.
+*/
+
 import * as db from '../db/connection.js';
 import * as Errors from '../errors/index.js';
 

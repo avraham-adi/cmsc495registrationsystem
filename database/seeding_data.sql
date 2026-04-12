@@ -22,409 +22,198 @@ ALTER TABLE `sections` AUTO_INCREMENT = 5500;
 ALTER TABLE `students` AUTO_INCREMENT = 10000000;
 ALTER TABLE `enrollments` AUTO_INCREMENT = 1;
 
-INSERT INTO `users` (`name`, `email`, `password_hash`, `first_login`, `sess_ver`) VALUES
-('Christian Horner', 'horne_chri87@gmail.com', '$2b$10$C2w4QzmAJrZiePIcjTGZrOpLsqRMHk5AzCujHyk2xT/RR45.NiNkO', '0', 0),
-('Toto Wolff', 'wolff_toto00@gmail.com', '$2b$10$6X9t36ieKXmVr8v8/8nbwO4jRJ9uSgYzQJod/ul8EFp.pdlHj8xGm', 1, 0),
-('James Vowles', 'vowle_jame00@gmail.com', '$2b$10$Sp0rGH/DFAVajsvUzCqQj.U2K2Fl8CL7tvrh3lqE4qOV39f5XEvtq', 1, 0),
-('Zak Brown', 'brown_zak00@gmail.com', '$2b$10$gT4l/chl8/m2BNGFfDovt.9qqFlYjiUhm3dJsgtueuhd67i16HLYK', 1, 0),
-('Max Verstappen', 'verst_max1@gmail.com', '$2b$10$2UWjISYtJXPJZXhd2m70NOBc7xwqgclmaZlN31cCA8noL4/6SLrAu', 1, 0),
-('Sergio Perez', 'perez_serg11@gmail.com', '$2b$10$X36PMU93mlGjppwwf/t9dOXuI1f5x3ipbxFaKnKv2UuIW8p1lEAzW', 1, 0),
-('Lewis Hamilton', 'hamil_lewi44@gmail.com', '$2b$10$GoZcyaBUrwz7YuYa/cObpeds1ZEhK4xLl/FiJYmebopd3FCxIE77O', 1, 0),
-('George Russell', 'russe_geor63@gmail.com', '$2b$10$8hndfyoJjWRknOOyvsFPW.XmQ6XTtvp4SO7bgzBZNGiDkP2o0rkQ.', 1, 0),
-('Charles Leclerc', 'lecle_char16@gmail.com', '$2b$10$rg4CFuz7RjtMkVgr.Qld7.h4GYavUmwc5FLm8/I9lFxJXrvGozW8C', 1, 0),
-('Carlos Sainz', 'sainz_carl55@gmail.com', '$2b$10$XpcL1f/vkNVOpPvikQkBf.IXZ489Vj0VuZ8wqZEuUaNZBH80gDm6q', 1, 0),
-('Lando Norris', 'norri_land4@gmail.com', '$2b$10$EVFk2XZ0vOxjzbmdwV80hOkev0UWDWYJpK2.VAe/H35Ox10Bvw8ky', 1, 0),
-('Oscar Piastri', 'piast_osca81@gmail.com', '$2b$10$yjIQvVeaz437rwXsEkUbXudmwkpTQ9unYutkvlSk3HRaOCJirq9y.', 1, 0),
-('Fernando Alonso', 'alons_fern14@gmail.com', '$2b$10$Xgz0Yir79/TQvOsHpaMsm.Cm4ZDsxTnVQaigCFhOTr5IpcrqE/gi6', 1, 0),
-('Lance Stroll', 'strol_lanc18@gmail.com', '$2b$10$hdXeM5JBjbO8j1o1DV1yd.b/6lESJPa8mQOEtzYYbRuNSwE3LIJNq', 1, 0),
-('Pierre Gasly', 'gasly_pierr10@gmail.com', '$2b$10$aQd3vhzB39fWwKExsKpgYeWtHQML1nOdc8Tnt9R4l9NkP2M5uTbxy', 1, 0),
-('Esteban Ocon', 'ocon_este31@gmail.com', '$2b$10$Lj9hTHDhRdy0pCRE52pkf.PisK8/OEV4RtBLHI0YnhZi42ZWI.Oxi', 1, 0),
-('Yuki Tsunoda', 'tsuno_yuki22@gmail.com', '$2b$10$dgyYnJtpmO2pZGEdZW1Jp.XuZdprfMhrCTrRY9SyEx/eVUFh5tDcq', 1, 0),
-('Daniel Ricciardo', 'ricci_dani3@gmail.com', '$2b$10$rlygXht.wkZ2HJKWz6dJTeOhRoI7yhzQCTidPvVMjBEp/MEbmuULS', 1, 0),
-('Valtteri Bottas', 'botta_valt77@gmail.com', '$2b$10$k1gVfkYG1gef.IQ6fXF5kulRWmtWJM4bDIZckPd6SS1TpcTjentUG', 1, 0),
-('Zhou Guanyu', 'zhou_guan24@gmail.com', '$2b$10$buktFz8/Z6H/bh7mYAMalOGZeBr5WNh.FSWQ2uUSNyxzFpByd37vK', 1, 0),
-('Kevin Magnussen', 'magnu_kevi20@gmail.com', '$2b$10$/kfHD22Y49BXa197uNcRsuTcaJ4B93tqs7kJfqQi1PeANGcsoA3G2', 1, 0),
-('Nico Hulkenberg', 'hulke_nico27@gmail.com', '$2b$10$41T8bnhuEoNfFbNKzy1IbuOKsf7WWlDwB5uNtooPfNP45O/TUK3Zq', 1, 0),
-('Alexander Albon', 'albon_alex23@gmail.com', '$2b$10$YpZxMq/ppJYP235I2ciQT.ZYk48G9bJUtAYv7tgQKFFM4HtNE18xO', 1, 0),
-('Logan Sargeant', 'sarge_loga2@gmail.com', '$2b$10$8c6zN2uMSZmGeRIiW.PKBOcr1AppxS3bpDc0xeoORJXn6cXwDmZ1q', 1, 0),
-('Nyck de Vries', 'devri_nyck21@gmail.com', '$2b$10$3arr.isOvxphmd1k9Mmgx.Ae38bgBtAOQ1Xp/piOBW6oielBHY0dC', 1, 0),
-('Liam Lawson', 'lawso_liam40@gmail.com', '$2b$10$xH8ru9kAzY6m7gb3wATRIuKGY/IBSoZzSW3cVFLvKq/f9eN/3s0jK', 1, 0),
-('Kimi Raikkonen', 'raikk_kimi7@gmail.com', '$2b$10$H/j0ksBPCKk.Bhp.GTezceAgLQXwMGe1lkFgVde5vmK/lWe04jGKS', 1, 0),
-('Sebastian Vettel', 'vette_seba5@gmail.com', '$2b$10$pNFBmchGa.PMK/kpHlhSM.x68vK.AUojYe/jsqlJR3tUMNxT0W/om', 1, 0),
-('Jenson Button', 'butto_jens22@gmail.com', '$2b$10$wyj7pYr/e3DAekEpQW.Oa.typNXpIBhPjywv/AYj/iTjMuoEQTgDy', 1, 0),
-('Nico Rosberg', 'rosbe_nico6@gmail.com', '$2b$10$/x.zWSlijqX2B1aMiBigDOLM74Oh0unkzNKw8Peh3bYjRnRV09sFm', 1, 0),
-('Felipe Massa', 'massa_feli19@gmail.com', '$2b$10$CcvgpLvtko0Y9Irjy4yD9uZ5NEyaUK3zq6JuOQNHa8hFf69IZDraG', 1, 0),
-('Rubens Barrichello', 'barri_rube11@gmail.com', '$2b$10$bD/5WPetdn/RiEYU7Dvno.cY6PE./K2MV.W6N4AgwkSsqsDlmKODa', 1, 0),
-('Michael Schumacher', 'schum_mich47@gmail.com', '$2b$10$7MNcNtAgJ7vECIhZ5OIuxef9BZ35S6X97ul78liaPmWlYsHqv4N1K', 1, 0),
-('Mick Schumacher', 'schum_mick47@gmail.com', '$2b$10$dkp1JyRwkT7pmMJ4hi/bo.Lu7iyQ3Ez7kovdiy1N7KVTPPQFHWKEa', 1, 0),
-('Romain Grosjean', 'grosj_roma8@gmail.com', '$2b$10$4Owk7ALNDai48hzAZN8px.yK4A0G.UDtqsuWyUozmkoowdqR4zrJm', 1, 0),
-('Pastor Maldonado', 'maldo_past18@gmail.com', '$2b$10$E5SL/3ygi76ANZ.nwdmg/Ok6dQU2CPXSocCOloSchvNBFPOly5DVi', 1, 0),
-('Ayrton Senna', 'senna_ayrt12@gmail.com', '$2b$10$f.hOdcOWI5sRKVDr2DlSJ.MAvCqXIfPDcKrLsJ5o3B99vuQNP9nXC', 1, 0),
-('Alain Prost', 'prost_alai1@gmail.com', '$2b$10$fJ0vcTUHHy/fp7/KPWFwEuQlmYfVtWIV8vqbtALKceFmrm/MwAWQW', 1, 0),
-('Niki Lauda', 'lauda_niki12@gmail.com', '$2b$10$81EhlPoULk5uOygHpRjr2.cE7JRFaTp.PaYJnI.anJWaN5TG1DGzG', 1, 0),
-('Gerhard Berger', 'berge_gerh28@gmail.com', '$2b$10$fVAM0ryrt7xiR504ctvS7.7q.njFdIooyoSB2ZSwgwhuRm6lHGThG', 1, 0),
-('David Coulthard', 'coult_davi2@gmail.com', '$2b$10$0pskyuhyCOe1sqF4/WJ.5uXxutu5rk/puKgk.X02joS.46NEp76GG', 1, 0),
-('Mika Hakkinen', 'hakki_mika8@gmail.com', '$2b$10$V5/tGooehW4DikV0w.Axv.6QowYCsCslbwuI6kB.hBU8U0B2rHXDm', 1, 0),
-('Jacques Villeneuve', 'ville_jacq27@gmail.com', '$2b$10$35BGfllooQCy1bRg9fHh..S6S80ZlOSXGhp5rFl79fKaSfgLh44J.', 1, 0),
-('Juan Pablo Montoya', 'monto_juan42@gmail.com', '$2b$10$FzPk/neFkNuhRkjyAnmmeeeS2E/2LDH7M5czVLWUsffUaw5Pii47m', 1, 0),
-('Kimi Antonelli', 'anton_kimi12@gmail.com', '$2b$10$LKY6BKiBAbHutAV51DGOGOhF92Ic8Qh429C3XIbxF7lA7UFQMmLcO', 1, 0),
-('Oliver Bearman', 'bearm_oliv87@gmail.com', '$2b$10$TEmdtWwBoHNQ.4/nYpAy9uQC/6huG1AnYyLUUgQJft/rAfrMA2Wt2', 1, 0),
-('Jack Doohan', 'dooha_jack7@gmail.com', '$2b$10$tU5HNLDgx7Q3wNGB3QlAsuK1UFxzoQ4w1NHbMNJGSLncmAL90jSXW', 1, 0),
-('Theo Pourchaire', 'pourd_theo5@gmail.com', '$2b$10$urjuK6pBIrDj7f.9bMTiY.pOwvvuEvsh9kKWOJYxJA5YCgq8ywVgq', 1, 0),
-('Callum Ilott', 'ilott_call12@gmail.com', '$2b$10$xQ6JcTXtQoBEQAECCOKNAuL5h2XPz.Uczw7w5XBn1lutM70IRuZN2', 1, 0),
-('Robert Kubica', 'kubic_robe88@gmail.com', '$2b$10$E.N2rAlatc0Kyl1W5hpcwey8BWy5MG.0ZxKbxS9graE0xcW7qsRTS', 1, 0),
-('Billy Butcher', 'butch_bill17@gmail.com', '$2b$10$lLy8LA6VFJO.FZd6ync9TeOydCVbOc2Ik.7Osazr2LfmzQZWIsM7W', 1, 0),
-('Hughie Campbell', 'campb_hugh18@gmail.com', '$2b$10$839VYjyWdkQDA4hkGk/QbOdW87ws5A1SVNRmRaxDa7dDDVRLwTV3S', 1, 0),
-('Annie January', 'janua_anni19@gmail.com', '$2b$10$cqSHvhxezgfOdplXc25qnul./Azsb69fpkbfOjzcViQ7A.8lK/71G', 1, 0),
-('John Homelander', 'homel_john20@gmail.com', '$2b$10$zLwz1iKfpWWznJUXx8XAQe2WxkOMexxmsyvJAArMD6QRq77r9iL92', 1, 0),
-('Maggie Maeve', 'maeve_magg21@gmail.com', '$2b$10$keZFB5rlWCuj/JwS5Hb/LO7YS85D91GlbkFc19JF3AwTAnU3TQJzC', 1, 0),
-('Kimiko Miyashiro', 'miyas_kimi22@gmail.com', '$2b$10$me440EPUsfMD4hUHpnHU1.KwYyiT/Q9iEYi0pEq.VEgTIwi2FnYYq', 1, 0),
-('Serge Frenchie', 'frenc_serg23@gmail.com', '$2b$10$nW5TVwNEFAbaw6viopHrZuZjFnMBP0kpTwlond5bPTab9pjzW7Uga', 1, 0),
-('Marvin Milk', 'milk_marv24@gmail.com', '$2b$10$S4iusxUq18aB1QUYNHQ6wOk19PTS43RJwRIwMMgIj9SgjR/ZIbSU6', 1, 0),
-('Ben Soldier', 'soldi_ben25@gmail.com', '$2b$10$vypN7bUvCR4vHxx0jJ3P5u7jVsnPcQy6ogeIPgTVmACLZVHObrDry', 1, 0),
-('Victoria Neuman', 'neuma_vict26@gmail.com', '$2b$10$Q7jA7sczXJcQ857mCfHMLuOKLlrJRNDlRclqMY5NbT6JLfTlFoTN6', 1, 0),
-('Ashley Barrett', 'barre_ashl27@gmail.com', '$2b$10$Yrgew4JbRbtyaurRlcYPEOwag/NZKdV.VJz1OPSmRGMbGHRT9RnNK', 1, 0),
-('Reggie Franklin', 'frank_regg28@gmail.com', '$2b$10$RkV/LHXC1o4oUyuR3sE/neWXffqEOAqc6lCBDEI8kxYmfaZbuFUG.', 1, 0),
-('Earving Noir', 'noir_earv29@gmail.com', '$2b$10$bXYJo5k4ipmNYTxCh7fvDOJ6fPRNsfQlK2ct5aKJhNOxHzUNtkHDq', 1, 0),
-('Kevin Moskowitz', 'mosko_kevi30@gmail.com', '$2b$10$dOH3H9Vd4/1RIxMczALgqO34rGd9Ff32YymLTUlGdmre/oJg8mm7S', 1, 0),
-('Ryan Butcher', 'butch_ryan31@gmail.com', '$2b$10$dPC70w6Cc9Koca30Q947WOv4NdjEG9of3DPBzCFImR8XAxosbadh6', 1, 0),
-('Cindy Campbell', 'campb_cind32@gmail.com', '$2b$10$tCSkXF5rjOi7d.NGE5IDNOvTar6PypnZZOTTAWNbyP2HscOvh1nMu', 1, 0),
-('Brenda Meeks', 'meeks_bren33@gmail.com', '$2b$10$IVtnCp8sT.I21csLT1mfG.Nq27WxcC4nkFrbQX5/bTiTs.QfLsG2q', 1, 0),
-('Shorty Meeks', 'meeks_shor34@gmail.com', '$2b$10$XgeTeltt5kokKHrVm6EQHuKgXLimmeScdNb.SUeMctsMlLF9iFv1G', 1, 0),
-('Ray Wilkins', 'wilki_ray35@gmail.com', '$2b$10$Y0rB9TLD4ALAAlGBOttzUOzNNn/YiU1Xo4rzUiuwOXd2MhfAhhufu', 1, 0),
-('Bobby Prinze', 'prinz_bobb36@gmail.com', '$2b$10$chbD7FI5YlTjD791gedwJudYb4lFqRP0l9nMxI0pw0n0pTaAUC7Xq', 1, 0),
-('Buffy Gilmore', 'gilmo_buff37@gmail.com', '$2b$10$UzDyWAy/upFMK5sVCCF0vupBOOZt62pamF1DrbnKUAad/F8W17uWm', 1, 0),
-('Greg Phillippe', 'phill_greg38@gmail.com', '$2b$10$37JlEcET5HduA975zIwCl.ojM02WfvBAw3nAFwdHHbY2dk1faxO.O', 1, 0),
-('Doofy Gilmore', 'gilmo_doof39@gmail.com', '$2b$10$wVHA0UVr45VQ.FIIbjQo1.VLYXoW7T478wm1RCW.2CQ9Xazk4Bdqu', 1, 0),
-('Gail Hailstorm', 'hails_gail40@gmail.com', '$2b$10$XvREeDCT2zvwCEKxfUADjemxlTdOteYV8BGA/MLxgpmnVhp1yE.bK', 1, 0),
-('Dwight Hartman', 'hartm_dwig41@gmail.com', '$2b$10$n1uEtKvGnpOtThOU4N0swuQvdriZ5PzNbr5ogBcY.HUR1Ie9Ta0zm', 1, 0),
-('Jane Hopper', 'hoppe_jane42@gmail.com', '$2b$10$Wrb20xs8hz4b5mPOSxZJ1.48.s.x.7q0Kj8fV1XU1Ssu8KoM2mL/G', 1, 0),
-('Mike Wheeler', 'wheel_mike43@gmail.com', '$2b$10$S8QfXKxSlN0c4dm3j2FaAu5Sujd2gVwEXI2qP8y.nJWCYfwLPNZ2e', 1, 0),
-('Dustin Henderson', 'hende_dust44@gmail.com', '$2b$10$vYTslvo8yZ4YRRIaJFa0gubE9ncJAwL/VR7IkXhA94bgn6bTzBwKe', 1, 0),
-('Lucas Sinclair', 'sincl_luca45@gmail.com', '$2b$10$W8MdQb/lV2dAdHAFLX0t0eNTUavC32RI4ISaEWKs7zQ7kWOs0dnzS', 1, 0),
-('Max Mayfield', 'mayfi_max46@gmail.com', '$2b$10$tKGrUvSvt27AbYLWAI6wQenF8JZGwh4R4fC1yDPZCbiw9iBsamQ0.', 1, 0),
-('Will Byers', 'byers_will47@gmail.com', '$2b$10$TaY5cDe7GB/qxpazRzZtdelghxnhuoaFfmCb0uDwSFY7S6irPxvmK', 1, 0),
-('Nancy Wheeler', 'wheel_nanc48@gmail.com', '$2b$10$Zyr0XnxXacns8D/2JBsEh.2aY4iPdnmO9e4Dugvo8P3GPItFLlJBW', 1, 0),
-('Jonathan Byers', 'byers_jona49@gmail.com', '$2b$10$1kn2zToZ7bPDxcBxRC10rOvyebHWxmEQwLs7quqHHXC283pns0Sg.', 1, 0),
-('Steve Harrington', 'harri_stev50@gmail.com', '$2b$10$qcvMpGFq4Noq5tKduM/IL.okzXBlSf2Y3FAfQm/e/4XLYRDbR9l0u', 1, 0),
-('Robin Buckley', 'buckl_robi51@gmail.com', '$2b$10$ZOwnazcVsItynEnY7FzcW.q3BzBeSMeEMGW5qvff.6RJH8MYIorci', 1, 0),
-('Jim Hopper', 'hoppe_jim52@gmail.com', '$2b$10$KZqIdMYOoMZ4.wpMxLtdwezBzpiIV481gTYyPEjd1lg/q6r2DlsAC', 1, 0),
-('Joyce Byers', 'byers_joyc53@gmail.com', '$2b$10$iL/YImUjaAlcNSxIy1o0hu0QfzB.jMqz96SfNsWgd2UA.p0BUHxsa', 1, 0),
-('Eddie Munson', 'munso_eddi54@gmail.com', '$2b$10$Pmdv4qAKyUkDgO8JkbVDhuIBZnXnjcVeTYyvIKItOkzg2vf9Bie92', 1, 0),
-('Murray Bauman', 'bauma_murr55@gmail.com', '$2b$10$.RzDWkw9SHL7Y9xfiWwuee/gWB2QafWEGArSnKIs8VUsSUimMHA6q', 1, 0),
-('Erica Sinclair', 'sincl_eric56@gmail.com', '$2b$10$Crz.wiZv4AosHBSifzNxcO0VMDzIdpzl3G5s1pB/lUxRxuvOBTXle', 1, 0),
-('Wednesday Addams', 'addam_wedn57@gmail.com', '$2b$10$fJ/5PddPxiKuzYi201CjO.akhUj.nZfFofl2xRJVVid67pqKXEk1O', 1, 0),
-('Enid Sinclair', 'sincl_enid58@gmail.com', '$2b$10$LEC1EQ7sudDDS9wpirPfSeOCJMkSFMuqKIgmp5Ww3soMHoSjJXJty', 1, 0),
-('Bianca Barclay', 'barcl_bian59@gmail.com', '$2b$10$MBh7uJGb7iiWtOWf.kBdruQANQg4LlY3Kn207MEp2BVKvT9WbZl3C', 1, 0),
-('Xavier Thorpe', 'thorp_xavi60@gmail.com', '$2b$10$Ts3vC8GE5ei4Wg4IcvtbrOZZaV6x6RaJ4jX9gnrmdo5Vb561qZr5S', 1, 0),
-('Tyler Galpin', 'galpi_tyle61@gmail.com', '$2b$10$w4LxcUwU9U68ZfgtkVNBK.3w1C7UD50ps0DAcjX2Cd3.1B2OzMCle', 1, 0),
-('Eugene Otinger', 'oting_euge62@gmail.com', '$2b$10$Buxp1B2gMYKmTJRjCIhzgODEzLK9OswvzYTLCZQB8sfxQQte44AT2', 1, 0),
-('Morticia Addams', 'addam_mort63@gmail.com', '$2b$10$Yb5yzCUloX1DQTVcPJiM8.k5qTvX88GzHiQMJx6iwfI0MBPu0hEZS', 1, 0),
-('Gomez Addams', 'addam_gome64@gmail.com', '$2b$10$pkrZxOc7Yo.itMd0ZwamseFlGC0VoqJUkHXSMQA6SqoC3AlioaE8u', 1, 0),
-('Pugsley Addams', 'addam_pugs65@gmail.com', '$2b$10$UV0pz/xw0N7pBW2KB8e3Y.ySE.eUoey3y7Nx0/yFp9KuGEYN2PBBS', 1, 0),
-('Larissa Weems', 'weems_lari66@gmail.com', '$2b$10$PvbX1pSsD6A0XRuzswi1kuiO5U/nWNVSHi51TczGhLsZM4gMo5nbG', 1, 0),
-('Joel Miller', 'mille_joel67@gmail.com', '$2b$10$lDlGmjixDSe2VodgejyJLeTNe8O2AepXWtD0k7NsQffr.x9y7qxVC', 1, 0),
-('Ellie Williams', 'willi_elli68@gmail.com', '$2b$10$AGAJkyVBhvbCGHBJ9JJW3.EOzLszH3ycNBuXj8pQozE8Fm171GMdW', 1, 0),
-('Tommy Miller', 'mille_tomm69@gmail.com', '$2b$10$N.qVJnJe/HLtYio0CLrhk.V4mH0GP3E1gImurBPWMX8hf3Yz8.g1.', 1, 0),
-('Sarah Miller', 'mille_sara70@gmail.com', '$2b$10$eJ9rVKTL0DSnA/WxOxiHkOjN8wLJFoeAFHRFMB871dp.BJC8PhaCa', 1, 0),
-('Tess Servopoulos', 'servo_tess71@gmail.com', '$2b$10$nOZtmiP9/EzVCGSrhRIEnOLa7JgOuM4UWGrZJIuNDr7asrHMXD1UW', 1, 0),
-('Marlene Stone', 'stone_marl72@gmail.com', '$2b$10$J8bT4HSAVEylNtHx4dVuYOfRNfHruX5x6QeXjLoYh71HLix4Q38XG', 1, 0),
-('Bill Franklin', 'frank_bill73@gmail.com', '$2b$10$I6JketmZaQ4UnpElnesxAuUBrPzGIBcjJeP3NebUWJD41d59rbP1u', 1, 0),
-('Frank Franklin', 'frank_fran74@gmail.com', '$2b$10$IXFcgNyTh/uZOd5R/.S1YO2eODfsqdu9IFayg7GzZmXlEe6ZpNFne', 1, 0),
-('Abby Anderson', 'ander_abby75@gmail.com', '$2b$10$cRG2SSl6HyDQxuHTKwVpm.8IaPJQW0pWWO8vgI/viKoNpV7tLfMhy', 1, 0),
-('Dina Alvarez', 'alvar_dina76@gmail.com', '$2b$10$kJoyaSBzO5nSXCbBqyk1zOj5Oe1SqQCmB5Q7JMU2YRthGCVR32W1a', 1, 0),
-('Rhaenyra Targaryen', 'targa_rhae77@gmail.com', '$2b$10$BllWi2dflVRfw28C1RvzkuKL3QucbipwubdYNZGCTDUI5.ulmaL0a', 1, 0),
-('Daemon Targaryen', 'targa_daem78@gmail.com', '$2b$10$FedSHVWPBGqhjR8RjW5LSe9o.24q4WV.2pwAxw.nsFq7/2r.IMEJm', 1, 0),
-('Alicent Hightower', 'hight_alic79@gmail.com', '$2b$10$1tNUJrziCHz7CdXSeX.I2u6vG0wghjt7vcya6DcbSW6wDxWm4Mpgu', 1, 0),
-('Viserys Targaryen', 'targa_vise80@gmail.com', '$2b$10$676GbuBxgGQTakXlPTiI1OyE.P7WjXG1btY7c/H4wsMMRmVM9I8kO', 1, 0),
-('Jacaerys Velaryon', 'velar_jaca81@gmail.com', '$2b$10$XEMz1hYYdw7DqHP9kkU/muQcZgrGjutr2ue0w/HjXHQBFMq6khIiq', 1, 0),
-('Lucerys Velaryon', 'velar_luce82@gmail.com', '$2b$10$YF0dwdvgMmrAC5whOEhTiuEVnTl2zX59w1c7a6PIIBtQNkHaCkBhe', 1, 0),
-('Corlys Velaryon', 'velar_corl83@gmail.com', '$2b$10$VJexDSaNyS0hkuBJgokPvOd6gSeub0Ywlj2yoZl5n8r.V4fMKEGem', 1, 0),
-('Rhaenys Targaryen', 'targa_rhae84@gmail.com', '$2b$10$ptFm/vczQzJiyUbiLS1idOv4cPeGhN8lbPuu4Kj5M57san3t5GSs2', 1, 0),
-('Aemond Targaryen', 'targa_aemo85@gmail.com', '$2b$10$jVpOr5gNsccn8ZCoO9BUDedjpQOAPI05ODBBBZk7B0pu8da8RS.ni', 1, 0),
-('Helaena Targaryen', 'targa_hela86@gmail.com', '$2b$10$5PYFBE/OdLNWxJIE9z9MnuqX55rEDtThNZelh6cRbh.Gli8jIs5XK', 1, 0),
-('Carmen Berzatto', 'berza_carm87@gmail.com', '$2b$10$pZzCoE.01RQullSNvIE.buGZBUT4y6kJc5aaqK.0DRB82TFPj.ham', 1, 0),
-('Sydney Adamu', 'adamu_sydn88@gmail.com', '$2b$10$xRJr.EVfEYidz0ZZ9uWNiOQs7b9Tl4ledtYj0WM98kIvq4zRf2FVK', 1, 0),
-('Richard Jerimovich', 'jerim_rich89@gmail.com', '$2b$10$pfxVqk97apw1EkktvZGD/OlIZVh8ULkpALEfjLtv1ZMyy574FhOjy', 1, 0),
-('Natalie Berzatto', 'berza_nata90@gmail.com', '$2b$10$azPD7Nl6XvmWWaZ6objmEe1WA0hmgPGucBnDL.7t0u/E4Sf5U7niG', 1, 0),
-('Marcus Brooks', 'brook_marc91@gmail.com', '$2b$10$JmrAO.nrY.C0r9RUvvtVzeVlqpxWk5YDsggyiFMKYKy49TGSyvMqq', 1, 0),
-('Tina Marrero', 'marre_tina92@gmail.com', '$2b$10$DNoHfhYfCHz8am1rz8UYX.5p0lQ7EgS8dKOe/KS0auZP5zU7ehlEW', 1, 0),
-('Ebraheim Hassan', 'hassa_ebra93@gmail.com', '$2b$10$izjBKpjzGG00c0X38.BOWeJecVp6rk7Zcr625F/7aU1FTxby70P3q', 1, 0),
-('Neil Fak', 'fak_neil94@gmail.com', '$2b$10$YiadrD9IJ8Q2aSAXHIitd.qLIb3ml6IADfqfeEjJX8d6wzabn3Db2', 1, 0),
-('Claire Dunlap', 'dunla_clai95@gmail.com', '$2b$10$Rnxjkduzm5sFVJ7zW9RokuSULRqV3o5KbOeashu5.1mj8cgrsguqy', 1, 0),
-('Michael Berzatto', 'berza_mich96@gmail.com', '$2b$10$2t.vfJJMNFwNSVsTnoNKV..0KxklYeXVtcVJdbhBRXnsbpK1p9byy', 1, 0),
-('Barbie Roberts', 'rober_barb97@gmail.com', '$2b$10$IQxegOvqbnucj2DhDxAEqOauDo8GsnUSiw7FO.LGfLn7Z/DOAZ0ze', 1, 0),
-('Ken Carson', 'carso_ken98@gmail.com', '$2b$10$LoENZZ4ovHbMDTyCR9fL9uyN84VQRu.NbjrK.AHVfMRavaRv3EOCy', 1, 0),
-('Gloria Rivera', 'river_glor99@gmail.com', '$2b$10$6xAVfndXqZ22AfyEMcbOzeiQIdYPKRYCVKL4rs4FKWKNwYLx46sjK', 1, 0),
-('Sasha Rivera', 'river_sash100@gmail.com', '$2b$10$Q9Dud4Cy.jk/MwfeDvg4nupkSdYlj.XacLekRD1PsAYgM76cIFnL2', 1, 0),
-('Weird Barbie', 'barbi_weir101@gmail.com', '$2b$10$jYSmo6HECJ7VvaXLK0VDUe5MlvmRjqAmGqq02VTZY498ZHwPtfQ4C', 1, 0),
-('Allan Sherwood', 'sherw_alla102@gmail.com', '$2b$10$8LSOBOft3KF9zGR18aWIn.RaSBu.VUHz5phctxsZ6rFE5IBXqDN26', 1, 0),
-('President Barbie', 'barbi_pres103@gmail.com', '$2b$10$VdddEIwE6QZQIWX7zuTKp.KYut9fZFcd78jYVZbCNZfNMEkQNRwoG', 1, 0),
-('Midge Hadley', 'hadle_midg104@gmail.com', '$2b$10$/2eGAszrmWRB6FAJuCY2O.dv6phSSIAw9elFij.Y9PqcqAl/ticfK', 1, 0),
-('Ruth Handler', 'handl_ruth105@gmail.com', '$2b$10$rqV6DB1uh3RDeUpwGatUW.k/buMNk4ilZmMhTbe5o0ZeIkadb7VK.', 1, 0),
-('Skipper Roberts', 'rober_skip106@gmail.com', '$2b$10$5vhZnH5rAFt4kmyy8mlax.EsBHhSN8TzYMMSFHzHuBJ//z6KCOW06', 1, 0),
-('Lucy MacLean', 'macle_lucy107@gmail.com', '$2b$10$wisB6QpNdO5nV.Np4sl2buP6U1tV75.994cNFh96DSjWd7QBmXuHK', 1, 0),
-('Maximus Stone', 'stone_maxi108@gmail.com', '$2b$10$7AjFU.xaeHCdPlDEwiVxfOJYVe/XqLpxBjnbvsr4KWgvdhk750p7u', 1, 0),
-('Cooper Howard', 'howar_coop109@gmail.com', '$2b$10$LicIjKYU2KSBqsUNNXq7V.YLmJbtS9w0B7.9RrGNwKAa2D2zLt1py', 1, 0),
-('Norm MacLean', 'macle_norm110@gmail.com', '$2b$10$lPeiccNg8Gw1bcAu7JC5DuEekNkWMqYWbQUdBtbY6/G3Y4Y62b0rO', 1, 0),
-('Hank MacLean', 'macle_hank111@gmail.com', '$2b$10$PuiYDWDiXtQGRc3kxNSbyurkqppzRylwT4YYnrl/XIpp43EvLl5ri', 1, 0),
-('Lee Moldaver', 'molda_lee112@gmail.com', '$2b$10$h5VtPehk1ODB0gR7iU2cQ../W0Gi1ZxVL/JWIFxrrjBAXnTA.W0LG', 1, 0),
-('Thaddeus Brown', 'brown_thad113@gmail.com', '$2b$10$ucW5A2uyUP.rVs6E4zp5UORdpqb6/Fdrj0dc3qQDdxRwRJtj183aW', 1, 0),
-('Dane Murphy', 'murph_dane114@gmail.com', '$2b$10$34BV.Rf6H/q5VE/aHN3xyuROU2NBYQJ.PLjmhPBnc/C6/RQkQzOF2', 1, 0),
-('Betty Pearson', 'pears_bett115@gmail.com', '$2b$10$c4vShip9JAsFNP74DVrSmO6hPDlRcVsMR1.Ss5kLPVxplUwZcavSq', 1, 0),
-('Ma June', 'june_ma116@gmail.com', '$2b$10$G1W87sus3aqHt49ZzEvsNO4uyyZ.PF8PswlVrYpjVDBLFyZzLEw7y', 1, 0);
+CREATE TEMPORARY TABLE `seed_admin_pool` (
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `access_level` INT NOT NULL
+);
+
+-- Primary demo admin account used in walkthroughs and validation.
+INSERT INTO `seed_admin_pool` (`name`, `email`, `access_level`) VALUES
+('Christian Horner', 'horne_chri201@guru.edu', 10),
+('Toto Wolff', 'wolff_toto202@guru.edu', 10),
+('James Vowles', 'vowle_jame203@guru.edu', 10),
+('Zak Brown', 'brown_zak204@guru.edu', 10),
+('Ashley Barrett', 'barre_ashl205@guru.edu', 10);
+
+CREATE TEMPORARY TABLE `seed_faculty_pool` (
+  `department` VARCHAR(45) NOT NULL,
+  `slot` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL
+);
+
+-- Primary demo professor account used in walkthroughs and validation.
+INSERT INTO `seed_faculty_pool` (`department`, `slot`, `name`, `email`) VALUES
+('Computer Science', 1, 'Billy Butcher', 'butch_bill301@guru.edu'),
+('Computer Science', 2, 'Hughie Campbell', 'campb_hugh302@guru.edu'),
+('Computer Science', 3, 'Annie January', 'janua_anni303@guru.edu'),
+('Computer Science', 4, 'Queen Maeve', 'maeve_quee304@guru.edu'),
+('Computer Science', 5, 'Kimiko Miyashiro', 'miyas_kimi305@guru.edu'),
+('Computer Science', 6, 'Marvin Milk', 'milk_marv306@guru.edu'),
+('Mathematics', 1, 'Max Verstappen', 'verst_max307@guru.edu'),
+('Mathematics', 2, 'Lewis Hamilton', 'hamil_lewi308@guru.edu'),
+('Mathematics', 3, 'Charles Leclerc', 'lecle_char309@guru.edu'),
+('Mathematics', 4, 'Lando Norris', 'norri_land310@guru.edu'),
+('Mathematics', 5, 'Fernando Alonso', 'alons_fern311@guru.edu'),
+('Mathematics', 6, 'Oscar Piastri', 'piast_osca312@guru.edu'),
+('English', 1, 'Obiwan Kenobi', 'kenob_obiw313@guru.edu'),
+('English', 2, 'Ahsoka Tano', 'tano_ahso314@guru.edu'),
+('English', 3, 'Din Djarin', 'djari_din315@guru.edu'),
+('English', 4, 'Hera Syndulla', 'syndu_hera316@guru.edu'),
+('English', 5, 'Ezra Bridger', 'bridg_ezra317@guru.edu'),
+('English', 6, 'BoKatan Kryze', 'kryze_boka318@guru.edu'),
+('History', 1, 'JeanLuc Picard', 'picar_jean319@guru.edu'),
+('History', 2, 'Benjamin Sisko', 'sisko_benj320@guru.edu'),
+('History', 3, 'Kathryn Janeway', 'janew_kath321@guru.edu'),
+('History', 4, 'William Riker', 'riker_will322@guru.edu'),
+('History', 5, 'Deanna Troi', 'troi_dean323@guru.edu'),
+('History', 6, 'Spock Sarek', 'sarek_spoc324@guru.edu'),
+('Physics', 1, 'Lelouch Lamperouge', 'lampe_lelo325@guru.edu'),
+('Physics', 2, 'Suzaku Kururugi', 'kurur_suza326@guru.edu'),
+('Physics', 3, 'Kallen Kozuki', 'kozuk_kall327@guru.edu'),
+('Physics', 4, 'Cornelia Britannia', 'brita_corn328@guru.edu'),
+('Physics', 5, 'Nunnally Lamperouge', 'lampe_nunn329@guru.edu'),
+('Physics', 6, 'Jeremiah Gottwald', 'gottw_jere330@guru.edu'),
+('Chemistry', 1, 'Kiritsugu Emiya', 'emiya_kiri331@guru.edu'),
+('Chemistry', 2, 'Saber Pendragon', 'pendr_sabe332@guru.edu'),
+('Chemistry', 3, 'Irisviel Einzbern', 'einzb_iris333@guru.edu'),
+('Chemistry', 4, 'Kirei Kotomine', 'kotom_kire334@guru.edu'),
+('Chemistry', 5, 'Waver Velvet', 'velve_wave335@guru.edu'),
+('Chemistry', 6, 'Tokiomi Tohsaka', 'tohsa_toki336@guru.edu'),
+('Nursing', 1, 'Alucard Hellsing', 'hells_aluc337@guru.edu'),
+('Nursing', 2, 'Seras Victoria', 'victo_sera338@guru.edu'),
+('Nursing', 3, 'Integra Hellsing', 'hells_inte339@guru.edu'),
+('Nursing', 4, 'Alexander Anderson', 'ander_alex340@guru.edu'),
+('Nursing', 5, 'Walter Dornez', 'dorne_walt341@guru.edu'),
+('Nursing', 6, 'Pip Bernadotte', 'berna_pip342@guru.edu'),
+('Information Systems Management', 1, 'Kira Yamato', 'yamat_kira343@guru.edu'),
+('Information Systems Management', 2, 'Athrun Zala', 'zala_athr344@guru.edu'),
+('Information Systems Management', 3, 'Lacus Clyne', 'clyne_lacu345@guru.edu'),
+('Information Systems Management', 4, 'Cagalli Yula', 'yula_caga346@guru.edu'),
+('Information Systems Management', 5, 'Mu LaFlaga', 'lafla_mu347@guru.edu'),
+('Information Systems Management', 6, 'Rau LeCreuset', 'lecre_rau348@guru.edu');
+
+CREATE TEMPORARY TABLE `seed_student_name_pool` (
+  `seed_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`seed_id`)
+);
+
+-- Primary demo student account used in walkthroughs and validation.
+INSERT INTO `seed_student_name_pool` (`name`) VALUES
+('Ichigo Kurosaki'), ('Rukia Kuchiki'), ('Orihime Inoue'), ('Uryu Ishida'), ('Yasutora Sado'), ('Renji Abarai'), ('Byakuya Kuchiki'), ('Toshiro Hitsugaya'), ('Rangiku Matsumoto'), ('Kenpachi Zaraki'),
+('Yachiru Kusajishi'), ('Sajin Komamura'), ('Shunsui Kyoraku'), ('Jushiro Ukitake'), ('Sosuke Aizen'), ('Gin Ichimaru'), ('Kaname Tosen'), ('Kisuke Urahara'), ('Yoruichi Shihoin'), ('Shinji Hirako'),
+('Love Aikawa'), ('Rojuro Otoribashi'), ('Kensei Muguruma'), ('Lisa Yadomaru'), ('Hiyori Sarugaki'), ('Mashiro Kuna'), ('Izuru Kira'), ('Momo Hinamori'), ('Shuhei Hisagi'), ('Ikkaku Madarame'),
+('Yumichika Ayasegawa'), ('Mayuri Kurotsuchi'), ('Nemu Kurotsuchi'), ('Retsu Unohana'), ('Isane Kotetsu'), ('Soi Fon'), ('Marechiyo Omaeda'), ('Nanao Ise'), ('Chojiro Sasakibe'), ('Genryusai Yamamoto'),
+('Kaien Shiba'), ('Kukaku Shiba'), ('Ganju Shiba'), ('Isshin Kurosaki'), ('Masaki Kurosaki'), ('Ryuken Ishida'), ('Soken Ishida'), ('Neliel Tu Odelschwanck'), ('Tier Harribel'), ('Ulquiorra Cifer'),
+('Grimmjow Jaegerjaquez'), ('Nnoitra Gilga'), ('Szayelaporro Granz'), ('Coyote Starrk'), ('Lilynette Gingerbuck'), ('Barragan Louisenbairn'), ('Tia Harribel'), ('Askin Nakk Le Vaar'), ('Jugram Haschwalth'), ('Bazz B'),
+('Luke Skywalker'), ('Leia Organa'), ('Han Solo'), ('Chewbacca'), ('Lando Calrissian'), ('Obi-Wan Kenobi'), ('Anakin Skywalker'), ('Padme Amidala'), ('Ahsoka Tano'), ('Captain Rex'),
+('Commander Cody'), ('Darth Maul'), ('Count Dooku'), ('Qui-Gon Jinn'), ('Mace Windu'), ('Yoda'), ('Plo Koon'), ('Kit Fisto'), ('Shaak Ti'), ('Ki-Adi-Mundi'),
+('Barriss Offee'), ('Asajj Ventress'), ('Savage Opress'), ('Bo-Katan Kryze'), ('Sabine Wren'), ('Ezra Bridger'), ('Hera Syndulla'), ('Kanan Jarrus'), ('Garazeb Orrelios'), ('Thrawn'),
+('Cassian Andor'), ('Jyn Erso'), ('Bodhi Rook'), ('Chirrut Imwe'), ('Baze Malbus'), ('Galen Erso'), ('Orson Krennic'), ('Din Djarin'), ('Grogu'), ('Greef Karga'),
+('Cara Dune'), ('Moff Gideon'), ('Fennec Shand'), ('Boba Fett'), ('Omega'), ('Hunter'), ('Crosshair'), ('Echo'), ('Tech'), ('Wrecker'),
+('Rey Skywalker'), ('Finn'), ('Poe Dameron'), ('Kylo Ren'), ('Rose Tico'), ('Amilyn Holdo'), ('Maz Kanata'), ('Saw Gerrera'), ('Mon Mothma'), ('Bail Organa'),
+('James Kirk'), ('Spock'), ('Leonard McCoy'), ('Nyota Uhura'), ('Hikaru Sulu'), ('Pavel Chekov'), ('Montgomery Scott'), ('Christine Chapel'), ('Jean-Luc Picard'), ('William Riker'),
+('Deanna Troi'), ('Beverly Crusher'), ('Geordi La Forge'), ('Worf'), ('Data'), ('Tasha Yar'), ('Guinan'), ('Wesley Crusher'), ('Benjamin Sisko'), ('Kira Nerys'),
+('Jadzia Dax'), ('Julian Bashir'), ('Miles O''Brien'), ('Keiko O''Brien'), ('Odo'), ('Quark'), ('Rom'), ('Nog'), ('Ezri Dax'), ('Kasidy Yates'),
+('Kathryn Janeway'), ('Chakotay'), ('Tuvok'), ('B''Elanna Torres'), ('Tom Paris'), ('Harry Kim'), ('Seven of Nine'), ('Neelix'), ('Kes'), ('The Doctor'),
+('Jonathan Archer'), ('T''Pol'), ('Trip Tucker'), ('Malcolm Reed'), ('Hoshi Sato'), ('Travis Mayweather'), ('Phlox'), ('Michael Burnham'), ('Saru'), ('Sylvia Tilly'),
+('Paul Stamets'), ('Hugh Culber'), ('Ash Tyler'), ('Christopher Pike'), ('Una Chin-Riley'), ('Bradward Boimler'), ('Beckett Mariner'), ('D''Vana Tendi'), ('Sam Rutherford'), ('Billy Butcher'),
+('Hughie Campbell'), ('Annie January'), ('Queen Maeve'), ('Kimiko Miyashiro'), ('Serge Frenchie'), ('Marvin Milk'), ('Homelander'), ('Starlight'), ('Ryan Butcher'), ('Victoria Neuman'),
+('Ashley Barrett'), ('Black Noir'), ('A-Train'), ('The Deep'), ('Stan Edgar'), ('Soldier Boy'), ('Becca Butcher'), ('Grace Mallory'), ('Stormfront'), ('V'),
+('Johnny Silverhand'), ('Judy Alvarez'), ('Panam Palmer'), ('River Ward'), ('Kerry Eurodyne'), ('Jackie Welles'), ('Dexter DeShawn'), ('Goro Takemura'), ('Rogue Amendiares'), ('Adam Smasher'),
+('Lucy Kushinada'), ('David Martinez'), ('Rebecca'), ('Maine'), ('Dorio'), ('Kiwi'), ('Falco'), ('Wakako Okada'), ('Viktor Vektor'), ('Kira Yamato'),
+('Athrun Zala'), ('Lacus Clyne'), ('Cagalli Yula Athha'), ('Mu La Flaga'), ('Rau Le Creuset'), ('Murrue Ramius'), ('Natarle Badgiruel'), ('Dearka Elsman'), ('Yzak Joule'), ('Shinn Asuka'),
+('Lunamaria Hawke'), ('Meyrin Hawke'), ('Sting Oakley'), ('Auel Neider'), ('Stellar Loussier'), ('Gilbert Durandal'), ('Talia Gladys'), ('Rey Za Burrel'), ('Andrew Waltfeld'), ('Miriallia Haw'),
+('Sai Argyle'), ('Flay Allster'), ('Nicol Amalfi'), ('Orga Sabnak'), ('Lelouch Lamperouge'), ('Suzaku Kururugi'), ('Kallen Kozuki'), ('C.C.'), ('Nunnally Lamperouge'), ('Cornelia li Britannia'),
+('Euphemia li Britannia'), ('Jeremiah Gottwald'), ('Villetta Nu'), ('Shirley Fenette'), ('Milly Ashford'), ('Rivalz Cardemonde'), ('Nina Einstein'), ('Kaname Ohgi'), ('Kyoshiro Tohdoh'), ('Diethard Ried'),
+('Xingke Li'), ('Schneizel el Britannia'), ('Rolo Lamperouge'), ('Sayoko Shinozaki'), ('Kiritsugu Emiya'), ('Irisviel von Einzbern'), ('Saber Pendragon'), ('Kirei Kotomine'), ('Tokiomi Tohsaka'), ('Rin Tohsaka'),
+('Sakura Matou'), ('Shirou Emiya'), ('Illyasviel von Einzbern'), ('Archer Emiya'), ('Cu Chulainn'), ('Waver Velvet'), ('Iskandar'), ('Kayneth El-Melloi'), ('Sola-Ui Nuada'), ('Kariya Matou'),
+('Lancelot'), ('Medea'), ('Souichirou Kuzuki'), ('Taiga Fujimura'), ('Alucard Hellsing'), ('Seras Victoria'), ('Integra Fairbrook Wingates Hellsing'), ('Walter C. Dornez'), ('Alexander Anderson'), ('Enrico Maxwell'),
+('Pip Bernadotte'), ('The Captain'), ('Tubalcain Alhambra'), ('Luke Valentine'), ('Jan Valentine'), ('Rip van Winkle'), ('Zorin Blitz'), ('The Major'), ('Heinkel Wolfe'), ('Heero Yuy'),
+('Duo Maxwell'), ('Trowa Barton'), ('Quatre Raberba Winner'), ('Chang Wufei'), ('Relena Peacecraft'), ('Zechs Merquise'), ('Treize Khushrenada'), ('Lucrezia Noin'), ('Lady Une'), ('Sally Po'),
+('Catherine Bloom'), ('Milliardo Peacecraft'), ('Howard Mason'), ('Naruto Uzumaki'), ('Sasuke Uchiha'), ('Sakura Haruno'), ('Kakashi Hatake'), ('Iruka Umino'), ('Hinata Hyuga'), ('Neji Hyuga'),
+('Rock Lee'), ('Tenten'), ('Shikamaru Nara'), ('Ino Yamanaka'), ('Choji Akimichi'), ('Gaara'), ('Temari'), ('Kankuro'), ('Jiraiya'), ('Tsunade'),
+('Orochimaru'), ('Kabuto Yakushi'), ('Itachi Uchiha'), ('Shisui Uchiha'), ('Obito Uchiha'), ('Madara Uchiha'), ('Hashirama Senju'), ('Tobirama Senju'), ('Minato Namikaze'), ('Kushina Uzumaki'),
+('Yamato'), ('Sai'), ('Kiba Inuzuka'), ('Shino Aburame'), ('Asuma Sarutobi'), ('Kurenai Yuhi'), ('Might Guy'), ('Konan'), ('Nagato'), ('Yahiko'),
+('Deidara'), ('Sasori'), ('Hidan'), ('Eren Yeager'), ('Mikasa Ackerman'), ('Armin Arlert'), ('Levi Ackerman'), ('Erwin Smith'), ('Hange Zoe'), ('Jean Kirstein'),
+('Connie Springer'), ('Sasha Blouse'), ('Historia Reiss'), ('Ymir'), ('Reiner Braun'), ('Bertholdt Hoover'), ('Annie Leonhart'), ('Pieck Finger'), ('Porco Galliard'), ('Marcel Galliard'),
+('Falco Grice'), ('Gabi Braun'), ('Zeke Yeager'), ('Izuku Midoriya'), ('Katsuki Bakugo'), ('Shoto Todoroki'), ('Ochaco Uraraka'), ('Tenya Iida'), ('Tsuyu Asui'), ('Momo Yaoyorozu'),
+('Eijiro Kirishima'), ('Denki Kaminari'), ('Kyoka Jiro'), ('Fumikage Tokoyami'), ('Mina Ashido'), ('Yuga Aoyama'), ('Hanta Sero'), ('Mezo Shoji'), ('Mashirao Ojiro'), ('Toru Hagakure'),
+('Rikido Sato'), ('Koji Koda'), ('Minoru Mineta'), ('All Might'), ('Shota Aizawa'), ('Present Mic'), ('Endeavor'), ('Hawks'), ('Mirko'), ('Best Jeanist'),
+('Tamaki Amajiki'), ('Mirio Togata'), ('Nejire Hado'), ('Monkey D. Luffy'), ('Roronoa Zoro'), ('Nami'), ('Usopp'), ('Sanji'), ('Tony Tony Chopper'), ('Nico Robin'),
+('Franky'), ('Brook'), ('Jinbe'), ('Trafalgar Law'), ('Eustass Kid'), ('Portgas D. Ace'), ('Sabo'), ('Boa Hancock'), ('Crocodile'), ('Dracule Mihawk'),
+('Donquixote Doflamingo'), ('Charlotte Katakuri'), ('Charlotte Linlin'), ('Commander Shepard'), ('Garrus Vakarian'), ('Liara T''Soni'), ('Tali''Zorah nar Rayya'), ('Urdnot Wrex'), ('Kaidan Alenko'), ('Ashley Williams'),
+('Miranda Lawson'), ('Jacob Taylor'), ('Jack'), ('Mordin Solus'), ('Grunt'), ('Samara'), ('Thane Krios'), ('Legion'), ('EDI'), ('James Vega'),
+('Javik'), ('Aria T''Loak'), ('Kasumi Goto'), ('Zaeed Massani'), ('Master Chief'), ('Cortana'), ('Thel ''Vadam'), ('Miranda Keyes'), ('Jacob Keyes'), ('Catherine Halsey'),
+('Avery Johnson'), ('Sarah Palmer'), ('Thomas Lasky'), ('Atriox'), ('Rtas ''Vadum'), ('Tartarus'), ('Jerome-117'), ('Isabel'), ('Carter-A259'), ('Kat-B320'),
+('Jun-A266'), ('Emile-A239'), ('Jorge-052'), ('Cloud Strife'), ('Tifa Lockhart'), ('Aerith Gainsborough'), ('Barret Wallace'), ('Cid Highwind'), ('Yuffie Kisaragi'), ('Vincent Valentine'),
+('Red XIII'), ('Sephiroth'), ('Zack Fair'), ('Reno'), ('Rude'), ('Elena'), ('Tseng'), ('Cait Sith'), ('Reeve Tuesti'), ('Shelke Rui'),
+('Yuji Itadori'), ('Megumi Fushiguro'), ('Nobara Kugisaki'), ('Satoru Gojo'), ('Suguru Geto'), ('Kento Nanami'), ('Maki Zenin'), ('Toge Inumaki'), ('Panda'), ('Yuta Okkotsu'),
+('Aoi Todo'), ('Mai Zenin'), ('Kasumi Miwa'), ('Kokichi Muta'), ('Mahito'), ('Edward Elric'), ('Alphonse Elric'), ('Winry Rockbell'), ('Roy Mustang'), ('Riza Hawkeye'),
+('Maes Hughes'), ('Alex Armstrong'), ('Olivier Armstrong'), ('Scar'), ('Ling Yao'), ('Lan Fan'), ('Greed'), ('Izumi Curtis'), ('King Bradley'), ('Van Hohenheim'),
+('Shou Tucker'), ('Tim Marcoh'), ('Jean Havoc'), ('Rebecca Catalina'), ('Maria Ross'), ('Tanjiro Kamado'), ('Nezuko Kamado'), ('Zenitsu Agatsuma'), ('Inosuke Hashibira'), ('Giyu Tomioka'),
+('Shinobu Kocho'), ('Kyojuro Rengoku'), ('Tengen Uzui'), ('Mitsuri Kanroji'), ('Muichiro Tokito'), ('Sanemi Shinazugawa'), ('Gyomei Himejima'), ('Obanai Iguro'), ('Kanae Kocho'), ('Kanao Tsuyuri');
+
+CREATE TEMPORARY TABLE `seed_student_pool` (
+  `seed_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `major` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`seed_id`)
+);
+
+INSERT INTO `seed_student_pool` (`name`, `email`, `major`)
+SELECT
+  snp.`name`,
+  CONCAT(
+    LOWER(
+      LEFT(
+        REPLACE(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(TRIM(snp.`name`), ' ', -1), '''', ''), '-', ''), '.', ''), '`', ''),
+        5
+      )
+    ),
+    '_',
+    LOWER(
+      LEFT(
+        REPLACE(REPLACE(REPLACE(REPLACE(SUBSTRING_INDEX(TRIM(snp.`name`), ' ', 1), '''', ''), '-', ''), '.', ''), '`', ''),
+        4
+      )
+    ),
+    LPAD(snp.`seed_id`, 3, '0'),
+    '@guru.edu'
+  ) AS `email`,
+  CASE MOD(snp.`seed_id` - 1, 8)
+    WHEN 0 THEN 'Computer Science'
+    WHEN 1 THEN 'Mathematics'
+    WHEN 2 THEN 'English'
+    WHEN 3 THEN 'History'
+    WHEN 4 THEN 'Physics'
+    WHEN 5 THEN 'Chemistry'
+    WHEN 6 THEN 'Nursing'
+    ELSE 'Information Systems Management'
+  END AS `major`
+FROM `seed_student_name_pool` snp
+ORDER BY snp.`seed_id`
+LIMIT 500;
+
+-- CODEX_SEED_USER_INSERTION_POINT
 
 INSERT INTO `admins` (`user_id`, `access_level`)
-SELECT `user_id`, 10
-FROM `users`
-WHERE `email` IN (
-    'horne_chri87@gmail.com',
-    'wolff_toto00@gmail.com',
-    'vowle_jame00@gmail.com',
-    'brown_zak00@gmail.com',
-    'barre_ashl27@gmail.com'
-);
+SELECT u.`user_id`, sap.`access_level`
+FROM `seed_admin_pool` sap
+JOIN `users` u ON u.`email` = sap.`email`;
 
 INSERT INTO `professors` (`user_id`, `department`)
-SELECT `user_id`, 'Computer Science'
-FROM `users`
-WHERE `email` IN (
-    'butch_bill17@gmail.com',
-    'campb_hugh18@gmail.com'
-);
-
-INSERT INTO `professors` (`user_id`, `department`)
-SELECT `user_id`, 'Mathematics'
-FROM `users`
-WHERE `email` IN (
-    'campb_cind32@gmail.com',
-    'meeks_bren33@gmail.com'
-);
-
-INSERT INTO `professors` (`user_id`, `department`)
-SELECT `user_id`, 'English'
-FROM `users`
-WHERE `email` IN (
-    'wheel_nanc48@gmail.com',
-    'byers_jona49@gmail.com'
-);
-
-INSERT INTO `professors` (`user_id`, `department`)
-SELECT `user_id`, 'History'
-FROM `users`
-WHERE `email` IN (
-    'byers_joyc53@gmail.com',
-    'bauma_murr55@gmail.com'
-);
-
-INSERT INTO `professors` (`user_id`, `department`)
-SELECT `user_id`, 'Physics'
-FROM `users`
-WHERE `email` IN (
-    'mille_joel67@gmail.com',
-    'mille_tomm69@gmail.com'
-);
-
-INSERT INTO `professors` (`user_id`, `department`)
-SELECT `user_id`, 'Chemistry'
-FROM `users`
-WHERE `email` IN (
-    'ander_abby75@gmail.com',
-    'alvar_dina76@gmail.com'
-);
-
-INSERT INTO `professors` (`user_id`, `department`)
-SELECT `user_id`, 'Nursing'
-FROM `users`
-WHERE `email` IN (
-    'dunla_clai95@gmail.com',
-    'river_glor99@gmail.com'
-);
-
-INSERT INTO `professors` (`user_id`, `department`)
-SELECT `user_id`, 'Information Systems Management'
-FROM `users`
-WHERE `email` IN (
-    'adamu_sydn88@gmail.com',
-    'jerim_rich89@gmail.com'
-);
+SELECT u.`user_id`, fp.`department`
+FROM `seed_faculty_pool` fp
+JOIN `users` u ON u.`email` = fp.`email`;
 
 INSERT INTO `students` (`user_id`, `major`)
-SELECT `user_id`, 'Computer Science'
-FROM `users`
-WHERE `email` IN (
-    'perez_serg11@gmail.com',
-    'strol_lanc18@gmail.com',
-    'hulke_nico27@gmail.com',
-    'rosbe_nico6@gmail.com',
-    'prost_alai1@gmail.com',
-    'bearm_oliv87@gmail.com',
-    'miyas_kimi22@gmail.com',
-    'butch_ryan31@gmail.com',
-    'hartm_dwig41@gmail.com',
-    'buckl_robi51@gmail.com',
-    'galpi_tyle61@gmail.com',
-    'servo_tess71@gmail.com',
-    'velar_jaca81@gmail.com',
-    'brook_marc91@gmail.com',
-    'barbi_weir101@gmail.com',
-    'howar_coop109@gmail.com'
-);
-
-INSERT INTO `students` (`user_id`, `major`)
-SELECT `user_id`, 'Mathematics'
-FROM `users`
-WHERE `email` IN (
-    'norri_land4@gmail.com',
-    'botta_valt77@gmail.com',
-    'raikk_kimi7@gmail.com',
-    'grosj_roma8@gmail.com',
-    'ville_jacq27@gmail.com',
-    'janua_anni19@gmail.com',
-    'frank_regg28@gmail.com',
-    'phill_greg38@gmail.com',
-    'mayfi_max46@gmail.com',
-    'sincl_enid58@gmail.com',
-    'weems_lari66@gmail.com',
-    'targa_daem78@gmail.com',
-    'targa_hela86@gmail.com',
-    'rober_barb97@gmail.com',
-    'rober_skip106@gmail.com',
-    'murph_dane114@gmail.com'
-);
-
-INSERT INTO `students` (`user_id`, `major`)
-SELECT `user_id`, 'English'
-FROM `users`
-WHERE `email` IN (
-    'russe_geor63@gmail.com',
-    'ocon_este31@gmail.com',
-    'sarge_loga2@gmail.com',
-    'barri_rube11@gmail.com',
-    'berge_gerh28@gmail.com',
-    'pourd_theo5@gmail.com',
-    'milk_marv24@gmail.com',
-    'wilki_ray35@gmail.com',
-    'wheel_mike43@gmail.com',
-    'munso_eddi54@gmail.com',
-    'addam_mort63@gmail.com',
-    'frank_bill73@gmail.com',
-    'velar_corl83@gmail.com',
-    'hassa_ebra93@gmail.com',
-    'barbi_pres103@gmail.com',
-    'macle_hank111@gmail.com'
-);
-
-INSERT INTO `students` (`user_id`, `major`)
-SELECT `user_id`, 'History'
-FROM `users`
-WHERE `email` IN (
-    'verst_max1@gmail.com',
-    'alons_fern14@gmail.com',
-    'magnu_kevi20@gmail.com',
-    'butto_jens22@gmail.com',
-    'senna_ayrt12@gmail.com',
-    'anton_kimi12@gmail.com',
-    'maeve_magg21@gmail.com',
-    'mosko_kevi30@gmail.com',
-    'hails_gail40@gmail.com',
-    'harri_stev50@gmail.com',
-    'thorp_xavi60@gmail.com',
-    'mille_sara70@gmail.com',
-    'targa_vise80@gmail.com',
-    'berza_nata90@gmail.com',
-    'river_sash100@gmail.com',
-    'stone_maxi108@gmail.com',
-    'june_ma116@gmail.com'
-);
-
-INSERT INTO `students` (`user_id`, `major`)
-SELECT `user_id`, 'Physics'
-FROM `users`
-WHERE `email` IN (
-    'sainz_carl55@gmail.com',
-    'ricci_dani3@gmail.com',
-    'lawso_liam40@gmail.com',
-    'schum_mick47@gmail.com',
-    'hakki_mika8@gmail.com',
-    'kubic_robe88@gmail.com',
-    'neuma_vict26@gmail.com',
-    'gilmo_buff37@gmail.com',
-    'sincl_luca45@gmail.com',
-    'addam_wedn57@gmail.com',
-    'addam_pugs65@gmail.com',
-    'targa_rhae77@gmail.com',
-    'targa_aemo85@gmail.com',
-    'berza_mich96@gmail.com',
-    'handl_ruth105@gmail.com',
-    'brown_thad113@gmail.com'
-);
-
-INSERT INTO `students` (`user_id`, `major`)
-SELECT `user_id`, 'Chemistry'
-FROM `users`
-WHERE `email` IN (
-    'hamil_lewi44@gmail.com',
-    'gasly_pierr10@gmail.com',
-    'albon_alex23@gmail.com',
-    'massa_feli19@gmail.com',
-    'lauda_niki12@gmail.com',
-    'dooha_jack7@gmail.com',
-    'frenc_serg23@gmail.com',
-    'meeks_shor34@gmail.com',
-    'hoppe_jane42@gmail.com',
-    'hoppe_jim52@gmail.com',
-    'oting_euge62@gmail.com',
-    'stone_marl72@gmail.com',
-    'velar_luce82@gmail.com',
-    'marre_tina92@gmail.com',
-    'sherw_alla102@gmail.com',
-    'macle_norm110@gmail.com'
-);
-
-INSERT INTO `students` (`user_id`, `major`)
-SELECT `user_id`, 'Nursing'
-FROM `users`
-WHERE `email` IN (
-    'piast_osca81@gmail.com',
-    'zhou_guan24@gmail.com',
-    'vette_seba5@gmail.com',
-    'maldo_past18@gmail.com',
-    'monto_juan42@gmail.com',
-    'homel_john20@gmail.com',
-    'noir_earv29@gmail.com',
-    'gilmo_doof39@gmail.com',
-    'byers_will47@gmail.com',
-    'barcl_bian59@gmail.com',
-    'willi_elli68@gmail.com',
-    'hight_alic79@gmail.com',
-    'berza_carm87@gmail.com',
-    'carso_ken98@gmail.com',
-    'macle_lucy107@gmail.com',
-    'pears_bett115@gmail.com'
-);
-
-INSERT INTO `students` (`user_id`, `major`)
-SELECT `user_id`, 'Information Systems Management'
-FROM `users`
-WHERE `email` IN (
-    'lecle_char16@gmail.com',
-    'tsuno_yuki22@gmail.com',
-    'devri_nyck21@gmail.com',
-    'schum_mich47@gmail.com',
-    'coult_davi2@gmail.com',
-    'ilott_call12@gmail.com',
-    'soldi_ben25@gmail.com',
-    'prinz_bobb36@gmail.com',
-    'hende_dust44@gmail.com',
-    'sincl_eric56@gmail.com',
-    'addam_gome64@gmail.com',
-    'frank_fran74@gmail.com',
-    'targa_rhae84@gmail.com',
-    'fak_neil94@gmail.com',
-    'hadle_midg104@gmail.com',
-    'molda_lee112@gmail.com'
-);
+SELECT u.`user_id`, sp.`major`
+FROM `seed_student_pool` sp
+JOIN `users` u ON u.`email` = sp.`email`;
 
 INSERT INTO `courses` (`course_code`, `title`, `description`, `credits`) VALUES
 ('CHEM103', 'General Chemistry I', 'Introductory general chemistry course focused on matter, chemical calculations, and foundational laboratory science concepts.', 4),
@@ -966,87 +755,47 @@ CREATE TEMPORARY TABLE `seed_sections` (
   PRIMARY KEY (`seed_id`)
 );
 
-INSERT INTO `seed_sections` (`course_code`, `term`, `year`, `professor_email`, `capacity`, `days`, `start_time`, `end_time`) VALUES
-('CMSC105', 'Spring', 2024, 'butch_bill17@gmail.com', 32, 'MW', '09:00:00', '10:15:00'),
-('CMSC115', 'Summer', 2024, 'campb_hugh18@gmail.com', 32, 'MW', '09:00:00', '10:15:00'),
-('CMSC150', 'Fall', 2024, 'butch_bill17@gmail.com', 32, 'MW', '09:00:00', '10:15:00'),
-('CMSC215', 'Spring', 2025, 'campb_hugh18@gmail.com', 32, 'MW', '09:00:00', '10:15:00'),
-('CMSC220', 'Summer', 2025, 'butch_bill17@gmail.com', 32, 'MW', '09:00:00', '10:15:00'),
-('CMSC310', 'Fall', 2025, 'campb_hugh18@gmail.com', 32, 'MW', '09:00:00', '10:15:00'),
-('CMSC315', 'Spring', 2026, 'butch_bill17@gmail.com', 32, 'MW', '09:00:00', '10:15:00'),
-('CMSC320', 'Fall', 2026, 'campb_hugh18@gmail.com', 32, 'MW', '09:00:00', '10:15:00'),
-('MATH105', 'Spring', 2024, 'campb_cind32@gmail.com', 32, 'TR', '09:00:00', '10:15:00'),
-('MATH107', 'Summer', 2024, 'meeks_bren33@gmail.com', 32, 'TR', '09:00:00', '10:15:00'),
-('MATH108', 'Fall', 2024, 'campb_cind32@gmail.com', 32, 'TR', '09:00:00', '10:15:00'),
-('MATH115', 'Spring', 2025, 'meeks_bren33@gmail.com', 32, 'TR', '09:00:00', '10:15:00'),
-('MATH140', 'Summer', 2025, 'campb_cind32@gmail.com', 32, 'TR', '09:00:00', '10:15:00'),
-('MATH141', 'Fall', 2025, 'meeks_bren33@gmail.com', 32, 'TR', '09:00:00', '10:15:00'),
-('MATH241', 'Spring', 2026, 'campb_cind32@gmail.com', 32, 'TR', '09:00:00', '10:15:00'),
-('MATH340', 'Fall', 2026, 'meeks_bren33@gmail.com', 32, 'TR', '09:00:00', '10:15:00'),
-('ENGL102', 'Spring', 2024, 'wheel_nanc48@gmail.com', 32, 'MW', '10:30:00', '11:45:00'),
-('ENGL103', 'Summer', 2024, 'byers_jona49@gmail.com', 32, 'MW', '10:30:00', '11:45:00'),
-('ENGL240', 'Fall', 2024, 'wheel_nanc48@gmail.com', 32, 'MW', '10:30:00', '11:45:00'),
-('ENGL281', 'Spring', 2025, 'byers_jona49@gmail.com', 32, 'MW', '10:30:00', '11:45:00'),
-('ENGL303', 'Summer', 2025, 'wheel_nanc48@gmail.com', 32, 'MW', '10:30:00', '11:45:00'),
-('ENGL384', 'Fall', 2025, 'byers_jona49@gmail.com', 32, 'MW', '10:30:00', '11:45:00'),
-('ENGL406', 'Spring', 2026, 'wheel_nanc48@gmail.com', 32, 'MW', '10:30:00', '11:45:00'),
-('ENGL495', 'Fall', 2026, 'byers_jona49@gmail.com', 32, 'MW', '10:30:00', '11:45:00'),
-('HIST115', 'Spring', 2024, 'byers_joyc53@gmail.com', 32, 'TR', '10:30:00', '11:45:00'),
-('HIST116', 'Summer', 2024, 'bauma_murr55@gmail.com', 32, 'TR', '10:30:00', '11:45:00'),
-('HIST125', 'Fall', 2024, 'byers_joyc53@gmail.com', 32, 'TR', '10:30:00', '11:45:00'),
-('HIST141', 'Spring', 2025, 'bauma_murr55@gmail.com', 32, 'TR', '10:30:00', '11:45:00'),
-('HIST142', 'Summer', 2025, 'byers_joyc53@gmail.com', 32, 'TR', '10:30:00', '11:45:00'),
-('HIST289', 'Fall', 2025, 'bauma_murr55@gmail.com', 32, 'TR', '10:30:00', '11:45:00'),
-('HIST309', 'Spring', 2026, 'byers_joyc53@gmail.com', 32, 'TR', '10:30:00', '11:45:00'),
-('HIST495', 'Fall', 2026, 'bauma_murr55@gmail.com', 32, 'TR', '10:30:00', '11:45:00'),
-('PHYS121', 'Spring', 2024, 'mille_joel67@gmail.com', 32, 'MW', '12:00:00', '13:15:00'),
-('PHYS122', 'Summer', 2024, 'mille_tomm69@gmail.com', 32, 'MW', '12:00:00', '13:15:00'),
-('MATH140', 'Fall', 2024, 'mille_joel67@gmail.com', 32, 'MW', '12:00:00', '13:15:00'),
-('MATH141', 'Spring', 2025, 'mille_tomm69@gmail.com', 32, 'MW', '12:00:00', '13:15:00'),
-('MATH241', 'Summer', 2025, 'mille_joel67@gmail.com', 32, 'MW', '12:00:00', '13:15:00'),
-('CMSC100', 'Fall', 2025, 'mille_tomm69@gmail.com', 32, 'MW', '12:00:00', '13:15:00'),
-('CMSC105', 'Spring', 2026, 'mille_joel67@gmail.com', 32, 'MW', '12:00:00', '13:15:00'),
-('CMSC427', 'Fall', 2026, 'mille_tomm69@gmail.com', 32, 'MW', '12:00:00', '13:15:00'),
-('CHEM103', 'Spring', 2024, 'ander_abby75@gmail.com', 32, 'TR', '12:00:00', '13:15:00'),
-('CHEM113', 'Summer', 2024, 'alvar_dina76@gmail.com', 32, 'TR', '12:00:00', '13:15:00'),
-('CHEM121', 'Fall', 2024, 'ander_abby75@gmail.com', 32, 'TR', '12:00:00', '13:15:00'),
-('CHEM297', 'Spring', 2025, 'alvar_dina76@gmail.com', 32, 'TR', '12:00:00', '13:15:00'),
-('MATH107', 'Summer', 2025, 'ander_abby75@gmail.com', 32, 'TR', '12:00:00', '13:15:00'),
-('MATH140', 'Fall', 2025, 'alvar_dina76@gmail.com', 32, 'TR', '12:00:00', '13:15:00'),
-('PHYS121', 'Spring', 2026, 'ander_abby75@gmail.com', 32, 'TR', '12:00:00', '13:15:00'),
-('PHYS122', 'Fall', 2026, 'alvar_dina76@gmail.com', 32, 'TR', '12:00:00', '13:15:00'),
-('NURS302', 'Spring', 2024, 'dunla_clai95@gmail.com', 32, 'MW', '13:30:00', '14:45:00'),
-('NURS322', 'Summer', 2024, 'river_glor99@gmail.com', 32, 'MW', '13:30:00', '14:45:00'),
-('NURS352', 'Fall', 2024, 'dunla_clai95@gmail.com', 32, 'MW', '13:30:00', '14:45:00'),
-('NURS372', 'Spring', 2025, 'river_glor99@gmail.com', 32, 'MW', '13:30:00', '14:45:00'),
-('NURS392', 'Summer', 2025, 'dunla_clai95@gmail.com', 32, 'MW', '13:30:00', '14:45:00'),
-('NURS412', 'Fall', 2025, 'river_glor99@gmail.com', 32, 'MW', '13:30:00', '14:45:00'),
-('NURS432', 'Spring', 2026, 'dunla_clai95@gmail.com', 32, 'MW', '13:30:00', '14:45:00'),
-('NURS496', 'Fall', 2026, 'river_glor99@gmail.com', 32, 'MW', '13:30:00', '14:45:00'),
-('IFSM201', 'Spring', 2024, 'adamu_sydn88@gmail.com', 32, 'TR', '13:30:00', '14:45:00'),
-('IFSM300', 'Summer', 2024, 'jerim_rich89@gmail.com', 32, 'TR', '13:30:00', '14:45:00'),
-('IFSM301', 'Fall', 2024, 'adamu_sydn88@gmail.com', 32, 'TR', '13:30:00', '14:45:00'),
-('IFSM304', 'Spring', 2025, 'jerim_rich89@gmail.com', 32, 'TR', '13:30:00', '14:45:00'),
-('IFSM310', 'Summer', 2025, 'adamu_sydn88@gmail.com', 32, 'TR', '13:30:00', '14:45:00'),
-('IFSM370', 'Fall', 2025, 'jerim_rich89@gmail.com', 32, 'TR', '13:30:00', '14:45:00'),
-('IFSM438', 'Spring', 2026, 'adamu_sydn88@gmail.com', 32, 'TR', '13:30:00', '14:45:00'),
-('IFSM495', 'Fall', 2026, 'jerim_rich89@gmail.com', 32, 'TR', '13:30:00', '14:45:00'),
-('CMSC340', 'Fall', 2026, 'butch_bill17@gmail.com', 22, 'MW', '09:00:00', '10:15:00'),
-('CMSC345', 'Fall', 2026, 'campb_hugh18@gmail.com', 22, 'MW', '09:00:00', '10:15:00'),
-('CMSC427', 'Fall', 2026, 'butch_bill17@gmail.com', 20, 'TR', '10:30:00', '11:45:00'),
-('CMSC495', 'Fall', 2026, 'campb_hugh18@gmail.com', 18, 'TR', '10:30:00', '11:45:00'),
-('MATH140', 'Fall', 2026, 'campb_cind32@gmail.com', 24, 'MW', '09:00:00', '10:15:00'),
-('MATH141', 'Fall', 2026, 'meeks_bren33@gmail.com', 24, 'MW', '09:00:00', '10:15:00'),
-('MATH246', 'Fall', 2026, 'campb_cind32@gmail.com', 20, 'TR', '12:00:00', '13:15:00'),
-('ENGL240', 'Fall', 2026, 'wheel_nanc48@gmail.com', 20, 'TR', '10:30:00', '11:45:00'),
-('ENGL303', 'Fall', 2026, 'byers_jona49@gmail.com', 20, 'TR', '10:30:00', '11:45:00'),
-('HIST156', 'Fall', 2026, 'byers_joyc53@gmail.com', 22, 'MW', '12:00:00', '13:15:00'),
-('HIST157', 'Fall', 2026, 'bauma_murr55@gmail.com', 22, 'MW', '12:00:00', '13:15:00'),
-('CHEM103', 'Fall', 2026, 'ander_abby75@gmail.com', 18, 'TR', '12:00:00', '13:15:00'),
-('PHYS121', 'Fall', 2026, 'mille_joel67@gmail.com', 18, 'TR', '12:00:00', '13:15:00'),
-('NURS372', 'Fall', 2026, 'dunla_clai95@gmail.com', 18, 'MW', '13:30:00', '14:45:00'),
-('IFSM201', 'Fall', 2026, 'adamu_sydn88@gmail.com', 24, 'TR', '13:30:00', '14:45:00'),
-('IFSM438', 'Fall', 2026, 'jerim_rich89@gmail.com', 20, 'TR', '13:30:00', '14:45:00');
+INSERT INTO `seed_sections` (`course_code`, `term`, `year`, `professor_email`, `capacity`, `days`, `start_time`, `end_time`)
+SELECT
+  c.`course_code`,
+  sem.`term`,
+  sem.`year`,
+  fp.`email` AS `professor_email`,
+  tmpl.`capacity`,
+  tmpl.`days`,
+  tmpl.`start_time`,
+  tmpl.`end_time`
+FROM `courses` c
+CROSS JOIN `semesters` sem
+JOIN (
+  SELECT 1 AS `section_number`, 32 AS `capacity`, 'MW' AS `days`, '08:00:00' AS `start_time`, '10:45:00' AS `end_time`
+  UNION ALL
+  SELECT 2, 30, 'TR', '08:00:00', '10:45:00'
+  UNION ALL
+  SELECT 3, 28, 'MW', '11:00:00', '13:45:00'
+  UNION ALL
+  SELECT 4, 26, 'TR', '11:00:00', '13:45:00'
+  UNION ALL
+  SELECT 5, 26, 'MW', '14:00:00', '16:45:00'
+  UNION ALL
+  SELECT 6, 24, 'TR', '14:00:00', '16:45:00'
+  UNION ALL
+  SELECT 7, 24, 'MTWR', '17:00:00', '18:15:00'
+  UNION ALL
+  SELECT 8, 22, 'TWRF', '17:00:00', '18:15:00'
+) tmpl
+JOIN `seed_faculty_pool` fp
+  ON fp.`department` = CASE LEFT(c.`course_code`, 4)
+    WHEN 'CMSC' THEN 'Computer Science'
+    WHEN 'MATH' THEN 'Mathematics'
+    WHEN 'ENGL' THEN 'English'
+    WHEN 'HIST' THEN 'History'
+    WHEN 'PHYS' THEN 'Physics'
+    WHEN 'CHEM' THEN 'Chemistry'
+    WHEN 'NURS' THEN 'Nursing'
+    WHEN 'IFSM' THEN 'Information Systems Management'
+  END
+ AND fp.`slot` = MOD(tmpl.`section_number` - 1, 6) + 1;
 
 INSERT INTO `sections` (`course_id`, `semester_id`, `professor_id`, `capacity`, `days`, `start_time`, `end_time`, `access_codes`)
 SELECT
@@ -1147,7 +896,15 @@ FROM `students` s
 JOIN `seed_major_plan` smp ON smp.`major` = s.`major`
 JOIN `semesters` sem ON sem.`term` = smp.`term` AND sem.`year` = smp.`year`
 JOIN `courses` c ON c.`course_code` = smp.`course_code`
-JOIN `sections` sec ON sec.`course_id` = c.`course_id` AND sec.`semester_id` = sem.`semester_id`;
+JOIN (
+  SELECT MIN(`section_id`) AS `section_id`, `course_id`, `semester_id`
+  FROM `sections`
+  GROUP BY `course_id`, `semester_id`
+) sec ON sec.`course_id` = c.`course_id` AND sec.`semester_id` = sem.`semester_id`;
 
 DROP TEMPORARY TABLE IF EXISTS `seed_major_plan`;
 DROP TEMPORARY TABLE IF EXISTS `seed_sections`;
+DROP TEMPORARY TABLE IF EXISTS `seed_admin_pool`;
+DROP TEMPORARY TABLE IF EXISTS `seed_student_pool`;
+DROP TEMPORARY TABLE IF EXISTS `seed_student_name_pool`;
+DROP TEMPORARY TABLE IF EXISTS `seed_faculty_pool`;

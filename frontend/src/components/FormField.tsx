@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+FormField.tsx
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Renders a labeled input field used across forms in the frontend.
+*/
+
 type FormFieldProps = {
 	id: string,
 	label: string,

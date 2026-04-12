@@ -1,15 +1,27 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+ProfilePage.tsx
+input
+authenticated user state and editable profile form values
+output
+role-aware profile routing and profile update UI feedback
+description
+Renders the standalone profile screen and redirects role-based users into their integrated profile workflows.
+*/
+
 import { useEffect, useState, type SubmitEvent } from 'react';
-import { ApiError } from '../api/client';
+import { Navigate } from 'react-router-dom';
 import { FormField } from '../components/FormField';
 import { StatusMessage } from '../components/StatusMessage';
 import { useAuth } from '../context/AuthContext';
+import { useFormFeedback } from '../lib/useFormFeedback';
 
 export function ProfilePage() {
-	const { updateProfileAction, user } = useAuth();
+	const { updateProfileAction, user, requiresPasswordChange } = useAuth();
 	const [name, setName] = useState(user?.name ?? '');
 	const [email, setEmail] = useState(user?.email ?? '');
-	const [message, setMessage] = useState('');
-	const [error, setError] = useState('');
+	const feedback = useFormFeedback();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	useEffect(() => {
@@ -17,21 +29,29 @@ export function ProfilePage() {
 		setEmail(user?.email ?? '');
 	}, [user?.email, user?.name]);
 
+	if (user?.role === 'STUDENT') {
+		return <Navigate to="/?view=profile" replace />;
+	}
+
+	if (user?.role === 'PROFESSOR') {
+		return <Navigate to="/?view=profile" replace />;
+	}
+
+	if (user?.role === 'ADMIN') {
+		return <Navigate to="/console/admin?view=profile" replace />;
+	}
+
+	// Saves the standalone profile form and surfaces backend validation messages.
 	async function submit(event: SubmitEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setIsSubmitting(true);
-		setMessage('');
-		setError('');
+		feedback.reset();
 
 		try {
 			await updateProfileAction({ name, email });
-			setMessage('Profile updated successfully.');
+			feedback.setSuccess('Profile updated successfully.');
 		} catch (err) {
-			if (err instanceof ApiError) {
-				setError(err.message);
-			} else {
-				setError('Unable to update profile right now.');
-			}
+			feedback.setErrorFromUnknown(err, 'Unable to update profile right now.');
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -54,10 +74,10 @@ export function ProfilePage() {
 				<FormField id="name" label="Name" value={name} onChange={setName} required />
 				<FormField id="profile-email" label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" required />
 
-				{message ? <StatusMessage kind="success" message={message} /> : null}
-				{error ? <StatusMessage kind="error" message={error} /> : null}
+				{feedback.feedback.message ? <StatusMessage kind="success" message={feedback.feedback.message} /> : null}
+				{feedback.feedback.error ? <StatusMessage kind="error" message={feedback.feedback.error} /> : null}
 
-				<button type="submit" className="primary-button" disabled={isSubmitting}>
+				<button type="submit" className="primary-button" disabled={isSubmitting || requiresPasswordChange}>
 					{isSubmitting ? 'Saving...' : 'Save Profile'}
 				</button>
 			</form>

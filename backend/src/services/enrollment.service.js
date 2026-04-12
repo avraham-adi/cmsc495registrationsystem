@@ -1,13 +1,27 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+enrollment.service.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Implements enrollment creation, status transitions, waitlisting, prerequisites, and schedule-conflict enforcement.
+*/
+
 import * as db from '../db/connection.js';
 import * as Errors from '../errors/index.js';
 import PrerequisiteService from './prerequisite.service.js';
 import SectionService from './section.service.js';
+import SemesterService from './semester.service.js';
 import Enrollment from '../domain/enrollment.js';
 
 class EnrollmentService {
 	constructor() {
 		this.section = new SectionService();
 		this.pre = new PrerequisiteService();
+		this.semester = new SemesterService();
 	}
 
 	normalizeDays(days) {
@@ -45,6 +59,11 @@ class EnrollmentService {
 		}
 
 		return this.timesOverlap(a.start_time, a.end_time, b.start_time, b.end_time);
+	}
+
+	async getCurrentSemesterId() {
+		const rows = await db.query('SELECT semester_id FROM semesters ORDER BY year DESC, semester_id DESC LIMIT 1', []);
+		return rows.length > 0 ? rows[0].semester_id : null;
 	}
 
 	async scheduleCheck(studentId, targetSection) {
@@ -85,6 +104,16 @@ class EnrollmentService {
 		const sec = await this.section.getSection(sectionId);
 		await this.scheduleCheck(studentId, sec);
 
+		// Students can only enroll in the current semester
+		if (actingUser?.role === 'STUDENT') {
+			const currentSemesterId = await this.getCurrentSemesterId();
+			if (sec.semester_id !== currentSemesterId) {
+				throw new Errors.AuthorizationError(
+					'Students can only enroll in courses from the current semester.'
+				);
+			}
+		}
+
 		const pre = await this.pre.getPrereqs(sec.course_id);
 		if (pre.data.length > 0) {
 			const c = await db.query(
@@ -117,10 +146,16 @@ class EnrollmentService {
 
 		const cur = r[0];
 		this.verifyOwn(cur.student_id, actingUser);
-		if (actingUser?.role === 'STUDENT' && !(status === 'dropped' || (status === 'enrolled' && accessCode))) {
-			throw new Errors.AuthorizationError(
-				'Students may only drop their own enrollments or use a valid access code to enroll.'
-			);
+		if (actingUser?.role === 'STUDENT') {
+			const canDrop = status === 'dropped' && ['enrolled', 'waitlisted'].includes(cur.status);
+			const canEnrollWithCode = status === 'enrolled' && cur.status === 'waitlisted' && !!accessCode;
+			const canMarkCompleted = status === 'completed' && cur.status === 'enrolled';
+
+			if (!(canDrop || canEnrollWithCode || canMarkCompleted)) {
+				throw new Errors.AuthorizationError(
+					'Students may only drop their own enrollments, mark enrolled courses completed, or use a valid access code to enroll.'
+				);
+			}
 		}
 
 		if (status === cur.status) {
@@ -236,12 +271,6 @@ class EnrollmentService {
 				throw new Errors.ValidationError('Invalid or already used access code.');
 			}
 
-			codes[key + '_used'] = true;
-			await db.queryWithConnection(con, 'UPDATE sections SET access_codes = ? WHERE section_id = ?', [
-				JSON.stringify(codes),
-				sectionId,
-			]);
-
 			if (enrollmentId) {
 				const e = await db.queryWithConnection(
 					con,
@@ -259,6 +288,12 @@ class EnrollmentService {
 					throw new Errors.ValidationError('Only the next waitlisted student may be promoted.');
 				}
 
+				codes[key + '_used'] = true;
+				await db.queryWithConnection(con, 'UPDATE sections SET access_codes = ? WHERE section_id = ?', [
+					JSON.stringify(codes),
+					sectionId,
+				]);
+
 				await db.queryWithConnection(con, 'UPDATE enrollments SET status = ? WHERE enrollment_id = ?', [
 					'enrolled',
 					enrollmentId,
@@ -266,6 +301,12 @@ class EnrollmentService {
 				await db.commit(con);
 				return enrollmentId;
 			}
+
+			codes[key + '_used'] = true;
+			await db.queryWithConnection(con, 'UPDATE sections SET access_codes = ? WHERE section_id = ?', [
+				JSON.stringify(codes),
+				sectionId,
+			]);
 
 			try {
 				const r = await db.queryWithConnection(

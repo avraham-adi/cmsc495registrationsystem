@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+enrollment.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the enrollment domain model and serialization helpers.
+*/
+
 class Enrollment {
     #enrollment_id;
     #student_id;

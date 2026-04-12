@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+index.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Re-exports the backend error classes from a single import surface.
+*/
+
 export { default as AppError } from './base/app.error.js';
 
 export { default as AuthenticationError } from './auth/authentication.error.js';

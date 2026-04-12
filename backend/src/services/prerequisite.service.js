@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+prerequisite.service.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Implements prerequisite reads, creation, deletion, and cycle-prevention validation.
+*/
+
 import * as db from '../db/connection.js';
 import * as Errors from '../errors/index.js';
 

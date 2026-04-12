@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+app.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Builds the Express application with middleware, session wiring, routes, and error handling.
+*/
+
 /* eslint-disable no-unused-vars */
 import express from 'express';
 import cors from 'cors';

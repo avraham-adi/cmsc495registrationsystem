@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+section.routes.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the section API routes for public reads and privileged section operations.
+*/
+
 import { Router } from 'express';
 import SectionController from '../controllers/section.controller.js';
 import auth, { flMw as flm } from '../../middleware/session.middleware.js';

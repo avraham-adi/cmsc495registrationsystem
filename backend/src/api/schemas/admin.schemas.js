@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+admin.schemas.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines request validation schemas for admin-managed user operations.
+*/
+
 import { z } from 'zod';
 import { paginationQuerySchema } from './common.schema.js';
 

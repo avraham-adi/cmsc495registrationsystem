@@ -262,20 +262,20 @@ export async function runEnrollmentSuite(env) {
         }
     );
 
-    await harness.run(
-        'Students cannot perform disallowed post-drop transitions',
-        `PUT /enrollment/${ctx.enrollment1?.enrollment_id ?? ':id'}`,
-        { method: 'PUT', client: 'student', body: { status: 'completed' } },
-        { status: 403 },
-        async () => {
-            const response = await student.request(`/enrollment/${ctx.enrollment1.enrollment_id}`, {
-                method: 'PUT',
-                body: { status: 'completed' },
-            });
-            assertStatus(response, 403);
-            return harness.responseSummary(response);
-        }
-    );
+	    await harness.run(
+	        'Students cannot perform disallowed post-drop transitions',
+	        `PUT /enrollment/${ctx.enrollment1?.enrollment_id ?? ':id'}`,
+	        { method: 'PUT', client: 'student', body: { status: 'completed' } },
+	        { status: 403 },
+	        async () => {
+	            const response = await student.request(`/enrollment/${ctx.enrollment1.enrollment_id}`, {
+	                method: 'PUT',
+	                body: { status: 'completed' },
+	            });
+	            assertStatus(response, 403);
+	            return harness.responseSummary(response);
+	        }
+	    );
 
     await harness.run(
         'Deleting a semester with scheduled sections is blocked',

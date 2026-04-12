@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+enrollment.schema.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines request validation schemas for enrollment creation and updates.
+*/
+
 import { z } from 'zod';
 
 export const enrollmentCreateBodySchema = z.object({

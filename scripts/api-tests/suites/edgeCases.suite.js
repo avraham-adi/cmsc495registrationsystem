@@ -1293,10 +1293,17 @@ export async function runEdgeCasesSuite(env) {
 
     await harness.run(
         'Enrollment creation is blocked by unmet prerequisites through HTTP',
-        'POST /course + POST /prerequisite + POST /section + POST /enrollment',
-        { method: 'MULTI', client: 'admin/student' },
+        'POST /course + POST /course + POST /prerequisite + POST /section + POST /enrollment',
+        { method: 'MULTI', client: 'admin' },
         { status: 409 },
         async () => {
+            const prereqCourseResponse = await admin.request('/course', {
+                method: 'POST',
+                body: { code: 'CMSC969', title: 'Required Prerequisite Course', desc: 'Must be completed first', cred: 3 },
+            });
+            assertStatus(prereqCourseResponse, 201);
+            ctx.extraCourses.push(prereqCourseResponse.body);
+
             const courseResponse = await admin.request('/course', {
                 method: 'POST',
                 body: { code: 'CMSC970', title: 'Blocked Enrollment Course', desc: 'Needs prereqs', cred: 3 },
@@ -1306,10 +1313,10 @@ export async function runEdgeCasesSuite(env) {
 
             const prereqResponse = await admin.request('/prerequisite', {
                 method: 'POST',
-                body: { cId: courseResponse.body.course_id, pId: ctx.course1.course_id },
+                body: { cId: courseResponse.body.course_id, pId: prereqCourseResponse.body.course_id },
             });
             assertStatus(prereqResponse, 201);
-            ctx.extraPrereqs.push({ cId: courseResponse.body.course_id, pId: ctx.course1.course_id });
+            ctx.extraPrereqs.push({ cId: courseResponse.body.course_id, pId: prereqCourseResponse.body.course_id });
 
             const sectionResponse = await admin.request(`/section/${courseResponse.body.course_id}`, {
                 method: 'POST',
@@ -1318,7 +1325,7 @@ export async function runEdgeCasesSuite(env) {
             assertStatus(sectionResponse, 201);
             ctx.extraSections.push(sectionResponse.body);
 
-            const response = await student.request('/enrollment', {
+            const response = await admin.request('/enrollment', {
                 method: 'POST',
                 body: { stuId: ctx.users.student.user.role_id, secId: sectionResponse.body.section_id },
             });

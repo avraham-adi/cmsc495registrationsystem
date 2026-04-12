@@ -1,12 +1,63 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+AppShell.tsx
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Renders the shared authenticated layout, role-based navigation, and top status chrome.
+*/
+
 import { useEffect, useState, type ReactNode } from 'react';
-import { NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+// Locks Navigation items when firstLogin=true
+function LockedNavItem({
+	to,
+	children,
+	disabled,
+	end = false,
+	isActive,
+}: {
+	to: string,
+	children: React.ReactNode,
+	disabled: boolean,
+	end?: boolean,
+	isActive?: (pathname: string, search: string) => boolean,
+}) {
+	const location = useLocation();
+
+	if (disabled) {
+		return (
+			<span className="nav-item nav-item-disabled" aria-disabled="true">
+				{children}
+			</span>
+		);
+	}
+
+	return (
+		<NavLink
+			to={to}
+			end={end}
+			className={({ isActive: linkActive }) => {
+				const active = isActive ? isActive(location.pathname, location.search) : linkActive;
+				return active ? 'nav-item active' : 'nav-item';
+			}}
+		>
+			{children}
+		</NavLink>
+	);
+}
 
 // Reads authstate and displays user/session info. Renders the active page via Outlet
 export function AppShell() {
 	const { logoutAction, requiresPasswordChange, user } = useAuth();
 	const navigate = useNavigate();
 	const [now, setNow] = useState(() => new Date());
+	const locked = requiresPasswordChange;
 
 	useEffect(() => {
 		const timer = window.setInterval(() => {
@@ -25,38 +76,58 @@ export function AppShell() {
 		dateStyle: 'full',
 		timeStyle: 'medium',
 	}).format(now);
+	const homeLabel = user?.role === 'PROFESSOR' ? 'Professor Home' : 'Student Home';
 
 	return (
 		<div className="app-frame">
 			<aside className="sidebar">
-				<div>
-					<p className="eyebrow">Group Golf Course Registration System</p>
-					<h1>Golf University Registration Utility</h1>
-					<p className="sidebar-copy">Session-based React client wired against the OpenAPI-authenticated backend.</p>
+				<div className="sidebar-brand">
+					<p className="eyebrow">GURU</p>
+					<h1>
+						Golf University
+						<br />
+						Registration
+						<br />
+						Utility
+					</h1>
 				</div>
 
 				<nav className="nav-list" aria-label="Primary">
-					<NavLink to="/" end className="nav-item">
-						Dashboard
-					</NavLink>
-					<NavLink to="/profile" end className="nav-item">
-						Profile
-					</NavLink>
-					<NavLink to="/change-password" className="nav-item">
-						Change Password
-					</NavLink>
+					{user?.role !== 'ADMIN' ? (
+						<LockedNavItem to="/" disabled={locked} end>
+							{homeLabel}
+						</LockedNavItem>
+					) : null}
 					{user?.role === 'STUDENT' ? (
 						<>
-							<NavLink to="/catalog" end className="nav-item">
-								Course Catalog
-							</NavLink>
+							<LockedNavItem to="/catalog" disabled={locked}>
+								Course Registration
+							</LockedNavItem>
 						</>
-					) : null}
+					) : user?.role === 'PROFESSOR' || user?.role === 'ADMIN' ? null : (
+						<>
+							<LockedNavItem to="/profile" disabled={locked}>
+								Profile
+							</LockedNavItem>
+						</>
+					)}
 					{user?.role === 'ADMIN' ? (
 						<>
-							<NavLink to="/admin/users" end className="nav-item">
-								Manage Users
-							</NavLink>
+							<LockedNavItem
+								to="/console/admin"
+								disabled={locked}
+								end
+								isActive={(pathname, search) => pathname === '/console/admin' && !new URLSearchParams(search).get('tool')}
+							>
+								Admin Home
+							</LockedNavItem>
+							<LockedNavItem
+								to="/console/admin?tool=users"
+								disabled={locked}
+								isActive={(pathname, search) => pathname === '/console/admin' && Boolean(new URLSearchParams(search).get('tool'))}
+							>
+								Admin Tools
+							</LockedNavItem>
 						</>
 					) : null}
 				</nav>
@@ -126,6 +197,16 @@ export function StudentOnly({ children }: { children: ReactNode }) {
 	const { user } = useAuth();
 
 	if (user?.role !== 'STUDENT') {
+		return <Navigate to="/profile" replace />;
+	}
+
+	return <>{children}</>;
+}
+
+export function ProfessorOnly({ children }: { children: ReactNode }) {
+	const { user } = useAuth();
+
+	if (user?.role !== 'PROFESSOR') {
 		return <Navigate to="/profile" replace />;
 	}
 

@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+section.js
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Defines the section domain model and derived seat and scheduling helpers.
+*/
+
 class Section {
 	#section_id;
 	#course_id;
@@ -128,10 +140,13 @@ class Section {
 		};
 	}
 
-	toReadableObject(cRow, subject, pRow, sRow) {
+	toReadableObject(cRow, subject, pRow, sRow, availability = {}) {
 		return {
 			section_id: this.#section_id,
 			capacity: this.#capacity,
+			enrolled_count: availability.enrolled_count ?? 0,
+			waitlisted_count: availability.waitlisted_count ?? 0,
+			seats_available: availability.seats_available ?? this.#capacity,
 			days: this.#days,
 			start_time: this.#start_time,
 			end_time: this.#end_time,
