@@ -3,6 +3,7 @@ info:
   title: Course Registration System - OpenAPI 3.1
   description: |-
     This is the Course Registration System developed by Group Delta for the CMSC495 Computer Science Capstone Project.
+    The API uses server-side session authentication with an HttpOnly cookie rather than JWT bearer tokens.
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -14,7 +15,7 @@ servers:
   - url: http://127.0.0.1:3000
 tags:
   - name: auth
-    description: Authentication and token generation
+    description: Authentication and server-side session management
     externalDocs:
       description: Read More
       url: https://github.com/avraham-adi/cmsc495registrationsystem/tree/main
@@ -740,6 +741,18 @@ paths:
           required: false
           schema:
             type: integer
+        - name: subject
+          in: query
+          description: Subject code filter, for example CMSC
+          required: false
+          schema:
+            type: string
+        - name: days
+          in: query
+          description: Canonical meeting days filter, for example MW or MTWR
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Paginated section list returned successfully.
@@ -808,7 +821,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SectionSafe'
+                $ref: '#/components/schemas/ReadableSection'
         '404':
           description: Section not found
     put:
@@ -1007,7 +1020,7 @@ paths:
       tags:
         - enrollment
       summary: Create an enrollment
-      description: Create a new enrollment record. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments. If the authenticated user is still on first login, access is blocked until they change their password.
+      description: Create a new enrollment record. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments and may only enroll in sections from the current semester. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: addEnrollment
       requestBody:
         required: true
@@ -1027,11 +1040,11 @@ paths:
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: STUDENT or ADMIN role required, or password change required on first login"
+          description: "Forbidden: STUDENT or ADMIN role required, password change required on first login, students may only create their own enrollments, and students may only enroll in sections from the current semester"
         '404':
           description: Student or section not found
         '409':
-          description: Prerequisites not met, student already enrolled, or section is full
+          description: Schedule conflict, unmet prerequisites, duplicate active enrollment, or section / waitlist capacity conflict
       security:
         - SessionAuth: []
   /enrollment/{id}:
@@ -1067,7 +1080,7 @@ paths:
       tags:
         - enrollment
       summary: Update an enrollment
-      description: Update enrollment details or status. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments. If the authenticated user is still on first login, access is blocked until they change their password.
+      description: Update enrollment details or status. Requires role STUDENT or ADMIN. Role is verified server-side for the session user. Students may only manage their own enrollments. Student-initiated transitions are limited to dropping enrolled or waitlisted records, marking enrolled records completed, or using a valid access code to move from waitlisted to enrolled. If the authenticated user is still on first login, access is blocked until they change their password.
       operationId: updEnrollment
       parameters:
         - name: id
@@ -1094,7 +1107,7 @@ paths:
         '401':
           description: Invalid or missing session
         '403':
-          description: "Forbidden: STUDENT or ADMIN role required, password change required on first login, and students may only update their own enrollments"
+          description: "Forbidden: STUDENT or ADMIN role required, password change required on first login, students may only update their own enrollments, and student transitions are limited to drop, mark-completed, or access-code promotion updates"
         '404':
           description: Enrollment or section not found
         '409':
@@ -1163,6 +1176,14 @@ components:
           format: password
     User:
       type: object
+      required:
+        - id
+        - name
+        - email
+        - first_login
+        - role
+        - role_id
+        - role_details
       properties:
         id:
           type: integer
@@ -1229,6 +1250,10 @@ components:
     Login:
       description: Login response containing the authenticated user. The server also sets a session cookie.
       type: object
+      required:
+        - message
+        - firstLogin
+        - User
       properties:
         message:
           type: string
@@ -1239,6 +1264,8 @@ components:
     AuthUser:
       description: Authenticated user response for a valid server-side session.
       type: object
+      required:
+        - User
       properties:
         User:
           $ref: '#/components/schemas/User'
@@ -1258,6 +1285,11 @@ components:
           $ref: '#/components/schemas/Meta'
     Meta:
       type: object
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
       properties:
         page:
           type: integer
@@ -1269,6 +1301,12 @@ components:
           type: integer
     Course:
       type: object
+      required:
+        - course_id
+        - course_code
+        - title
+        - description
+        - credits
       properties:
         course_id:
           type: integer
@@ -1282,6 +1320,7 @@ components:
           type: integer
         subject:
           type: string
+          description: Present on course-list responses. Single-course reads do not currently include this derived field.
     CourseWriteRequest:
       type: object
       required:
@@ -1340,6 +1379,10 @@ components:
             $ref: '#/components/schemas/Prerequisite'
     Semester:
       type: object
+      required:
+        - semester_id
+        - term
+        - year
       properties:
         semester_id:
           type: integer
@@ -1366,6 +1409,15 @@ components:
             $ref: '#/components/schemas/Semester'
     SectionSafe:
       type: object
+      required:
+        - section_id
+        - course_id
+        - semester_id
+        - professor_id
+        - capacity
+        - days
+        - start_time
+        - end_time
       properties:
         section_id:
           type: integer
@@ -1390,6 +1442,13 @@ components:
           pattern: '^(\d{2}:\d{2}:\d{2})?$'
     SectionCourseSummary:
       type: object
+      required:
+        - course_id
+        - course_code
+        - title
+        - description
+        - subject
+        - credits
       properties:
         course_id:
           type: integer
@@ -1405,6 +1464,9 @@ components:
           type: integer
     SectionProfessorSummary:
       type: object
+      required:
+        - professor_id
+        - professor_name
       properties:
         professor_id:
           type: integer
@@ -1412,11 +1474,32 @@ components:
           type: string
     ReadableSection:
       type: object
+      required:
+        - section_id
+        - capacity
+        - enrolled_count
+        - waitlisted_count
+        - seats_available
+        - days
+        - start_time
+        - end_time
+        - course
+        - professor
+        - semester
       properties:
         section_id:
           type: integer
         capacity:
           type: integer
+        enrolled_count:
+          type: integer
+          description: Number of currently enrolled students in the section.
+        waitlisted_count:
+          type: integer
+          description: Number of currently waitlisted students in the section.
+        seats_available:
+          type: integer
+          description: Remaining available enrolled seats.
         days:
           type: string
           description: Meeting-day code string such as MWF or TR, or `async` for asynchronous classes.
@@ -1489,6 +1572,11 @@ components:
           $ref: '#/components/schemas/Meta'
     Enrollment:
       type: object
+      required:
+        - enrollment_id
+        - student_id
+        - section_id
+        - status
       properties:
         enrollment_id:
           type: integer
@@ -1520,6 +1608,9 @@ components:
           type: integer
         stuId:
           type: integer
+        code:
+          type: string
+          description: Optional access code field. The current API ignores unknown create-body fields and does not use access codes during initial enrollment creation.
     EnrollmentUpdateRequest:
       type: object
       required:
