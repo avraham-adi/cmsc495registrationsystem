@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+auth.ts
+input
+frontend auth payloads and route-specific session operations
+output
+typed auth API requests for login, logout, self-read, profile, and password updates
+description
+Provides the frontend authentication client helpers used by the React auth and account-management flows.
+*/
+
 import { request } from './client.ts';
 import type { AuthUserResponse, ChangePasswordPayload, LoginPayload, LoginResponse, UpdateUserPayload } from '../types/api';
 

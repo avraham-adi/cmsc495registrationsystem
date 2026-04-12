@@ -1,9 +1,21 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+AuthContext.tsx
+input
+session API responses and auth-related form actions
+output
+context state and auth actions for the React application
+description
+Stores the authenticated user and exposes shared login, logout, refresh, profile, and password actions.
+*/
+
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { updPassword, getUser, login, logout, updUser } from '../api/auth';
 import { ApiError } from '../api/client';
 import type { ChangePasswordPayload, LoginPayload, UpdateUserPayload, User } from '../types/api';
 
-// Authentication/User Context
+// Describes the shared auth state and actions exposed to the React tree.
 type AuthContextValue = {
 	user: User | null,
 	isLoading: boolean,
@@ -18,7 +30,7 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-// Authentican Information Provider
+// Provides server-backed auth state and actions to the application.
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -32,9 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			const response = await getUser();
 			setUser(response.User);
 		} catch (error) {
-			if (!(error instanceof ApiError) || error.status !== 401) {
-				console.error(error);
-			}
 			setUser(null);
 		} finally {
 			setIsLoading(false);
@@ -76,9 +85,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}
 
 	async function changePasswordAction(payload: ChangePasswordPayload) {
-		const response = await updPassword(payload);
-		setUser(response.User);
-		return response.User;
+		await updPassword(payload);
+		const refreshedUser = await refreshUser();
+
+		if (!refreshedUser) {
+			throw new Error('Session refresh failed after password update.');
+		}
+
+		setUser(refreshedUser);
+		return refreshedUser;
 	}
 
 	const value: AuthContextValue = {
@@ -96,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Apply context
+// Returns the active auth context and guards against missing providers.
 export function useAuth() {
 	const context = useContext(AuthContext);
 

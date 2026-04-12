@@ -1,3 +1,15 @@
+/*
+Adi Avraham
+CMSC495 Group Golf Capstone Project
+AuthGate.tsx
+input
+runtime requests, imported dependencies, and function arguments
+output
+exported modules, rendered UI, or application side effects
+description
+Guards authenticated routes and redirects users based on session and first-login state.
+*/
+
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.tsx';
