@@ -1429,29 +1429,6 @@ p {
 	letter-spacing: 0;
 }
 
-.schedule-debug-panel {
-	margin-top: 16px;
-	padding: 16px;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	background: #f8fafc;
-}
-
-.schedule-debug-output {
-	margin: 0;
-	max-height: 240px;
-	overflow: auto;
-	padding: 12px;
-	border: 1px solid var(--border);
-	border-radius: calc(var(--radius) - 4px);
-	background: #fff;
-	color: #1f2a37;
-	font-size: 0.75rem;
-	line-height: 1.4;
-	white-space: pre-wrap;
-	word-break: break-word;
-}
-
 .dashboard-panel .panel-header {
 	align-items: flex-end;
 }
