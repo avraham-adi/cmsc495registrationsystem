@@ -12,6 +12,7 @@ Builds student enrollment, transcript, and weekly schedule data for dashboard vi
 
 import { getSection, listEnrollments, listSemesters } from '../api/catalog';
 import type { Enrollment, EnrollmentStatus, Section, Semester } from '../types/api';
+import { addDays, startOfWeek } from 'date-fns';
 
 const TERM_RANK: Record<string, number> = {
 	Spring: 1,
@@ -30,43 +31,43 @@ const DAY_LABELS: Record<string, string> = {
 };
 
 export type StudentEnrollmentData = {
-	enrollments: Enrollment[],
-	sections: Section[],
-	semesters: Semester[],
+	enrollments: Enrollment[];
+	sections: Section[];
+	semesters: Semester[];
 };
 
 export type EnrichedEnrollment = {
-	enrollment: Enrollment,
-	section: Section,
+	enrollment: Enrollment;
+	section: Section;
 };
 
 export type Event = {
-	id: string,
-	enrollmentId: number,
-	sectionId: number,
-	status: EnrollmentStatus,
-	courseCode: string,
-	title: string,
-	scheduleText: string,
-	startDate: Date,
-	endDate: Date,
+	id: string;
+	enrollmentId: number;
+	sectionId: number;
+	status: EnrollmentStatus;
+	courseCode: string;
+	title: string;
+	scheduleText: string;
+	startDate: Date;
+	endDate: Date;
 };
 
 export type TranscriptSemesterGroup = {
-	semester: Semester,
-	items: EnrichedEnrollment[],
-	totalCredits: number,
+	semester: Semester;
+	items: EnrichedEnrollment[];
+	totalCredits: number;
 };
 
 function weekday(days: string[]) {
 	const codes = {
-		'U': 0,
-		'M': 1,
-		'T': 2,
-		'W': 3,
-		'R': 4,
-		'F': 5,
-		'S': 6,
+		'M': 0,
+		'T': 1,
+		'W': 2,
+		'R': 3,
+		'F': 4,
+		'S': 5,
+		'U': 6,
 	};
 
 	let daysNum = [];
@@ -218,6 +219,8 @@ export function groupEnrollmentsBySemester(enrollments: EnrichedEnrollment[]): T
 }
 
 export function buildWeeklySchedule(enrollments: EnrichedEnrollment[]): Event[] {
+	const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+
 	const events = enrollments.flatMap((enrollment: EnrichedEnrollment) => {
 		if (!isValidDayCombination(enrollment.section.days)) {
 			return [];
@@ -232,18 +235,13 @@ export function buildWeeklySchedule(enrollments: EnrichedEnrollment[]): Event[] 
 		const [sHours, sMinutes, sSeconds] = enrollment.section?.start_time?.split(':').map(Number) ?? '99:99:99'.split(':').map(Number);
 		const [eHours, eMinutes, eSeconds] = enrollment.section?.end_time?.split(':').map(Number) ?? '99:99:99'.split(':').map(Number);
 		const days = enrollment.section.days;
-		const currentDay = new Date().getDay();
 		const daysNum = weekday(days.split(''));
 
 		return daysNum.map((d) => {
-			const start = new Date();
-			const end = new Date();
-			const distance = (d - currentDay - 7) % 7;
-
-			start.setDate(start.getDate() + distance);
+			const start = addDays(weekStart, d);
 			start.setHours(sHours, sMinutes, sSeconds, 0);
 
-			end.setDate(end.getDate() + distance);
+			const end = addDays(weekStart, d);
 			end.setHours(eHours, eMinutes, eSeconds, 0);
 			return {
 				id: `${enrollment_id}-${d}`,

@@ -104,6 +104,7 @@ const enrollments = [
 describe('studentEnrollment', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.useRealTimers();
 	});
 
 	it('formats asynchronous sections as Asynchronous', () => {
@@ -202,6 +203,15 @@ it('builds one weekly event per scheduled meeting day', () => {
 	expect(result).toHaveLength(3);
 	expect(result.every((event) => event.courseCode === 'CMSC350')).toBe(true);
 });
+
+	it('anchors weekly events to the current Monday-based week', () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-04-15T12:00:00Z'));
+
+		const result = buildWeeklySchedule([{ enrollment: enrollments[0], section: sectionA }]);
+
+		expect(result.map((event) => event.startDate.getDay())).toEqual([1, 3, 5]);
+	});
 
 	it('skips asynchronous sections when building weekly schedule events', () => {
 		const result = buildWeeklySchedule([{ enrollment: { ...enrollments[2], status: 'completed' }, section: asyncSection }]);
