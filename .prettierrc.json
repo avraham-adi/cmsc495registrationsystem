@@ -9,7 +9,6 @@
 	"bracketSpacing": true,
 	"objectWrap": "preserve",
 	"arrowParens": "always",
-	"parser": "flow",
 	"endOfLine": "lf",
 	"overrides": [
 		{

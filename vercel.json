@@ -1,0 +1,41 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"rewrites": [
+		{
+			"source": "/api/:path*",
+			"destination": "https://cmsc495registrationsystem-production.up.railway.app/api/:path*"
+		},
+		{
+			"source": "/user/:path*",
+			"destination": "https://cmsc495registrationsystem-production.up.railway.app/user/:path*"
+		},
+		{
+			"source": "/admin/:path*",
+			"destination": "https://cmsc495registrationsystem-production.up.railway.app/admin/:path*"
+		},
+		{
+			"source": "/course/:path*",
+			"destination": "https://cmsc495registrationsystem-production.up.railway.app/course/:path*"
+		},
+		{
+			"source": "/prerequisite/:path*",
+			"destination": "https://cmsc495registrationsystem-production.up.railway.app/prerequisite/:path*"
+		},
+		{
+			"source": "/section/:path*",
+			"destination": "https://cmsc495registrationsystem-production.up.railway.app/section/:path*"
+		},
+		{
+			"source": "/semester/:path*",
+			"destination": "https://cmsc495registrationsystem-production.up.railway.app/semester/:path*"
+		},
+		{
+			"source": "/enrollment/:path*",
+			"destination": "https://cmsc495registrationsystem-production.up.railway.app/enrollment/:path*"
+		},
+		{
+			"source": "/(.*)",
+			"destination": "/"
+		}
+	]
+}
