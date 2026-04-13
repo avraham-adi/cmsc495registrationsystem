@@ -5,10 +5,12 @@ let store;
 
 // Build Cookie Options
 function buildOpt() {
+	const isProduction = process.env.NODE_ENV === 'production';
+
 	return {
 		httpOnly: true,
-		sameSite: 'lax',
-		secure: process.env.NODE_ENV === 'production',
+		sameSite: isProduction ? 'none' : 'lax',
+		secure: isProduction,
 		maxAge: 1000 * 60 * 60 * 8,
 	};
 }
@@ -169,6 +171,7 @@ export function config() {
 	return {
 		name: process.env.SESSION_COOKIE_NAME,
 		secret: process.env.SESSION_SECRET,
+		proxy: process.env.NODE_ENV === 'production',
 		resave: false,
 		saveUninitialized: false,
 		cookie: buildOpt(),
