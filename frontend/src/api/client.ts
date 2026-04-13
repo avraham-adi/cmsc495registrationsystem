@@ -12,7 +12,8 @@ Provides the shared frontend HTTP client and API error handling helpers.
 
 import type { ApiErrorPayload } from '../types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+// In local dev, keep requests same-origin so Vite can proxy them to the backend.
+const API_BASE_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_BASE_URL ?? '');
 
 // API Error Class
 export class ApiError extends Error {

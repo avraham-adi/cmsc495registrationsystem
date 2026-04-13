@@ -29,7 +29,6 @@ import {
 import type { Semester } from '../types/api.ts';
 import { ApiError } from '../api/client.ts';
 import { useWeekView } from 'react-weekview';
-import { isSameDay } from 'date-fns';
 import { FormField } from '../components/FormField.tsx';
 import { StatusMessage } from '../components/StatusMessage.tsx';
 import { useSearchParams } from 'react-router-dom';
@@ -439,7 +438,7 @@ export function DashboardPage() {
 										</div>
 
 										<div className="schedule-grid">
-											{visibleDays.map((day) => (
+											{visibleDays.map((day, dayIndex) => (
 												<div key={day.date.toISOString()} className="schedule-day-column">
 													{day.cells.map((cell) => (
 														<button key={cell.date.toISOString()} type="button" className="schedule-grid-cell" />
@@ -447,7 +446,7 @@ export function DashboardPage() {
 
 													<div className="schedule-events-layer">
 														{schedule
-															.filter((event) => isSameDay(event.startDate, day.date))
+															.filter((event) => event.weekdayIndex === dayIndex)
 															.map((event) => (
 																<button
 																	key={event.id}

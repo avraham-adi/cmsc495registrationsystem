@@ -45,6 +45,7 @@ export type Event = {
 	id: string;
 	enrollmentId: number;
 	sectionId: number;
+	weekdayIndex: number;
 	status: EnrollmentStatus;
 	courseCode: string;
 	title: string;
@@ -247,6 +248,7 @@ export function buildWeeklySchedule(enrollments: EnrichedEnrollment[]): Event[] 
 				id: `${enrollment_id}-${d}`,
 				enrollmentId: enrollment_id,
 				sectionId: section_id,
+				weekdayIndex: d,
 				status,
 				courseCode,
 				title: title,
