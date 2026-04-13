@@ -471,6 +471,29 @@ export function DashboardPage() {
 										</div>
 									</div>
 								</div>
+
+								<section className="schedule-debug-panel">
+									<div className="panel-header">
+										<div>
+											<p className="eyebrow">Temporary Debug</p>
+											<h3>Computed Schedule Events</h3>
+										</div>
+									</div>
+									<pre className="schedule-debug-output">
+										{JSON.stringify(
+											schedule.map((event) => ({
+												id: event.id,
+												courseCode: event.courseCode,
+												weekdayIndex: event.weekdayIndex,
+												startDate: event.startDate.toString(),
+												endDate: event.endDate.toString(),
+												scheduleText: event.scheduleText,
+											})),
+											null,
+											2
+										)}
+									</pre>
+								</section>
 							</section>
 
 							<aside className="dashboard-completed-column">
