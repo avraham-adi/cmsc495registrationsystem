@@ -27,6 +27,9 @@ import { config as sessionConfig } from './config/session.config.js';
 
 const app = express();
 
+// Trust the upstream platform proxy so secure session cookies can be issued in production.
+app.set('trust proxy', 1);
+
 // Core middleware
 app.use(
     cors({
