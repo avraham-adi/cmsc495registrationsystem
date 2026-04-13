@@ -43,6 +43,7 @@ export type EnrichedEnrollment = {
 export type Event = {
 	id: string,
 	enrollmentId: number,
+	sectionId: number,
 	status: EnrollmentStatus,
 	courseCode: string,
 	title: string,
@@ -93,6 +94,27 @@ export async function loadStudentEnrollmentData(studentId: number): Promise<Stud
 	};
 }
 
+// Formats a Date object into a compact display time.
+function eventDate(date: Date) {
+	const d = date.toLocaleTimeString().split(':');
+	const time = d[0] + ':' + d[1];
+	const meridiem = ' ' + d[2].substring(3, 5);
+
+	return time + meridiem;
+}
+
+// Formats event Days into human-readable days
+function eventDays(days: string) {
+	const d = days.split('');
+	let dayView = '';
+
+	d.map((str) => {
+		return (dayView = dayView.concat(DAY_LABELS[str], '/'));
+	});
+
+	return dayView.trim().slice(0, dayView.length - 1);
+}
+
 export function formatSchedule(section: Section) {
 	if (!section.days || section.days === 'async') {
 		return 'Asynchronous';
@@ -102,7 +124,14 @@ export function formatSchedule(section: Section) {
 		return section.days;
 	}
 
-	return `${section.days} - ${section.start_time.slice(0, 5)}-${section.end_time.slice(0, 5)}`;
+	const s = section.start_time.split(':');
+	const start = new Date();
+	start.setHours(Number(s[0]), Number(s[1]), Number(s[2]));
+	const e = section.end_time.split(':');
+	const end = new Date();
+	end.setHours(Number(e[0]), Number(e[1]), Number(e[2]));
+
+	return `${eventDays(section.days)} - ${eventDate(start)}-${eventDate(end)}`;
 }
 
 export function buildEnrichedEnrollments(data: StudentEnrollmentData, semester?: number, statuses: EnrollmentStatus[] = ['enrolled', 'waitlisted']) {
@@ -197,6 +226,7 @@ export function buildWeeklySchedule(enrollments: EnrichedEnrollment[]): Event[] 
 		const { enrollment_id, status } = enrollment.enrollment;
 		const courseCode = enrollment.section.course.course_code;
 		const title = enrollment.section.course.title;
+		const section_id = enrollment.section.section_id;
 		const scheduleText = formatSchedule(enrollment.section);
 
 		const [sHours, sMinutes, sSeconds] = enrollment.section?.start_time?.split(':').map(Number) ?? '99:99:99'.split(':').map(Number);
@@ -204,11 +234,11 @@ export function buildWeeklySchedule(enrollments: EnrichedEnrollment[]): Event[] 
 		const days = enrollment.section.days;
 		const currentDay = new Date().getDay();
 		const daysNum = weekday(days.split(''));
-		
+
 		return daysNum.map((d) => {
 			const start = new Date();
 			const end = new Date();
-			const distance = (d - currentDay);
+			const distance = (d - currentDay - 7) % 7;
 
 			start.setDate(start.getDate() + distance);
 			start.setHours(sHours, sMinutes, sSeconds, 0);
@@ -218,6 +248,7 @@ export function buildWeeklySchedule(enrollments: EnrichedEnrollment[]): Event[] 
 			return {
 				id: `${enrollment_id}-${d}`,
 				enrollmentId: enrollment_id,
+				sectionId: section_id,
 				status,
 				courseCode,
 				title: title,

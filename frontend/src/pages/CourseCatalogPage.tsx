@@ -56,9 +56,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 // Builds the persistent meeting-day dropdown options from the semester's section list.
 function generateDaysOptions(sections: Section[]) {
-	const options: Array<{ value: string; label: string }> = [
-		{ value: '', label: 'All Meeting Days' },
-	];
+	const options: Array<{ value: string, label: string }> = [{ value: '', label: 'All Meeting Days' }];
 
 	const uniqueDays = new Set<string>();
 	for (const section of sections) {
@@ -616,7 +614,10 @@ export function CourseCatalogPage() {
 																		{prerequisites.map((prerequisite) => {
 																			const isCompleted = completedCourseIds.includes(prerequisite.courseId);
 																			return (
-																				<span key={`${entry.section.section_id}-${prerequisite.courseId}`} className={`catalog-prerequisite-chip ${isCompleted ? 'complete' : 'incomplete'}`}>
+																				<span
+																					key={`${entry.section.section_id}-${prerequisite.courseId}`}
+																					className={`catalog-prerequisite-chip ${isCompleted ? 'complete' : 'incomplete'}`}
+																				>
 																					{prerequisite.courseCode}
 																				</span>
 																			);

@@ -165,10 +165,7 @@ export function DashboardPage() {
 		setSchedule(buildWeeklySchedule(nextEnrollments));
 	}, [enrollmentData, selectedSemesterId]);
 
-	const completedEnrollments = useMemo(
-		() => (enrollmentData ? buildEnrichedEnrollments(enrollmentData, undefined, ['completed']) : []),
-		[enrollmentData]
-	);
+	const completedEnrollments = useMemo(() => (enrollmentData ? buildEnrichedEnrollments(enrollmentData, undefined, ['completed']) : []), [enrollmentData]);
 	const completedTranscriptGroups = useMemo(
 		() =>
 			groupEnrollmentsBySemester(completedEnrollments).sort((left, right) => {
@@ -196,9 +193,10 @@ export function DashboardPage() {
 		return date.getHours() * 60 + date.getMinutes();
 	}
 
+	// SET VARIABLE IN CSS AS WELL IF CHANGED
 	const visibleStartMinutes = 7 * 60;
 	const visibleEndMinutes = 22 * 60;
-	const scheduleStepHeight = 28;
+	const scheduleStepHeight = 30;
 
 	const visibleDays = days.map((day) => ({
 		...day,
@@ -281,21 +279,13 @@ export function DashboardPage() {
 		try {
 			await updateEnrollment(selectedScheduleEvent.enrollmentId, { status });
 			setSelectedScheduleEvent(null);
-			setActionMessage(
-				status === 'completed'
-					? `${selectedScheduleEvent.courseCode} was marked completed.`
-					: `${selectedScheduleEvent.courseCode} was dropped successfully.`
-			);
+			setActionMessage(status === 'completed' ? `${selectedScheduleEvent.courseCode} was marked completed.` : `${selectedScheduleEvent.courseCode} was dropped successfully.`);
 			await loadDashboardData();
 		} catch (error) {
 			if (error instanceof ApiError) {
 				setActionError(error.message);
 			} else {
-				setActionError(
-					status === 'completed'
-						? 'Unable to mark that course completed right now.'
-						: 'Unable to drop that course right now.'
-				);
+				setActionError(status === 'completed' ? 'Unable to mark that course completed right now.' : 'Unable to drop that course right now.');
 			}
 		} finally {
 			setIsUpdatingEnrollment(false);
@@ -367,10 +357,20 @@ export function DashboardPage() {
 				</div>
 
 				<div className="dashboard-section-nav" role="tablist" aria-label="Dashboard sections">
-					<button type="button" className={`dashboard-section-button ${activeView === 'schedule' ? 'active' : ''}`} onClick={() => setDashboardView('schedule')} disabled={requiresPasswordChange}>
+					<button
+						type="button"
+						className={`dashboard-section-button ${activeView === 'schedule' ? 'active' : ''}`}
+						onClick={() => setDashboardView('schedule')}
+						disabled={requiresPasswordChange}
+					>
 						Schedule
 					</button>
-					<button type="button" className={`dashboard-section-button ${activeView === 'profile' ? 'active' : ''}`} onClick={() => setDashboardView('profile')} disabled={requiresPasswordChange}>
+					<button
+						type="button"
+						className={`dashboard-section-button ${activeView === 'profile' ? 'active' : ''}`}
+						onClick={() => setDashboardView('profile')}
+						disabled={requiresPasswordChange}
+					>
 						Profile
 					</button>
 				</div>
@@ -378,9 +378,7 @@ export function DashboardPage() {
 				<div className="info-grid dashboard-info-grid">
 					<div className="info-card">
 						<span className="info-label">Selected Semester </span>
-						<strong>
-							{selectedSemester ? `${selectedSemester.term} ${selectedSemester.year}` : 'No semester selected'}
-						</strong>
+						<strong>{selectedSemester ? `${selectedSemester.term} ${selectedSemester.year}` : 'No semester selected'}</strong>
 					</div>
 					<div className="info-card">
 						<span className="info-label">Semester Credit Load </span>
@@ -426,7 +424,7 @@ export function DashboardPage() {
 										<div className="days-view-spacer" />
 										{days.map((day) => (
 											<div key={day.date.toISOString()} className="days-view-day">
-												<strong>{day.name}</strong>
+												<strong>{day.shortName}</strong>
 											</div>
 										))}
 									</div>
@@ -462,11 +460,10 @@ export function DashboardPage() {
 																		setSelectedScheduleEvent(event);
 																	}}
 																>
-																	<strong>{event.courseCode}</strong>
+																	<strong>
+																		{event.courseCode} - #{event.sectionId}
+																	</strong>
 																	<span className="schedule-event-title">{event.title}</span>
-																	<span>
-																		{eventDate(event.startDate)} - {eventDate(event.endDate)}
-																	</span>
 																</button>
 															))}
 													</div>
@@ -499,7 +496,9 @@ export function DashboardPage() {
 											completedTranscriptGroups.map((group) => (
 												<details key={group.semester.semester_id} className="dashboard-completed-group">
 													<summary className="dashboard-completed-group-header">
-														<strong>{group.semester.term} {group.semester.year}</strong>
+														<strong>
+															{group.semester.term} {group.semester.year}
+														</strong>
 														<span>{group.totalCredits} Credits</span>
 													</summary>
 
@@ -508,6 +507,7 @@ export function DashboardPage() {
 															<article key={entry.enrollment.enrollment_id} className="dashboard-completed-item">
 																<div>
 																	<strong>{entry.section.course.course_code}</strong>
+																	<br></br>
 																	<span>{entry.section.course.title}</span>
 																</div>
 																<div className="dashboard-completed-item-actions">
@@ -616,7 +616,12 @@ export function DashboardPage() {
 							</button>
 							{selectedScheduleEvent.status === 'waitlisted' ? (
 								<>
-									<button type="button" className="secondary-button" onClick={() => void activateSelectedWaitlistedEnrollment()} disabled={isUpdatingEnrollment || scheduleAccessCode.trim() === '' || selectedSemesterId !== currentSemesterId}>
+									<button
+										type="button"
+										className="secondary-button"
+										onClick={() => void activateSelectedWaitlistedEnrollment()}
+										disabled={isUpdatingEnrollment || scheduleAccessCode.trim() === '' || selectedSemesterId !== currentSemesterId}
+									>
 										{isUpdatingEnrollment ? 'Updating...' : 'Use Access Code'}
 									</button>
 									<button type="button" className="primary-button" onClick={() => void updateSelectedEnrollment('dropped')} disabled={isUpdatingEnrollment}>
@@ -656,7 +661,9 @@ export function DashboardPage() {
 								<br />
 								{selectedTranscriptEnrollment.section.course.title}
 							</p>
-							<p className="sidebar-meta">{selectedTranscriptEnrollment.section.semester.term} {selectedTranscriptEnrollment.section.semester.year}</p>
+							<p className="sidebar-meta">
+								{selectedTranscriptEnrollment.section.semester.term} {selectedTranscriptEnrollment.section.semester.year}
+							</p>
 							<p className="sidebar-meta">Developer mode only. Transcript removal is exposed for local testing and is not part of the student workflow.</p>
 							{actionError ? <StatusMessage kind="error" message={actionError} /> : null}
 						</div>
@@ -675,24 +682,3 @@ export function DashboardPage() {
 		</StudentOnly>
 	);
 }
-
-/**
- * <div className="subpanel stack">
-							<h4>Current Enrollments</h4>
-							{isLoadingDashboard ? (
-								<p className="sidebar-copy">Loading dashboard data...</p>
-							) : enrollments.length > 0 ? (
-								enrollments.map((entry) => (
-									<article key={entry.enrollment.enrollment_id} className="cart-item">
-										<div>
-											<strong>{entry.section?.course.course_code ?? `Section ${entry.enrollment.section_id}`}</strong>
-											<p className="sidebar-meta">{entry.section?.course.title ?? 'Untitled course'}</p>
-											<p className="sidebar-meta">{entry.section ? `${entry.section.semester.term} ${entry.section.semester.year}` : 'Unknown semester'}</p>
-										</div>
-									</article>
-								))
-							) : (
-								<p className="sidebar-copy">No current enrollments found.</p>
-							)}
-						</div>
- */

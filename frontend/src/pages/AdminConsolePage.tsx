@@ -39,16 +39,7 @@ import {
 	updateSection,
 	updateUserRole,
 } from '../api/admin';
-import type {
-	AdminUserCreatePayload,
-	Course,
-	Meta,
-	Prerequisite,
-	Section,
-	Semester,
-	User,
-	UserRole,
-} from '../types/api';
+import type { AdminUserCreatePayload, Course, Meta, Prerequisite, Section, Semester, User, UserRole } from '../types/api';
 
 type AdminArea = 'home' | 'tools';
 type AdminHomeView = 'overview' | 'profile' | 'password';
@@ -223,10 +214,7 @@ async function fetchAllSections() {
 }
 
 // Iterates a paginated backend endpoint until every item has been collected locally.
-async function fetchAllPaginated<T, TResponse extends { Meta: Meta }>(
-	loadPage: (page: number) => Promise<TResponse>,
-	mapItems: (response: TResponse) => T[]
-) {
+async function fetchAllPaginated<T, TResponse extends { Meta: Meta }>(loadPage: (page: number) => Promise<TResponse>, mapItems: (response: TResponse) => T[]) {
 	const items: T[] = [];
 	let page = 1;
 	let totalPages = 1;
@@ -279,13 +267,7 @@ export function AdminConsolePage({ area = 'home' }: { area?: AdminArea }) {
 		setLoadError('');
 
 		try {
-			const [users, professors, courses, semestersResponse, sections] = await Promise.all([
-				fetchAllUsers(),
-				fetchAllUsers('PROFESSOR'),
-				fetchAllCourses(),
-				listSemesters(),
-				fetchAllSections(),
-			]);
+			const [users, professors, courses, semestersResponse, sections] = await Promise.all([fetchAllUsers(), fetchAllUsers('PROFESSOR'), fetchAllCourses(), listSemesters(), fetchAllSections()]);
 
 			setData({
 				users,
@@ -405,14 +387,21 @@ export function AdminConsolePage({ area = 'home' }: { area?: AdminArea }) {
 
 				{activeArea === 'home' ? (
 					<div className="dashboard-section-nav" role="tablist" aria-label="Admin home sections">
-						<button type="button" className={`dashboard-section-button ${activeHomeView === 'overview' ? 'active' : ''}`} onClick={() => setAdminHomeView('overview')} disabled={requiresPasswordChange}>
+						<button
+							type="button"
+							className={`dashboard-section-button ${activeHomeView === 'overview' ? 'active' : ''}`}
+							onClick={() => setAdminHomeView('overview')}
+							disabled={requiresPasswordChange}
+						>
 							Overview
 						</button>
-						<button type="button" className={`dashboard-section-button ${activeHomeView === 'profile' ? 'active' : ''}`} onClick={() => setAdminHomeView('profile')} disabled={requiresPasswordChange}>
+						<button
+							type="button"
+							className={`dashboard-section-button ${activeHomeView === 'profile' ? 'active' : ''}`}
+							onClick={() => setAdminHomeView('profile')}
+							disabled={requiresPasswordChange}
+						>
 							Profile
-						</button>
-						<button type="button" className={`dashboard-section-button ${activeHomeView === 'password' ? 'active' : ''}`} onClick={() => setAdminHomeView('password')}>
-							Password
 						</button>
 					</div>
 				) : (
@@ -449,6 +438,9 @@ export function AdminConsolePage({ area = 'home' }: { area?: AdminArea }) {
 							<button type="submit" className="primary-button" disabled={isSavingProfile || requiresPasswordChange}>
 								{isSavingProfile ? 'Saving...' : 'Save Profile'}
 							</button>
+							<button type="button" className="secondary-button" onClick={() => navigate('/change-password')}>
+								Change Password
+							</button>
 						</form>
 					</section>
 				) : null}
@@ -463,7 +455,15 @@ export function AdminConsolePage({ area = 'home' }: { area?: AdminArea }) {
 						{requiresPasswordChange ? <StatusMessage kind="info" message="It appears to be your first time logging in. Password change is mandatory." /> : null}
 						<form className="stack" onSubmit={submitPassword}>
 							<FormField id="admin-new-password" label="New Password" type="password" value={password} onChange={setPassword} autoComplete="new-password" required />
-							<FormField id="admin-confirm-password" label="Confirm Password" type="password" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" required />
+							<FormField
+								id="admin-confirm-password"
+								label="Confirm Password"
+								type="password"
+								value={confirmPassword}
+								onChange={setConfirmPassword}
+								autoComplete="new-password"
+								required
+							/>
 							<p className="hint">
 								Password requires:
 								<br /> - at least 8 characters
@@ -498,11 +498,15 @@ function AdminOverview({ data }: { data: AdminDataState }) {
 		<section className="admin-grid">
 			<div className="subpanel stack">
 				<h3>Admin Home</h3>
-				<p className="sidebar-copy">Use the Admin Home to manage your profile and authentication. Open Admin Tools to manage users, courses, prerequisites, semesters, and section offerings.</p>
+				<p className="sidebar-copy">
+					Use the Admin Home to manage your profile and authentication. Open Admin Tools to manage users, courses, prerequisites, semesters, and section offerings.
+				</p>
 			</div>
 			<div className="subpanel stack">
 				<h3>Current Inventory</h3>
-				<p className="sidebar-copy">The current environment includes {data.users.length} users, {data.courses.length} courses, {data.semesters.length} semesters, and {data.sections.length} sections.</p>
+				<p className="sidebar-copy">
+					The current environment includes {data.users.length} users, {data.courses.length} courses, {data.semesters.length} semesters, and {data.sections.length} sections.
+				</p>
 			</div>
 		</section>
 	);
@@ -557,7 +561,9 @@ function AdminUsersView({ users, onReload }: { users: User[], onReload: () => Pr
 					<FormField id="admin-user-detail" label={ROLE_DETAIL_LABEL[form.type]} value={form.detail} onChange={(value) => setForm((current) => ({ ...current, detail: value }))} required />
 					{createFeedback.feedback.message ? <StatusMessage kind="success" message={createFeedback.feedback.message} /> : null}
 					{createFeedback.feedback.error ? <StatusMessage kind="error" message={createFeedback.feedback.error} /> : null}
-					<button type="submit" className="primary-button">Create User</button>
+					<button type="submit" className="primary-button">
+						Create User
+					</button>
 				</form>
 			</section>
 
@@ -573,7 +579,9 @@ function AdminUsersView({ users, onReload }: { users: User[], onReload: () => Pr
 				setPage={pagination.setPage}
 			>
 				<div className="admin-card-list">
-					{paginated.items.map((entry) => <UserCard key={entry.id} user={entry} onReload={onReload} />)}
+					{paginated.items.map((entry) => (
+						<UserCard key={entry.id} user={entry} onReload={onReload} />
+					))}
 				</div>
 			</AdminListShell>
 		</section>
@@ -643,8 +651,14 @@ function AdminCoursesView({ courses, onReload }: { courses: Course[], onReload: 
 					{saveFeedback.feedback.message ? <StatusMessage kind="success" message={saveFeedback.feedback.message} /> : null}
 					{saveFeedback.feedback.error ? <StatusMessage kind="error" message={saveFeedback.feedback.error} /> : null}
 					<div className="admin-action-row">
-						<button type="submit" className="primary-button">{form.courseId ? 'Save Course' : 'Create Course'}</button>
-						{form.courseId ? <button type="button" className="secondary-button" onClick={() => setForm(DEFAULT_COURSE_FORM)}>Cancel Edit</button> : null}
+						<button type="submit" className="primary-button">
+							{form.courseId ? 'Save Course' : 'Create Course'}
+						</button>
+						{form.courseId ? (
+							<button type="button" className="secondary-button" onClick={() => setForm(DEFAULT_COURSE_FORM)}>
+								Cancel Edit
+							</button>
+						) : null}
 					</div>
 				</form>
 			</section>
@@ -664,20 +678,30 @@ function AdminCoursesView({ courses, onReload }: { courses: Course[], onReload: 
 			>
 				<div className="admin-card-list">
 					{paginated.items.map((entry) => (
-								<article key={entry.course_id} className="section-card">
-									<div className="section-header">
-										<div>
-											<p className="eyebrow">{entry.subject}</p>
-											<h3>{entry.course_code} • {entry.title}</h3>
-										</div>
-										<span className="pill subtle">{entry.credits} credits</span>
-									</div>
-									<p className="section-description">{entry.description}</p>
-									<div className="admin-action-row">
-										<button type="button" className="secondary-button" onClick={() => setForm({ courseId: entry.course_id, code: entry.course_code, title: entry.title, desc: entry.description, cred: String(entry.credits) })}>Edit</button>
-										<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDeleteCourse(entry)}>Delete</button>
-									</div>
-								</article>
+						<article key={entry.course_id} className="section-card">
+							<div className="section-header">
+								<div>
+									<p className="eyebrow">{entry.subject}</p>
+									<h3>
+										{entry.course_code} • {entry.title}
+									</h3>
+								</div>
+								<span className="pill subtle">{entry.credits} credits</span>
+							</div>
+							<p className="section-description">{entry.description}</p>
+							<div className="admin-action-row">
+								<button
+									type="button"
+									className="secondary-button"
+									onClick={() => setForm({ courseId: entry.course_id, code: entry.course_code, title: entry.title, desc: entry.description, cred: String(entry.credits) })}
+								>
+									Edit
+								</button>
+								<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDeleteCourse(entry)}>
+									Delete
+								</button>
+							</div>
+						</article>
 					))}
 				</div>
 			</AdminListShell>
@@ -763,7 +787,11 @@ function AdminPrerequisitesView({ courses }: { courses: Course[] }) {
 				<label className="field" htmlFor="prereq-course">
 					<span>Course</span>
 					<select id="prereq-course" value={selectedCourseId ?? ''} onChange={(event) => setSelectedCourseId(Number(event.target.value))}>
-						{courses.map((entry) => <option key={entry.course_id} value={entry.course_id}>{entry.course_code} • {entry.title}</option>)}
+						{courses.map((entry) => (
+							<option key={entry.course_id} value={entry.course_id}>
+								{entry.course_code} • {entry.title}
+							</option>
+						))}
 					</select>
 				</label>
 				<form className="stack" onSubmit={handleAddPrerequisite}>
@@ -771,12 +799,18 @@ function AdminPrerequisitesView({ courses }: { courses: Course[] }) {
 						<span>Add Prerequisite</span>
 						<select id="prereq-candidate" value={candidateId} onChange={(event) => setCandidateId(event.target.value)}>
 							<option value="">Select a course</option>
-							{candidates.map((entry) => <option key={entry.course_id} value={entry.course_id}>{entry.course_code} • {entry.title}</option>)}
+							{candidates.map((entry) => (
+								<option key={entry.course_id} value={entry.course_id}>
+									{entry.course_code} • {entry.title}
+								</option>
+							))}
 						</select>
 					</label>
 					{addFeedback.feedback.message ? <StatusMessage kind="success" message={addFeedback.feedback.message} /> : null}
 					{addFeedback.feedback.error ? <StatusMessage kind="error" message={addFeedback.feedback.error} /> : null}
-					<button type="submit" className="primary-button">Add Prerequisite</button>
+					<button type="submit" className="primary-button">
+						Add Prerequisite
+					</button>
 				</form>
 			</section>
 
@@ -795,20 +829,24 @@ function AdminPrerequisitesView({ courses }: { courses: Course[] }) {
 			>
 				<div className="admin-card-list">
 					{isLoading ? <p className="sidebar-copy">Loading prerequisite relationships...</p> : null}
-					{!isLoading && paginated.items.length === 0 ? <p className="sidebar-copy">No prerequisite relationships found for {selectedCourse ? selectedCourse.course_code : 'the selected course'}.</p> : null}
+					{!isLoading && paginated.items.length === 0 ? (
+						<p className="sidebar-copy">No prerequisite relationships found for {selectedCourse ? selectedCourse.course_code : 'the selected course'}.</p>
+					) : null}
 					{paginated.items.map((entry) => (
-								<article key={entry.courseId} className="section-card">
-									<div className="section-header">
-										<div>
-											<p className="eyebrow">Prerequisite</p>
-											<h3>{entry.courseCode}</h3>
-										</div>
-									</div>
-									<p className="section-description">{entry.title}</p>
-									<div className="admin-action-row">
-										<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDeletePrerequisite(entry)}>Delete Relationship</button>
-									</div>
-								</article>
+						<article key={entry.courseId} className="section-card">
+							<div className="section-header">
+								<div>
+									<p className="eyebrow">Prerequisite</p>
+									<h3>{entry.courseCode}</h3>
+								</div>
+							</div>
+							<p className="section-description">{entry.title}</p>
+							<div className="admin-action-row">
+								<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDeletePrerequisite(entry)}>
+									Delete Relationship
+								</button>
+							</div>
+						</article>
 					))}
 				</div>
 			</AdminListShell>
@@ -865,7 +903,9 @@ function AdminSemestersView({ semesters, onReload }: { semesters: Semester[], on
 					<FormField id="semester-year" label="Year" type="number" value={form.year} onChange={(value) => setForm((current) => ({ ...current, year: value }))} required />
 					{createFeedback.feedback.message ? <StatusMessage kind="success" message={createFeedback.feedback.message} /> : null}
 					{createFeedback.feedback.error ? <StatusMessage kind="error" message={createFeedback.feedback.error} /> : null}
-					<button type="submit" className="primary-button">Create Semester</button>
+					<button type="submit" className="primary-button">
+						Create Semester
+					</button>
 				</form>
 			</section>
 
@@ -884,18 +924,22 @@ function AdminSemestersView({ semesters, onReload }: { semesters: Semester[], on
 			>
 				<div className="admin-card-list">
 					{paginated.items.map((entry) => (
-								<article key={entry.semester_id} className="section-card">
-									<div className="section-header">
-										<div>
-											<p className="eyebrow">Semester</p>
-											<h3>{entry.term} {entry.year}</h3>
-										</div>
-										<span className="pill subtle">ID {entry.semester_id}</span>
-									</div>
-									<div className="admin-action-row">
-										<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDeleteSemester(entry)}>Delete</button>
-									</div>
-								</article>
+						<article key={entry.semester_id} className="section-card">
+							<div className="section-header">
+								<div>
+									<p className="eyebrow">Semester</p>
+									<h3>
+										{entry.term} {entry.year}
+									</h3>
+								</div>
+								<span className="pill subtle">ID {entry.semester_id}</span>
+							</div>
+							<div className="admin-action-row">
+								<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDeleteSemester(entry)}>
+									Delete
+								</button>
+							</div>
+						</article>
 					))}
 				</div>
 			</AdminListShell>
@@ -903,7 +947,19 @@ function AdminSemestersView({ semesters, onReload }: { semesters: Semester[], on
 	);
 }
 
-function AdminSectionsView({ courses, professors, semesters, sections, onReload }: { courses: Course[], professors: User[], semesters: Semester[], sections: Section[], onReload: () => Promise<void> }) {
+function AdminSectionsView({
+	courses,
+	professors,
+	semesters,
+	sections,
+	onReload,
+}: {
+	courses: Course[],
+	professors: User[],
+	semesters: Semester[],
+	sections: Section[],
+	onReload: () => Promise<void>,
+}) {
 	const [sectionSearch, setSectionSearch] = useState('');
 	const [form, setForm] = useState<SectionFormState>(DEFAULT_SECTION_FORM);
 	const saveFeedback = useFormFeedback();
@@ -913,7 +969,9 @@ function AdminSectionsView({ courses, professors, semesters, sections, onReload 
 	const filteredSections = useMemo(() => {
 		const term = sectionSearch.trim().toLowerCase();
 		if (term === '') return sections;
-		return sections.filter((entry) => `${entry.course.course_code} ${entry.course.title} ${entry.professor.professor_name} ${entry.semester.term} ${entry.semester.year} ${entry.days}`.toLowerCase().includes(term));
+		return sections.filter((entry) =>
+			`${entry.course.course_code} ${entry.course.title} ${entry.professor.professor_name} ${entry.semester.term} ${entry.semester.year} ${entry.days}`.toLowerCase().includes(term)
+		);
 	}, [sectionSearch, sections]);
 	const paginated = useMemo(() => paginateItems(filteredSections, pagination.page, pagination.pageSize), [filteredSections, pagination.page, pagination.pageSize]);
 	const selectedSection = sections.find((entry) => entry.section_id === form.sectionId) ?? null;
@@ -966,32 +1024,56 @@ function AdminSectionsView({ courses, professors, semesters, sections, onReload 
 						<span>Course</span>
 						<select id="section-course" value={form.courseId} onChange={(event) => setForm((current) => ({ ...current, courseId: event.target.value }))} disabled={form.sectionId !== null}>
 							<option value="">Select a course</option>
-							{courses.map((entry) => <option key={entry.course_id} value={entry.course_id}>{entry.course_code} • {entry.title}</option>)}
+							{courses.map((entry) => (
+								<option key={entry.course_id} value={entry.course_id}>
+									{entry.course_code} • {entry.title}
+								</option>
+							))}
 						</select>
 					</label>
 					<label className="field" htmlFor="section-semester">
 						<span>Semester</span>
 						<select id="section-semester" value={form.semId} onChange={(event) => setForm((current) => ({ ...current, semId: event.target.value }))}>
 							<option value="">Select a semester</option>
-							{semesters.map((entry) => <option key={entry.semester_id} value={entry.semester_id}>{entry.term} {entry.year}</option>)}
+							{semesters.map((entry) => (
+								<option key={entry.semester_id} value={entry.semester_id}>
+									{entry.term} {entry.year}
+								</option>
+							))}
 						</select>
 					</label>
 					<label className="field" htmlFor="section-professor">
 						<span>Professor</span>
 						<select id="section-professor" value={form.profId} onChange={(event) => setForm((current) => ({ ...current, profId: event.target.value }))}>
 							<option value="">Select a professor</option>
-							{professors.map((entry) => <option key={entry.id} value={entry.role_id}>{entry.name} • {entry.role_details}</option>)}
+							{professors.map((entry) => (
+								<option key={entry.id} value={entry.role_id}>
+									{entry.name} • {entry.role_details}
+								</option>
+							))}
 						</select>
 					</label>
 					<FormField id="section-capacity" label="Capacity" type="number" value={form.capacity} onChange={(value) => setForm((current) => ({ ...current, capacity: value }))} required />
-					<FormField id="section-days" label="Meeting Days" value={form.days} onChange={(value) => setForm((current) => ({ ...current, days: value.toUpperCase() }))} placeholder="MWF or TR" />
+					<FormField
+						id="section-days"
+						label="Meeting Days"
+						value={form.days}
+						onChange={(value) => setForm((current) => ({ ...current, days: value.toUpperCase() }))}
+						placeholder="MWF or TR"
+					/>
 					<FormField id="section-start" label="Start Time" value={form.startTm} onChange={(value) => setForm((current) => ({ ...current, startTm: value }))} placeholder="09:00:00" />
 					<FormField id="section-end" label="End Time" value={form.endTm} onChange={(value) => setForm((current) => ({ ...current, endTm: value }))} placeholder="10:15:00" />
 					{saveFeedback.feedback.message ? <StatusMessage kind="success" message={saveFeedback.feedback.message} /> : null}
 					{saveFeedback.feedback.error ? <StatusMessage kind="error" message={saveFeedback.feedback.error} /> : null}
 					<div className="admin-action-row">
-						<button type="submit" className="primary-button">{form.sectionId ? 'Save Section' : 'Create Section'}</button>
-						{form.sectionId ? <button type="button" className="secondary-button" onClick={() => setForm(DEFAULT_SECTION_FORM)}>Cancel Edit</button> : null}
+						<button type="submit" className="primary-button">
+							{form.sectionId ? 'Save Section' : 'Create Section'}
+						</button>
+						{form.sectionId ? (
+							<button type="button" className="secondary-button" onClick={() => setForm(DEFAULT_SECTION_FORM)}>
+								Cancel Edit
+							</button>
+						) : null}
 					</div>
 				</form>
 			</section>
@@ -1011,37 +1093,62 @@ function AdminSectionsView({ courses, professors, semesters, sections, onReload 
 			>
 				<div className="admin-card-list">
 					{paginated.items.map((entry) => (
-								<article key={entry.section_id} className="section-card">
-									<div className="section-header">
-										<div>
-											<p className="eyebrow">Section {entry.section_id}</p>
-											<h3>{entry.course.course_code} • {entry.course.title}</h3>
-										</div>
-										<span className="pill subtle">{entry.semester.term} {entry.semester.year}</span>
-									</div>
-									<div className="catalog-meta-grid">
-										<div className="info-card">
-											<span className="info-label">Professor</span>
-											<strong>{entry.professor.professor_name}</strong>
-										</div>
-										<div className="info-card">
-											<span className="info-label">Meeting</span>
-											<strong>{entry.days === 'async' ? 'Asynchronous' : entry.days}</strong>
-										</div>
-										<div className="info-card">
-											<span className="info-label">Time</span>
-											<strong>{entry.start_time && entry.end_time ? `${entry.start_time.slice(0, 5)}-${entry.end_time.slice(0, 5)}` : 'Unscheduled'}</strong>
-										</div>
-										<div className="info-card">
-											<span className="info-label">Seats</span>
-											<strong>{entry.seats_available}/{entry.capacity}</strong>
-										</div>
-									</div>
-									<div className="admin-action-row">
-										<button type="button" className="secondary-button" onClick={() => setForm({ sectionId: entry.section_id, courseId: String(entry.course.course_id), semId: String(entry.semester.semester_id), profId: String(entry.professor.professor_id), capacity: String(entry.capacity), days: entry.days === 'async' ? '' : entry.days, startTm: toTimeValue(entry.start_time), endTm: toTimeValue(entry.end_time) })}>Edit</button>
-										<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDeleteSection(entry)}>Delete</button>
-									</div>
-								</article>
+						<article key={entry.section_id} className="section-card">
+							<div className="section-header">
+								<div>
+									<p className="eyebrow">Section {entry.section_id}</p>
+									<h3>
+										{entry.course.course_code} • {entry.course.title}
+									</h3>
+								</div>
+								<span className="pill subtle">
+									{entry.semester.term} {entry.semester.year}
+								</span>
+							</div>
+							<div className="catalog-meta-grid">
+								<div className="info-card">
+									<span className="info-label">Professor</span>
+									<strong>{entry.professor.professor_name}</strong>
+								</div>
+								<div className="info-card">
+									<span className="info-label">Meeting</span>
+									<strong>{entry.days === 'async' ? 'Asynchronous' : entry.days}</strong>
+								</div>
+								<div className="info-card">
+									<span className="info-label">Time</span>
+									<strong>{entry.start_time && entry.end_time ? `${entry.start_time.slice(0, 5)}-${entry.end_time.slice(0, 5)}` : 'Unscheduled'}</strong>
+								</div>
+								<div className="info-card">
+									<span className="info-label">Seats</span>
+									<strong>
+										{entry.seats_available}/{entry.capacity}
+									</strong>
+								</div>
+							</div>
+							<div className="admin-action-row">
+								<button
+									type="button"
+									className="secondary-button"
+									onClick={() =>
+										setForm({
+											sectionId: entry.section_id,
+											courseId: String(entry.course.course_id),
+											semId: String(entry.semester.semester_id),
+											profId: String(entry.professor.professor_id),
+											capacity: String(entry.capacity),
+											days: entry.days === 'async' ? '' : entry.days,
+											startTm: toTimeValue(entry.start_time),
+											endTm: toTimeValue(entry.end_time),
+										})
+									}
+								>
+									Edit
+								</button>
+								<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDeleteSection(entry)}>
+									Delete
+								</button>
+							</div>
+						</article>
 					))}
 				</div>
 				{selectedSection ? <p className="sidebar-copy">Editing section {selectedSection.section_id}. The course selection remains locked while editing the existing section.</p> : null}
@@ -1104,8 +1211,12 @@ function UserCard({ user, onReload }: { user: User, onReload: () => Promise<void
 			{feedback.feedback.message ? <StatusMessage kind="success" message={feedback.feedback.message} /> : null}
 			{feedback.feedback.error ? <StatusMessage kind="error" message={feedback.feedback.error} /> : null}
 			<div className="admin-action-row admin-user-card-actions">
-				<button type="button" className="secondary-button" onClick={() => void handleRoleSave()}>Save Role</button>
-				<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDelete()}>Delete User</button>
+				<button type="button" className="secondary-button" onClick={() => void handleRoleSave()}>
+					Save Role
+				</button>
+				<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDelete()}>
+					Delete User
+				</button>
 			</div>
 		</article>
 	);

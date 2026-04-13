@@ -12,14 +12,7 @@ Renders the professor home, assigned sections, access-code tools, and embedded a
 
 import { useEffect, useMemo, useState, type FormEvent, type SubmitEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-	generateSectionAccessCodes,
-	listProfessorSections,
-	listSectionAccessCodes,
-	mapSectionList,
-	revokeSectionAccessCode,
-	sortSectionsByCourse,
-} from '../api/professor';
+import { generateSectionAccessCodes, listProfessorSections, listSectionAccessCodes, mapSectionList, revokeSectionAccessCode, sortSectionsByCourse } from '../api/professor';
 import { ProfessorOnly } from '../components/AppShell';
 import { FormField } from '../components/FormField';
 import { StatusMessage } from '../components/StatusMessage';
@@ -213,9 +206,9 @@ export function ProfessorSectionsPage() {
 		};
 	}, [sections]);
 
-	const selectedSection = selectedSectionId === null ? null : sections.find((entry) => entry.section_id === selectedSectionId) ?? null;
-	const selectedCodes = selectedSectionId === null ? [] : codesBySection[selectedSectionId] ?? [];
-	const selectedState = selectedSectionId === null ? DEFAULT_CARD_STATE : cardState[selectedSectionId] ?? DEFAULT_CARD_STATE;
+	const selectedSection = selectedSectionId === null ? null : (sections.find((entry) => entry.section_id === selectedSectionId) ?? null);
+	const selectedCodes = selectedSectionId === null ? [] : (codesBySection[selectedSectionId] ?? []);
+	const selectedState = selectedSectionId === null ? DEFAULT_CARD_STATE : (cardState[selectedSectionId] ?? DEFAULT_CARD_STATE);
 
 	useEffect(() => {
 		void loadProfessorSections();
@@ -252,11 +245,7 @@ export function ProfessorSectionsPage() {
 			);
 
 			setCodesBySection(Object.fromEntries(codeEntries));
-			setCardState(
-				Object.fromEntries(
-					sectionList.map((section) => [section.section_id, DEFAULT_CARD_STATE])
-				)
-			);
+			setCardState(Object.fromEntries(sectionList.map((section) => [section.section_id, DEFAULT_CARD_STATE])));
 		} catch (error) {
 			setLoadError(getErrorMessage(error, 'Unable to load professor sections right now.'));
 		} finally {
@@ -405,14 +394,21 @@ export function ProfessorSectionsPage() {
 				</div>
 
 				<div className="dashboard-section-nav" role="tablist" aria-label="Professor sections">
-					<button type="button" className={`dashboard-section-button ${activeView === 'sections' ? 'active' : ''}`} onClick={() => setProfessorView('sections')} disabled={requiresPasswordChange}>
+					<button
+						type="button"
+						className={`dashboard-section-button ${activeView === 'sections' ? 'active' : ''}`}
+						onClick={() => setProfessorView('sections')}
+						disabled={requiresPasswordChange}
+					>
 						Sections
 					</button>
-					<button type="button" className={`dashboard-section-button ${activeView === 'profile' ? 'active' : ''}`} onClick={() => setProfessorView('profile')} disabled={requiresPasswordChange}>
+					<button
+						type="button"
+						className={`dashboard-section-button ${activeView === 'profile' ? 'active' : ''}`}
+						onClick={() => setProfessorView('profile')}
+						disabled={requiresPasswordChange}
+					>
 						Profile
-					</button>
-					<button type="button" className={`dashboard-section-button ${activeView === 'password' ? 'active' : ''}`} onClick={() => setProfessorView('password')}>
-						Password
 					</button>
 				</div>
 
@@ -459,12 +455,14 @@ export function ProfessorSectionsPage() {
 										{/* Current Semester Sections */}
 										{sectionGrouping.currentSectionGroups.map((group) => (
 											<section key={group.key} className="subpanel stack professor-group">
-											<div className="professor-group-header">
-												<div>
-													<p className="eyebrow">{group.semesterLabel}</p>
+												<div className="professor-group-header">
+													<div>
+														<p className="eyebrow">{group.semesterLabel}</p>
 														<h3>{group.subjectLabel} Sections</h3>
 													</div>
-													<span className="pill subtle">{group.sections.length} section{group.sections.length === 1 ? '' : 's'}</span>
+													<span className="pill subtle">
+														{group.sections.length} section{group.sections.length === 1 ? '' : 's'}
+													</span>
 												</div>
 
 												<div className="professor-row-list">
@@ -500,7 +498,10 @@ export function ProfessorSectionsPage() {
 														<p className="eyebrow">Previous Semesters</p>
 														<h3>Archive</h3>
 													</div>
-													<span className="pill subtle">{sectionGrouping.previousSectionGroups.reduce((sum, g) => sum + g.sections.length, 0)} section{sectionGrouping.previousSectionGroups.reduce((sum, g) => sum + g.sections.length, 0) === 1 ? '' : 's'}</span>
+													<span className="pill subtle">
+														{sectionGrouping.previousSectionGroups.reduce((sum, g) => sum + g.sections.length, 0)} section
+														{sectionGrouping.previousSectionGroups.reduce((sum, g) => sum + g.sections.length, 0) === 1 ? '' : 's'}
+													</span>
 												</button>
 
 												{expandedPreviousSemesters ? (
@@ -567,6 +568,9 @@ export function ProfessorSectionsPage() {
 							<button type="submit" className="primary-button" disabled={isSavingProfile || requiresPasswordChange}>
 								{isSavingProfile ? 'Saving...' : 'Save Profile'}
 							</button>
+							<button type="button" className="secondary-button" onClick={() => navigate('/change-password')}>
+								Change Password
+							</button>
 						</form>
 					</section>
 				) : null}
@@ -584,7 +588,15 @@ export function ProfessorSectionsPage() {
 
 						<form className="stack" onSubmit={submitPassword}>
 							<FormField id="professor-new-password" label="New Password" type="password" value={password} onChange={setPassword} autoComplete="new-password" required />
-							<FormField id="professor-confirm-password" label="Confirm Password" type="password" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" required />
+							<FormField
+								id="professor-confirm-password"
+								label="Confirm Password"
+								type="password"
+								value={confirmPassword}
+								onChange={setConfirmPassword}
+								autoComplete="new-password"
+								required
+							/>
 
 							<p className="hint">
 								Password requires:
@@ -611,7 +623,9 @@ export function ProfessorSectionsPage() {
 					<section className="dialog-card professor-code-dialog" role="dialog" aria-modal="true" aria-labelledby="professor-access-code-title" onClick={(event) => event.stopPropagation()}>
 						<div className="panel-header">
 							<div>
-								<p className="eyebrow">{selectedSection.semester.term} {selectedSection.semester.year}</p>
+								<p className="eyebrow">
+									{selectedSection.semester.term} {selectedSection.semester.year}
+								</p>
 								<h3 id="professor-access-code-title">{selectedSection.course.course_code} Access Codes</h3>
 							</div>
 							<span className="pill subtle">{selectedCodes.length} total</span>
@@ -621,7 +635,9 @@ export function ProfessorSectionsPage() {
 							<p>
 								<strong>{selectedSection.course.title}</strong>
 								<br />
-								<span className="sidebar-meta">{formatMeeting(selectedSection)} • Enrolled {selectedSection.enrolled_count}</span>
+								<span className="sidebar-meta">
+									{formatMeeting(selectedSection)} • Enrolled {selectedSection.enrolled_count}
+								</span>
 							</p>
 
 							<form className="admin-action-row professor-code-form" onSubmit={(event) => void handleGenerate(selectedSection.section_id, event)}>

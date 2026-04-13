@@ -4,15 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { CourseCatalogPage } from '../../../frontend/src/pages/CourseCatalogPage';
 
-const {
-	useAuthMock,
-	loadStudentEnrollmentDataMock,
-	buildEnrichedEnrollmentsMock,
-	listSectionsBySemesterMock,
-	listPrerequisitesMock,
-	createEnrollmentMock,
-	updateEnrollmentMock,
-} = vi.hoisted(() => ({
+const { useAuthMock, loadStudentEnrollmentDataMock, buildEnrichedEnrollmentsMock, listSectionsBySemesterMock, listPrerequisitesMock, createEnrollmentMock, updateEnrollmentMock } = vi.hoisted(() => ({
 	useAuthMock: vi.fn(),
 	loadStudentEnrollmentDataMock: vi.fn(),
 	buildEnrichedEnrollmentsMock: vi.fn(),
@@ -121,8 +113,8 @@ describe('CourseCatalogPage', () => {
 		useAuthMock.mockReturnValue({
 			user: {
 				id: 1,
-				name: 'Ichigo Kurosaki',
-				email: 'kuros_ichi001@guru.edu',
+				name: 'Ethan Walker',
+				email: 'walke_etha001@guru.edu',
 				first_login: false,
 				role: 'STUDENT',
 				role_id: 100001,
@@ -161,7 +153,9 @@ describe('CourseCatalogPage', () => {
 			const allSections = semId === currentSemester.semester_id ? [cmsc495Section, cmsc350Section] : [previousSection];
 			const filteredByDays = days ? allSections.filter((section) => section.days === days) : allSections;
 			const filtered = search
-				? filteredByDays.filter((section) => `${section.course.course_code} ${section.course.title} ${section.course.description} ${section.professor.professor_name}`.toLowerCase().includes(search.toLowerCase()))
+				? filteredByDays.filter((section) =>
+						`${section.course.course_code} ${section.course.title} ${section.course.description} ${section.professor.professor_name}`.toLowerCase().includes(search.toLowerCase())
+					)
 				: filteredByDays;
 			return {
 				Section: (limit === 100 ? allSections : filtered).map((Section) => ({ Section })),

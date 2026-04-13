@@ -7,129 +7,125 @@ CREATE TEMPORARY TABLE `seed_demo_accounts` (
 );
 
 INSERT INTO `seed_demo_accounts` (`email`) VALUES
-('kuros_ichi001@guru.edu'),
-('butch_bill301@guru.edu'),
-('horne_chri201@guru.edu');
+('walke_etha001@guru.edu'),
+('harpe_dani301@guru.edu'),
+('hughe_caro201@guru.edu');
 
-CREATE TEMPORARY TABLE `seed_first_step_targets` (
-  `display_order` TINYINT NOT NULL,
-  `course_code` VARCHAR(10) NOT NULL,
-  `target_mode` ENUM('FULL_WAITLIST', 'HALF_FULL') NOT NULL,
-  PRIMARY KEY (`display_order`),
-  UNIQUE KEY `uq_seed_first_step_targets_course` (`course_code`)
-);
+CREATE TEMPORARY TABLE `seed_demo_completed_courses` AS
+SELECT DISTINCT completed_section.`course_id`
+FROM `students` demo_student
+INNER JOIN `users` demo_user
+  ON demo_user.`user_id` = demo_student.`user_id`
+INNER JOIN `enrollments` completed_enrollment
+  ON completed_enrollment.`student_id` = demo_student.`student_id`
+ AND completed_enrollment.`status` = 'completed'
+INNER JOIN `sections` completed_section
+  ON completed_section.`section_id` = completed_enrollment.`section_id`
+WHERE demo_user.`email` = 'walke_etha001@guru.edu';
 
-INSERT INTO `seed_first_step_targets` (`display_order`, `course_code`, `target_mode`) VALUES
-(1, 'CMSC425', 'FULL_WAITLIST'),
-(2, 'ENGL311', 'FULL_WAITLIST'),
-(3, 'ENGL389', 'FULL_WAITLIST'),
-(4, 'HIST461', 'FULL_WAITLIST'),
-(5, 'CMSC405', 'HALF_FULL'),
-(6, 'CMSC345', 'HALF_FULL'),
-(7, 'IFSM380', 'HALF_FULL'),
-(8, 'IFSM486B', 'HALF_FULL');
-
-CREATE TEMPORARY TABLE `seed_first_step_sections` AS
+CREATE TEMPORARY TABLE `seed_professor_current_sections` AS
 SELECT
-  target.`display_order`,
-  target.`course_code`,
-  target.`target_mode`,
-  section_pick.`section_id`,
-  section_pick.`capacity`
-FROM `seed_first_step_targets` target
+  section_record.`section_id`,
+  course_record.`course_code`,
+  section_record.`capacity`
+FROM `sections` section_record
 INNER JOIN `courses` course_record
-  ON course_record.`course_code` = target.`course_code`
-INNER JOIN (
-  SELECT
-    MIN(section_record.`section_id`) AS `section_id`,
-    section_record.`course_id`,
-    section_record.`semester_id`
-  FROM `sections` section_record
-  GROUP BY section_record.`course_id`, section_record.`semester_id`
-) section_choice
-  ON section_choice.`course_id` = course_record.`course_id`
-INNER JOIN `sections` section_pick
-  ON section_pick.`section_id` = section_choice.`section_id`
+  ON course_record.`course_id` = section_record.`course_id`
+INNER JOIN `professors` professor_record
+  ON professor_record.`professor_id` = section_record.`professor_id`
+INNER JOIN `users` professor_user
+  ON professor_user.`user_id` = professor_record.`user_id`
 INNER JOIN (
   SELECT `semester_id`
   FROM `semesters`
   ORDER BY `year` DESC, `semester_id` DESC
   LIMIT 1
 ) current_semester
-  ON current_semester.`semester_id` = section_choice.`semester_id`;
+  ON current_semester.`semester_id` = section_record.`semester_id`
+WHERE professor_user.`email` = 'harpe_dani301@guru.edu';
+
+CREATE TEMPORARY TABLE `seed_demo_waitlist_section` AS
+SELECT
+  professor_section.`section_id`,
+  professor_section.`course_code`,
+  professor_section.`capacity`
+FROM `seed_professor_current_sections` professor_section
+INNER JOIN `courses` course_record
+  ON course_record.`course_code` = professor_section.`course_code`
+WHERE EXISTS (
+    SELECT 1
+    FROM `prerequisites` prerequisite_record
+    WHERE prerequisite_record.`course_id` = course_record.`course_id`
+  )
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `prerequisites` prerequisite_record
+    WHERE prerequisite_record.`course_id` = course_record.`course_id`
+      AND prerequisite_record.`prerequisite_course_id` NOT IN (
+        SELECT `course_id`
+        FROM `seed_demo_completed_courses`
+      )
+  )
+ORDER BY professor_section.`course_code` ASC
+LIMIT 1;
+
+CREATE TEMPORARY TABLE `seed_demo_waitlist_section_exclusion` AS
+SELECT `section_id`
+FROM `seed_demo_waitlist_section`;
+
+CREATE TEMPORARY TABLE `seed_demo_professor_targets` AS
+SELECT
+  1 AS `display_order`,
+  waitlist_section.`section_id`,
+  waitlist_section.`course_code`,
+  waitlist_section.`capacity`,
+  1 AS `non_demo_waitlist_count`
+FROM `seed_demo_waitlist_section` waitlist_section
+UNION ALL
+SELECT
+  ranked_section.`display_order`,
+  ranked_section.`section_id`,
+  ranked_section.`course_code`,
+  ranked_section.`capacity`,
+  CASE WHEN ranked_section.`display_order` = 2 THEN 1 ELSE 0 END AS `non_demo_waitlist_count`
+FROM (
+  SELECT
+    ROW_NUMBER() OVER (ORDER BY professor_section.`course_code` ASC) + 1 AS `display_order`,
+    professor_section.`section_id`,
+    professor_section.`course_code`,
+    professor_section.`capacity`
+  FROM `seed_professor_current_sections` professor_section
+  LEFT JOIN `seed_demo_waitlist_section_exclusion` waitlist_section_exclusion
+    ON waitlist_section_exclusion.`section_id` = professor_section.`section_id`
+  WHERE waitlist_section_exclusion.`section_id` IS NULL
+  ORDER BY professor_section.`course_code` ASC
+  LIMIT 3
+) ranked_section;
 
 DELETE enrollment_record
 FROM `enrollments` enrollment_record
-INNER JOIN `seed_first_step_sections` first_step_section
-  ON first_step_section.`section_id` = enrollment_record.`section_id`;
-
-INSERT INTO `enrollments` (`student_id`, `section_id`, `status`)
-SELECT
-  student_record.`student_id`,
-  first_step_section.`section_id`,
-  'enrolled'
-FROM `students` student_record
-INNER JOIN `users` user_record
-  ON user_record.`user_id` = student_record.`user_id`
-INNER JOIN `seed_first_step_sections` first_step_section
-  ON first_step_section.`course_code` = 'CMSC425'
-WHERE user_record.`email` = 'kuros_ichi001@guru.edu';
-
-CREATE TEMPORARY TABLE `seed_first_step_enrollment_targets` AS
-WITH seeded_counts AS (
-  SELECT
-    first_step_section.`display_order`,
-    first_step_section.`section_id`,
-    first_step_section.`target_mode`,
-    first_step_section.`capacity`,
-    COALESCE(COUNT(CASE WHEN enrollment_record.`status` = 'enrolled' THEN 1 END), 0) AS `existing_enrolled`
-  FROM `seed_first_step_sections` first_step_section
-  LEFT JOIN `enrollments` enrollment_record
-    ON enrollment_record.`section_id` = first_step_section.`section_id`
-  GROUP BY
-    first_step_section.`display_order`,
-    first_step_section.`section_id`,
-    first_step_section.`target_mode`,
-    first_step_section.`capacity`
-),
-enrollment_targets AS (
-  SELECT
-    seeded_count.`display_order`,
-    seeded_count.`section_id`,
-    GREATEST(
-      CASE
-        WHEN seeded_count.`target_mode` = 'FULL_WAITLIST' THEN seeded_count.`capacity`
-        ELSE FLOOR(seeded_count.`capacity` / 2)
-      END - seeded_count.`existing_enrolled`,
-      0
-    ) AS `target_count`
-  FROM `seeded_counts` seeded_count
-)
-SELECT
-  enrollment_target.`display_order`,
-  enrollment_target.`section_id`,
-  enrollment_target.`target_count`
-FROM `enrollment_targets` enrollment_target;
+INNER JOIN `seed_demo_professor_targets` target_section
+  ON target_section.`section_id` = enrollment_record.`section_id`;
 
 INSERT INTO `enrollments` (`student_id`, `section_id`, `status`)
 WITH
-target_ranges AS (
+enrollment_ranges AS (
   SELECT
-    enrollment_target.`display_order`,
-    enrollment_target.`section_id`,
-    enrollment_target.`target_count`,
+    target_section.`display_order`,
+    target_section.`section_id`,
+    target_section.`capacity` AS `target_count`,
     COALESCE(
-      SUM(enrollment_target.`target_count`) OVER (
-        ORDER BY enrollment_target.`display_order`
+      SUM(target_section.`capacity`) OVER (
+        ORDER BY target_section.`display_order`
         ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
       ),
       0
     ) + 1 AS `start_rank`,
-    SUM(enrollment_target.`target_count`) OVER (
-      ORDER BY enrollment_target.`display_order`
+    SUM(target_section.`capacity`) OVER (
+      ORDER BY target_section.`display_order`
       ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
     ) AS `end_rank`
-  FROM `seed_first_step_enrollment_targets` enrollment_target
+  FROM `seed_demo_professor_targets` target_section
 ),
 eligible_students AS (
   SELECT
@@ -144,54 +140,37 @@ eligible_students AS (
 )
 SELECT
   eligible_student.`student_id`,
-  target_range.`section_id`,
+  enrollment_range.`section_id`,
   'enrolled'
-FROM `target_ranges` target_range
+FROM `enrollment_ranges` enrollment_range
 INNER JOIN `eligible_students` eligible_student
-  ON eligible_student.`student_rank` BETWEEN target_range.`start_rank` AND target_range.`end_rank`
-WHERE target_range.`target_count` > 0;
+  ON eligible_student.`student_rank` BETWEEN enrollment_range.`start_rank` AND enrollment_range.`end_rank`;
 
-CREATE TEMPORARY TABLE `seed_first_step_waitlist_targets` AS
+CREATE TEMPORARY TABLE `seed_demo_professor_enrolled_total` AS
+SELECT COALESCE(SUM(`capacity`), 0) AS `count_total`
+FROM `seed_demo_professor_targets`;
+
+CREATE TEMPORARY TABLE `seed_demo_professor_waitlist_ranges` AS
 SELECT
-  first_step_section.`display_order`,
-  first_step_section.`section_id`,
-  CASE
-    WHEN first_step_section.`target_mode` = 'FULL_WAITLIST' THEN 2
-    ELSE 0
-  END AS `target_count`
-FROM `seed_first_step_sections` first_step_section;
+  target_section.`display_order`,
+  target_section.`section_id`,
+  target_section.`non_demo_waitlist_count` AS `target_count`,
+  COALESCE(
+    SUM(target_section.`non_demo_waitlist_count`) OVER (
+      ORDER BY target_section.`display_order`
+      ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+    ),
+    0
+  ) + 1 AS `start_rank`,
+  SUM(target_section.`non_demo_waitlist_count`) OVER (
+    ORDER BY target_section.`display_order`
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) AS `end_rank`
+FROM `seed_demo_professor_targets` target_section
+WHERE target_section.`non_demo_waitlist_count` > 0;
 
 INSERT INTO `enrollments` (`student_id`, `section_id`, `status`)
 WITH
-enrolled_total AS (
-  SELECT COALESCE(SUM(`target_count`), 0) AS `count_total`
-  FROM `seed_first_step_enrollment_targets`
-),
-waitlist_targets AS (
-  SELECT
-    waitlist_target.`display_order`,
-    waitlist_target.`section_id`,
-    waitlist_target.`target_count`
-  FROM `seed_first_step_waitlist_targets` waitlist_target
-),
-waitlist_ranges AS (
-  SELECT
-    waitlist_target.`display_order`,
-    waitlist_target.`section_id`,
-    waitlist_target.`target_count`,
-    COALESCE(
-      SUM(waitlist_target.`target_count`) OVER (
-        ORDER BY waitlist_target.`display_order`
-        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
-      ),
-      0
-    ) + 1 AS `start_rank`,
-    SUM(waitlist_target.`target_count`) OVER (
-      ORDER BY waitlist_target.`display_order`
-      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-    ) AS `end_rank`
-  FROM `waitlist_targets` waitlist_target
-),
 eligible_students AS (
   SELECT
     student_record.`student_id`,
@@ -207,18 +186,31 @@ SELECT
   eligible_student.`student_id`,
   waitlist_range.`section_id`,
   'waitlisted'
-FROM `waitlist_ranges` waitlist_range
-INNER JOIN `enrolled_total` enrolled_total_record
+FROM `seed_demo_professor_waitlist_ranges` waitlist_range
+INNER JOIN `seed_demo_professor_enrolled_total` enrolled_total_record
 INNER JOIN `eligible_students` eligible_student
   ON eligible_student.`student_rank`
      BETWEEN waitlist_range.`start_rank` + enrolled_total_record.`count_total`
-         AND waitlist_range.`end_rank` + enrolled_total_record.`count_total`
-WHERE waitlist_range.`target_count` > 0;
+         AND waitlist_range.`end_rank` + enrolled_total_record.`count_total`;
 
-DROP TEMPORARY TABLE IF EXISTS `seed_first_step_waitlist_targets`;
-DROP TEMPORARY TABLE IF EXISTS `seed_first_step_enrollment_targets`;
-DROP TEMPORARY TABLE IF EXISTS `seed_first_step_sections`;
-DROP TEMPORARY TABLE IF EXISTS `seed_first_step_targets`;
+INSERT INTO `enrollments` (`student_id`, `section_id`, `status`)
+SELECT
+  demo_student.`student_id`,
+  waitlist_section.`section_id`,
+  'waitlisted'
+FROM `students` demo_student
+INNER JOIN `users` demo_user
+  ON demo_user.`user_id` = demo_student.`user_id`
+INNER JOIN `seed_demo_waitlist_section` waitlist_section
+WHERE demo_user.`email` = 'walke_etha001@guru.edu';
+
+DROP TEMPORARY TABLE IF EXISTS `seed_demo_professor_targets`;
+DROP TEMPORARY TABLE IF EXISTS `seed_demo_professor_waitlist_ranges`;
+DROP TEMPORARY TABLE IF EXISTS `seed_demo_professor_enrolled_total`;
+DROP TEMPORARY TABLE IF EXISTS `seed_demo_waitlist_section_exclusion`;
+DROP TEMPORARY TABLE IF EXISTS `seed_demo_waitlist_section`;
+DROP TEMPORARY TABLE IF EXISTS `seed_professor_current_sections`;
+DROP TEMPORARY TABLE IF EXISTS `seed_demo_completed_courses`;
 DROP TEMPORARY TABLE IF EXISTS `seed_demo_accounts`;
 
 COMMIT;

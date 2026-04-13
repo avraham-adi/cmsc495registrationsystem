@@ -118,9 +118,9 @@ The frontend includes:
 
 Seeded demo logins after `npm run db:reset`:
 
-- Student: `kuros_ichi001@guru.edu` / `Ichigo Kurosakikuros_ichi001@guru.edu`
-- Professor: `butch_bill301@guru.edu` / `Billy Butcherbutch_bill301@guru.edu`
-- Admin: `horne_chri201@guru.edu` / `Christian Hornerhorne_chri201@guru.edu`
+- Student: `walke_etha001@guru.edu` / `Ethan Walkerwalke_etha001@guru.edu`
+- Professor: `harpe_dani301@guru.edu` / `Daniel Harperharpe_dani301@guru.edu`
+- Admin: `hughe_caro201@guru.edu` / `Caroline Hugheshughe_caro201@guru.edu`
 
 ## API Test Suite
 

@@ -528,6 +528,25 @@ WHERE ranked.`student_time_rank` = 1
   AND ranked.`semester_credit_total` <= 18
   AND ranked.`overall_credit_total` <= 100;
 
+-- Keep the primary demo student on a single active waitlist in the current term.
+DELETE enrollment_record
+FROM `enrollments` enrollment_record
+INNER JOIN `students` student_record
+  ON student_record.`student_id` = enrollment_record.`student_id`
+INNER JOIN `users` user_record
+  ON user_record.`user_id` = student_record.`user_id`
+INNER JOIN `sections` section_record
+  ON section_record.`section_id` = enrollment_record.`section_id`
+INNER JOIN `courses` course_record
+  ON course_record.`course_id` = section_record.`course_id`
+INNER JOIN `semesters` semester_record
+  ON semester_record.`semester_id` = section_record.`semester_id`
+WHERE user_record.`email` = 'walke_etha001@guru.edu'
+  AND enrollment_record.`status` = 'waitlisted'
+  AND semester_record.`term` = 'Fall'
+  AND semester_record.`year` = 2026
+  AND course_record.`course_code` = 'CMSC495';
+
 DROP TEMPORARY TABLE IF EXISTS `seed_candidate_enrollments`;
 DROP TEMPORARY TABLE IF EXISTS `seed_ranked_sections`;
 DROP TEMPORARY TABLE IF EXISTS `seed_student_profiles`;
