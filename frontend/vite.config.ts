@@ -3,8 +3,8 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 const frontendRoot = fileURLToPath(new URL('.', import.meta.url));
+const backendTarget = 'https://cmsc495registrationsystem-production.up.railway.app';
 
-// https://vite.dev/config/
 export default defineConfig({
 	root: frontendRoot,
 	plugins: [react()],
@@ -18,14 +18,46 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		proxy: {
-			'/api': 'http://127.0.0.1:3000',
-			'/user': 'http://127.0.0.1:3000',
-			'/admin': 'http://127.0.0.1:3000',
-			'/course': 'http://127.0.0.1:3000',
-			'/prerequisite': 'http://127.0.0.1:3000',
-			'/section': 'http://127.0.0.1:3000',
-			'/semester': 'http://127.0.0.1:3000',
-			'/enrollment': 'http://127.0.0.1:3000',
+			'/api': {
+				target: backendTarget,
+				changeOrigin: true,
+				secure: true,
+			},
+			'/user': {
+				target: backendTarget,
+				changeOrigin: true,
+				secure: true,
+			},
+			'/admin': {
+				target: backendTarget,
+				changeOrigin: true,
+				secure: true,
+			},
+			'/course': {
+				target: backendTarget,
+				changeOrigin: true,
+				secure: true,
+			},
+			'/prerequisite': {
+				target: backendTarget,
+				changeOrigin: true,
+				secure: true,
+			},
+			'/section': {
+				target: backendTarget,
+				changeOrigin: true,
+				secure: true,
+			},
+			'/semester': {
+				target: backendTarget,
+				changeOrigin: true,
+				secure: true,
+			},
+			'/enrollment': {
+				target: backendTarget,
+				changeOrigin: true,
+				secure: true,
+			},
 		},
 	},
 });
