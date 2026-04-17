@@ -7,9 +7,7 @@ import { renderWithRouter } from '../support/test-utils';
 
 describe('FormField', () => {
 	it('renders an accessible input by label', () => {
-		renderWithRouter(
-			<FormField id="email" label="Email" value="" onChange={vi.fn()} type="email" />
-		);
+		renderWithRouter(<FormField id="email" label="Email" value="" onChange={vi.fn()} type="email" />);
 
 		expect(screen.getByLabelText('Email')).toHaveAttribute('type', 'email');
 	});

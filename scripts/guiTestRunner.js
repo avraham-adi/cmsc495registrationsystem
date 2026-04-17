@@ -19,11 +19,7 @@ function flattenAssertions(node, bucket = []) {
 		}
 	}
 
-	if (
-		(!Array.isArray(node.assertionResults) || node.assertionResults.length === 0)
-		&& node.status === 'failed'
-		&& node.name
-	) {
+	if ((!Array.isArray(node.assertionResults) || node.assertionResults.length === 0) && node.status === 'failed' && node.name) {
 		bucket.push({
 			fullName: node.name,
 			title: node.name,
@@ -46,13 +42,7 @@ function formatFailure(assertion, index) {
 	const status = assertion.status ?? 'failed';
 	const lines = Array.isArray(assertion.failureMessages) ? assertion.failureMessages : [];
 
-	return [
-		`### ${index}. ${title}`,
-		'',
-		`- Status: \`${status}\``,
-		...(lines.length > 0 ? ['', '```text', lines.join('\n\n'), '```'] : []),
-		'',
-	].join('\n');
+	return [`### ${index}. ${title}`, '', `- Status: \`${status}\``, ...(lines.length > 0 ? ['', '```text', lines.join('\n\n'), '```'] : []), ''].join('\n');
 }
 
 async function writeReport(results) {
@@ -72,9 +62,7 @@ async function writeReport(results) {
 		...(failed.length > 0 ? failed.map((entry, index) => formatFailure(entry, index + 1)) : ['None', '']),
 		'## TESTS PASSED',
 		'',
-		...(passed.length > 0
-			? passed.map((entry, index) => `${index + 1}. ${entry.fullName ?? entry.title}`)
-			: ['None']),
+		...(passed.length > 0 ? passed.map((entry, index) => `${index + 1}. ${entry.fullName ?? entry.title}`) : ['None']),
 		'',
 	].join('\n');
 
@@ -83,19 +71,7 @@ async function writeReport(results) {
 
 async function run() {
 	try {
-		await execFileAsync(
-			'node',
-			[
-				'./node_modules/vitest/vitest.mjs',
-				'run',
-				'--config',
-				'frontend/vite.config.ts',
-				'--reporter=json',
-				'--outputFile',
-				RESULTS_PATH,
-			],
-			{ cwd: ROOT_DIR }
-		);
+		await execFileAsync('node', ['./node_modules/vitest/vitest.mjs', 'run', '--config', 'frontend/vite.config.ts', '--reporter=json', '--outputFile', RESULTS_PATH], { cwd: ROOT_DIR });
 	} catch (error) {
 		if (error.code === 'ENOENT') {
 			throw new Error('Vitest is not installed.');

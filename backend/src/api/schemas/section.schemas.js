@@ -51,12 +51,7 @@ export const sectionBodySchema = z
 		semId: z.coerce.number().int().positive(),
 		profId: z.coerce.number().int().positive(),
 		capacity: z.coerce.number().int().positive(),
-		days: z
-			.string()
-			.trim()
-			.toUpperCase()
-			.refine(isCanonicalDaysValue, 'Days must use unique canonical day codes in order, such as MWF or TR.')
-			.optional(),
+		days: z.string().trim().toUpperCase().refine(isCanonicalDaysValue, 'Days must use unique canonical day codes in order, such as MWF or TR.').optional(),
 		startTm: z.string().regex(TIME_PATTERN, 'Start time must be in HH:MM:SS 24-hour format.').optional(),
 		endTm: z.string().regex(TIME_PATTERN, 'End time must be in HH:MM:SS 24-hour format.').optional(),
 	})
@@ -86,12 +81,7 @@ export const sectionQuerySchema = z
 		semId: z.coerce.number().int().positive(),
 		profId: z.coerce.number().int().positive(),
 		capacity: z.coerce.number().int().positive(),
-		days: z
-			.string()
-			.trim()
-			.toUpperCase()
-			.refine(isCanonicalDaysValue, 'Days must use unique canonical day codes in order, such as MWF or TR.')
-			.optional(),
+		days: z.string().trim().toUpperCase().refine(isCanonicalDaysValue, 'Days must use unique canonical day codes in order, such as MWF or TR.').optional(),
 		startTm: z.string().regex(TIME_PATTERN, 'Start time must be in HH:MM:SS 24-hour format.').optional(),
 		endTm: z.string().regex(TIME_PATTERN, 'End time must be in HH:MM:SS 24-hour format.').optional(),
 	})
@@ -122,12 +112,7 @@ export const getAllSectionsQuerySchema = paginationQuerySchema.extend({
 	semId: z.coerce.number().int().positive().optional(),
 	profId: z.coerce.number().int().positive().optional(),
 	subject: z.string().trim().toUpperCase().min(1).max(10).optional(),
-	days: z
-		.string()
-		.trim()
-		.toUpperCase()
-		.refine(isCanonicalDaysValue, 'Days must use unique canonical day codes in order, such as MWF or TR.')
-		.optional(),
+	days: z.string().trim().toUpperCase().refine(isCanonicalDaysValue, 'Days must use unique canonical day codes in order, such as MWF or TR.').optional(),
 });
 
 export const generateAccessCodesBodySchema = z.object({

@@ -13,7 +13,7 @@ Defines the error raised when submitted course data is invalid.
 import ValidationError from '../validation/validation.error.js';
 
 export default class InvalidCourseDataError extends ValidationError {
-    constructor(details) {
-        super('Invalid course data.', details);
-    }
+	constructor(details) {
+		super('Invalid course data.', details);
+	}
 }

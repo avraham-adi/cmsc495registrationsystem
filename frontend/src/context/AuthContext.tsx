@@ -17,15 +17,15 @@ import type { ChangePasswordPayload, LoginPayload, UpdateUserPayload, User } fro
 
 // Describes the shared auth state and actions exposed to the React tree.
 type AuthContextValue = {
-	user: User | null,
-	isLoading: boolean,
-	isAuthenticated: boolean,
-	requiresPasswordChange: boolean,
-	loginAction: (payload: LoginPayload) => Promise<User>,
-	logoutAction: () => Promise<void>,
-	refreshUser: () => Promise<User | null>,
-	updateProfileAction: (payload: UpdateUserPayload) => Promise<User>,
-	changePasswordAction: (payload: ChangePasswordPayload) => Promise<User>,
+	user: User | null;
+	isLoading: boolean;
+	isAuthenticated: boolean;
+	requiresPasswordChange: boolean;
+	loginAction: (payload: LoginPayload) => Promise<User>;
+	logoutAction: () => Promise<void>;
+	refreshUser: () => Promise<User | null>;
+	updateProfileAction: (payload: UpdateUserPayload) => Promise<User>;
+	changePasswordAction: (payload: ChangePasswordPayload) => Promise<User>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);

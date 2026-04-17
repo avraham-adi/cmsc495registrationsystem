@@ -22,10 +22,7 @@ class AuthService {
 
 	// Authenticates a user and returns the fully hydrated session-safe user payload.
 	async login(email, password) {
-		const userRows = await db.query(
-			'SELECT user_id AS id, name, email, password_hash, first_login, sess_ver FROM users WHERE email = ?',
-			[email]
-		);
+		const userRows = await db.query('SELECT user_id AS id, name, email, password_hash, first_login, sess_ver FROM users WHERE email = ?', [email]);
 
 		if (userRows.length === 0) {
 			throw new Errors.AuthenticationError('Invalid email and/or password.');
@@ -122,10 +119,7 @@ class AuthService {
 			throw new Errors.AuthenticationError('Authentication required.');
 		}
 
-		const userRows = await db.query(
-			'SELECT user_id AS id, name, email, password_hash, first_login, sess_ver FROM users WHERE user_id = ?',
-			[authUser.id]
-		);
+		const userRows = await db.query('SELECT user_id AS id, name, email, password_hash, first_login, sess_ver FROM users WHERE user_id = ?', [authUser.id]);
 		const user = User.fromPersistence(userRows[0]);
 		const role = await this.updType(user.getUserID());
 		const hydratedUser = user.withRole(role);

@@ -75,10 +75,9 @@ function assert(data) {
 
 // Helper function to get a row from sessions based on the Session ID
 async function getRow(id) {
-	const rows = await query(
-		'SELECT session_id, user_id, created_at, updated_at, expires_at, ip_addr, user_agent, sess_ver, data FROM sessions WHERE session_id = ? AND expires_at > NOW() LIMIT 1',
-		[id]
-	);
+	const rows = await query('SELECT session_id, user_id, created_at, updated_at, expires_at, ip_addr, user_agent, sess_ver, data FROM sessions WHERE session_id = ? AND expires_at > NOW() LIMIT 1', [
+		id,
+	]);
 
 	return rows[0] ?? null;
 }
@@ -106,15 +105,11 @@ async function remove(id) {
 }
 
 async function touch(id, data) {
-	await query('UPDATE sessions SET expires_at = ?, updated_at = NOW(), sess_ver = ? WHERE session_id = ?', [
-		getExpiry(data),
-		getVers(data),
-		id,
-	]);
+	await query('UPDATE sessions SET expires_at = ?, updated_at = NOW(), sess_ver = ? WHERE session_id = ?', [getExpiry(data), getVers(data), id]);
 }
 
 class MySqlSessionStore extends session.Store {
-    // Get parsed JSON object
+	// Get parsed JSON object
 	async get(id, callback) {
 		try {
 			const row = await getRow(id);
@@ -124,7 +119,7 @@ class MySqlSessionStore extends session.Store {
 		}
 	}
 
-    // Push to DB
+	// Push to DB
 	async set(id, data, callback) {
 		try {
 			await push(id, data);
@@ -134,7 +129,7 @@ class MySqlSessionStore extends session.Store {
 		}
 	}
 
-    // Remove from sessions
+	// Remove from sessions
 	async destroy(id, callback) {
 		try {
 			await remove(id);
@@ -144,7 +139,7 @@ class MySqlSessionStore extends session.Store {
 		}
 	}
 
-    // Refresh
+	// Refresh
 	async touch(id, data, callback) {
 		try {
 			await touch(id, data);

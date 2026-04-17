@@ -32,7 +32,7 @@ export class ApiError extends Error {
 
 // Request Options
 type RequestOptions = Omit<RequestInit, 'body'> & {
-	body?: unknown,
+	body?: unknown;
 };
 
 // HTTP Helper to send a request and parse the response

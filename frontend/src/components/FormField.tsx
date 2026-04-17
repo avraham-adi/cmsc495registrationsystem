@@ -11,14 +11,14 @@ Renders a labeled input field used across forms in the frontend.
 */
 
 type FormFieldProps = {
-	id: string,
-	label: string,
-	type?: string,
-	value: string,
-	onChange: (value: string) => void,
-	autoComplete?: string,
-	required?: boolean,
-	placeholder?: string,
+	id: string;
+	label: string;
+	type?: string;
+	value: string;
+	onChange: (value: string) => void;
+	autoComplete?: string;
+	required?: boolean;
+	placeholder?: string;
 };
 
 export function FormField({ id, label, type = 'text', value, onChange, autoComplete, required, placeholder }: FormFieldProps) {

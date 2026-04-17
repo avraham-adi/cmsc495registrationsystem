@@ -60,9 +60,7 @@ describe('LoginPage', () => {
 
 	it('shows API failures returned during login', async () => {
 		const user = userEvent.setup();
-		const loginAction = vi.fn().mockRejectedValue(
-			new ApiError(401, { error: 'Invalid email and/or password.' })
-		);
+		const loginAction = vi.fn().mockRejectedValue(new ApiError(401, { error: 'Invalid email and/or password.' }));
 
 		useAuthMock.mockReturnValue({
 			isAuthenticated: false,

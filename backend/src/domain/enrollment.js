@@ -11,68 +11,68 @@ Defines the enrollment domain model and serialization helpers.
 */
 
 class Enrollment {
-    #enrollment_id;
-    #student_id;
-    #section_id;
-    #status;
+	#enrollment_id;
+	#student_id;
+	#section_id;
+	#status;
 
-    constructor({ enrollment_id, student_id, section_id, status }) {
-        this.#enrollment_id = enrollment_id;
-        this.#student_id = student_id;
-        this.#section_id = section_id;
-        this.#status = status;
-    }
+	constructor({ enrollment_id, student_id, section_id, status }) {
+		this.#enrollment_id = enrollment_id;
+		this.#student_id = student_id;
+		this.#section_id = section_id;
+		this.#status = status;
+	}
 
-    static fromPersistence(row) {
-        if (!row) {
-            throw new Error('Cannot construct Enrollment from empty persistence row.');
-        }
+	static fromPersistence(row) {
+		if (!row) {
+			throw new Error('Cannot construct Enrollment from empty persistence row.');
+		}
 
-        return new Enrollment({
-            enrollment_id: row.enrollment_id,
-            student_id: row.student_id,
-            section_id: row.section_id,
-            status: row.status,
-        });
-    }
+		return new Enrollment({
+			enrollment_id: row.enrollment_id,
+			student_id: row.student_id,
+			section_id: row.section_id,
+			status: row.status,
+		});
+	}
 
-    static fromObject(data) {
-        if (!data) {
-            throw new Error('Cannot construct Enrollment from empty object.');
-        }
+	static fromObject(data) {
+		if (!data) {
+			throw new Error('Cannot construct Enrollment from empty object.');
+		}
 
-        return new Enrollment({
-            enrollment_id: data.enrollment_id,
-            student_id: data.student_id,
-            section_id: data.section_id,
-            status: data.status,
-        });
-    }
+		return new Enrollment({
+			enrollment_id: data.enrollment_id,
+			student_id: data.student_id,
+			section_id: data.section_id,
+			status: data.status,
+		});
+	}
 
-    getEnrollmentID() {
-        return this.#enrollment_id;
-    }
+	getEnrollmentID() {
+		return this.#enrollment_id;
+	}
 
-    getStudentID() {
-        return this.#student_id;
-    }
+	getStudentID() {
+		return this.#student_id;
+	}
 
-    getSectionID() {
-        return this.#section_id;
-    }
+	getSectionID() {
+		return this.#section_id;
+	}
 
-    getStatus() {
-        return this.#status;
-    }
+	getStatus() {
+		return this.#status;
+	}
 
-    toObject() {
-        return {
-            enrollment_id: this.#enrollment_id,
-            student_id: this.#student_id,
-            section_id: this.#section_id,
-            status: this.#status,
-        };
-    }
+	toObject() {
+		return {
+			enrollment_id: this.#enrollment_id,
+			student_id: this.#student_id,
+			section_id: this.#section_id,
+			status: this.#status,
+		};
+	}
 }
 
 export default Enrollment;

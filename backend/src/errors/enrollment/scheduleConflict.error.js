@@ -13,10 +13,10 @@ Defines the error raised when an enrollment conflicts with the student's schedul
 import EnrollmentError from './enrollment.error.js';
 
 export default class ScheduleConflictError extends EnrollmentError {
-    constructor(details = null) {
-        super('Schedule conflict with an existing enrollment.', details);
-        this.code = 'SCHEDULE_CONFLICT';
-        this.status = 409;
-        this.statusCode = 409;
-    }
+	constructor(details = null) {
+		super('Schedule conflict with an existing enrollment.', details);
+		this.code = 'SCHEDULE_CONFLICT';
+		this.status = 409;
+		this.statusCode = 409;
+	}
 }

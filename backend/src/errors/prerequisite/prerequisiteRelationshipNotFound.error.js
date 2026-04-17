@@ -13,11 +13,11 @@ Defines the error raised when a prerequisite relationship cannot be found for re
 import NotFoundError from '../common/notFound.error.js';
 
 export default class PrerequisiteRelationshipNotFoundError extends NotFoundError {
-    constructor(courseId, prerequisiteId, details = null) {
-        super('Prerequisite relationship', {
-            courseId,
-            prerequisiteId,
-            ...(details ?? {}),
-        });
-    }
+	constructor(courseId, prerequisiteId, details = null) {
+		super('Prerequisite relationship', {
+			courseId,
+			prerequisiteId,
+			...(details ?? {}),
+		});
+	}
 }

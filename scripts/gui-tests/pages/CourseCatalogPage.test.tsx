@@ -32,7 +32,7 @@ vi.mock('../../../frontend/src/api/catalog', () => ({
 vi.mock('../../../frontend/src/lib/studentEnrollment', () => ({
 	loadStudentEnrollmentData: loadStudentEnrollmentDataMock,
 	buildEnrichedEnrollments: buildEnrichedEnrollmentsMock,
-	formatSchedule: (section: { days: string, start_time: string | null, end_time: string | null }) =>
+	formatSchedule: (section: { days: string; start_time: string | null; end_time: string | null }) =>
 		section.days === 'async' ? 'Asynchronous' : `${section.days} ${section.start_time?.slice(0, 5) ?? ''}-${section.end_time?.slice(0, 5) ?? ''}`.trim(),
 	getCurrentSemester: (semesters: Array<{ semester_id: number }>) => semesters[0] ?? null,
 	sortSemesters: (semesters: Array<unknown>) => semesters,
@@ -149,7 +149,7 @@ describe('CourseCatalogPage', () => {
 			return [];
 		});
 
-		listSectionsBySemesterMock.mockImplementation(async ({ semId, limit, days, search }: { semId: number, limit: number, days?: string, search?: string }) => {
+		listSectionsBySemesterMock.mockImplementation(async ({ semId, limit, days, search }: { semId: number; limit: number; days?: string; search?: string }) => {
 			const allSections = semId === currentSemester.semester_id ? [cmsc495Section, cmsc350Section] : [previousSection];
 			const filteredByDays = days ? allSections.filter((section) => section.days === days) : allSections;
 			const filtered = search

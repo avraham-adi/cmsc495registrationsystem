@@ -14,11 +14,7 @@ import { Router } from 'express';
 import AdminController from '../controllers/admin.controller.js';
 import auth, { flMw as flm } from '../../middleware/session.middleware.js';
 import { default as roles } from '../../middleware/rbac.middleware.js';
-import {
-	validateBody as body,
-	validateParams as params,
-	validateQuery as query,
-} from '../middleware/validateRequest.middleware.js';
+import { validateBody as body, validateParams as params, validateQuery as query } from '../middleware/validateRequest.middleware.js';
 import { addUserSchema as user, setUserRoleSchema as role, getAllUsersQuerySchema as users } from '../schemas/admin.schemas.js';
 import { idParamSchema as id } from '../schemas/common.schema.js';
 

@@ -11,8 +11,8 @@ Renders standardized success, error, and informational status messages.
 */
 
 type statusMessageProps = {
-	kind: 'error' | 'success' | 'info',
-	message: string,
+	kind: 'error' | 'success' | 'info';
+	message: string;
 };
 
 export function StatusMessage({ kind, message }: statusMessageProps) {

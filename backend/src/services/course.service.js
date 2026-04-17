@@ -16,79 +16,79 @@ import * as Errors from '../errors/index.js';
 import { getSubjectNameFromCourseCode } from '../utils/courseSubjects.js';
 
 class CourseService {
-    constructor() {}
+	constructor() {}
 
-    async getCourse(courseId) {
-        const r = await db.query('SELECT course_id, course_code, title, description, credits FROM courses WHERE course_id = ?', [courseId]);
+	async getCourse(courseId) {
+		const r = await db.query('SELECT course_id, course_code, title, description, credits FROM courses WHERE course_id = ?', [courseId]);
 
-        if (r.length === 0) {
-            throw new Errors.NotFoundError('Course not found.');
-        }
+		if (r.length === 0) {
+			throw new Errors.NotFoundError('Course not found.');
+		}
 
-        return Course.fromPersistence(r[0]).toObject();
-    }
+		return Course.fromPersistence(r[0]).toObject();
+	}
 
-    async addCourse(courseData) {
-        const { course_code, title, description, credits } = courseData;
+	async addCourse(courseData) {
+		const { course_code, title, description, credits } = courseData;
 
-        const e = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_code = ?', [course_code]);
+		const e = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_code = ?', [course_code]);
 
-        if (e[0].count > 0) {
-            throw new Errors.DuplicateEntryError('Course with this course code already exists.');
-        }
+		if (e[0].count > 0) {
+			throw new Errors.DuplicateEntryError('Course with this course code already exists.');
+		}
 
-        const x = await db.query('INSERT INTO courses (course_code, title, description, credits) VALUES (?, ?, ?, ?)', [course_code, title, description, credits]);
+		const x = await db.query('INSERT INTO courses (course_code, title, description, credits) VALUES (?, ?, ?, ?)', [course_code, title, description, credits]);
 
-        const r = await db.query('SELECT course_id, course_code, title, description, credits FROM courses WHERE course_id = ?', [x.insertId]);
+		const r = await db.query('SELECT course_id, course_code, title, description, credits FROM courses WHERE course_id = ?', [x.insertId]);
 
-        if (r.length === 0) {
-            throw new Errors.DatabaseError('Failed to retrieve newly created course.');
-        }
+		if (r.length === 0) {
+			throw new Errors.DatabaseError('Failed to retrieve newly created course.');
+		}
 
-        return Course.fromPersistence(r[0]).toObject();
-    }
+		return Course.fromPersistence(r[0]).toObject();
+	}
 
-    async updCourse(courseId, courseData) {
-        const { course_code, title, description, credits } = courseData;
+	async updCourse(courseId, courseData) {
+		const { course_code, title, description, credits } = courseData;
 
-        const e = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_id = ?', [courseId]);
+		const e = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_id = ?', [courseId]);
 
-        if (e[0].count === 0) {
-            throw new Errors.NotFoundError('Course not found.');
-        }
+		if (e[0].count === 0) {
+			throw new Errors.NotFoundError('Course not found.');
+		}
 
-        const d = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_code = ? AND course_id <> ?', [course_code, courseId]);
+		const d = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_code = ? AND course_id <> ?', [course_code, courseId]);
 
-        if (d[0].count > 0) {
-            throw new Errors.DuplicateEntryError('Course with this course code already exists.');
-        }
+		if (d[0].count > 0) {
+			throw new Errors.DuplicateEntryError('Course with this course code already exists.');
+		}
 
-        await db.query('UPDATE courses SET course_code = ?, title = ?, description = ?, credits = ? WHERE course_id = ?', [course_code, title, description, credits, courseId]);
+		await db.query('UPDATE courses SET course_code = ?, title = ?, description = ?, credits = ? WHERE course_id = ?', [course_code, title, description, credits, courseId]);
 
-        const r = await db.query('SELECT course_id, course_code, title, description, credits FROM courses WHERE course_id = ?', [courseId]);
+		const r = await db.query('SELECT course_id, course_code, title, description, credits FROM courses WHERE course_id = ?', [courseId]);
 
-        if (r.length === 0) {
-            throw new Errors.DatabaseError('Failed to retrieve updated course.');
-        }
+		if (r.length === 0) {
+			throw new Errors.DatabaseError('Failed to retrieve updated course.');
+		}
 
-        return Course.fromPersistence(r[0]).toObject();
-    }
+		return Course.fromPersistence(r[0]).toObject();
+	}
 
-    async rmvCourse(courseId) {
-        const e = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_id = ?', [courseId]);
+	async rmvCourse(courseId) {
+		const e = await db.query('SELECT COUNT(*) AS count FROM courses WHERE course_id = ?', [courseId]);
 
-        if (e[0].count === 0) {
-            throw new Errors.NotFoundError('Course not found.');
-        }
+		if (e[0].count === 0) {
+			throw new Errors.NotFoundError('Course not found.');
+		}
 
-        const d = await db.query('SELECT COUNT(*) AS count FROM sections WHERE course_id = ?', [courseId]);
+		const d = await db.query('SELECT COUNT(*) AS count FROM sections WHERE course_id = ?', [courseId]);
 
-        if (d[0].count > 0) {
-            throw new Errors.ValidationError('Cannot delete a course that has scheduled sections. Remove or archive its sections first.');
-        }
+		if (d[0].count > 0) {
+			throw new Errors.ValidationError('Cannot delete a course that has scheduled sections. Remove or archive its sections first.');
+		}
 
-        await db.query('DELETE FROM courses WHERE course_id = ?', [courseId]);
-    }
+		await db.query('DELETE FROM courses WHERE course_id = ?', [courseId]);
+	}
 
 	async getCourses(page, limit, search, subject) {
 		const p = Number.isInteger(Number(page)) && Number(page) > 0 ? Number(page) : 1;

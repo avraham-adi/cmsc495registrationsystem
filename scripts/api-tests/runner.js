@@ -18,46 +18,46 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export async function runApiTests() {
-    const harness = createHarness(BASE_URL);
-    const { clients, ctx } = createTestEnv(BASE_URL);
-    const env = { harness, clients, ctx };
-    let child;
+	const harness = createHarness(BASE_URL);
+	const { clients, ctx } = createTestEnv(BASE_URL);
+	const env = { harness, clients, ctx };
+	let child;
 
-    try {
-        await resetDatabase();
-        child = startServer(path.resolve(__dirname, '..', '..', SERVER_ENTRY.replace(/^\.\//, '')));
+	try {
+		await resetDatabase();
+		child = startServer(path.resolve(__dirname, '..', '..', SERVER_ENTRY.replace(/^\.\//, '')));
 
-        const ready = await waitForServer(BASE_URL, SERVER_READY_TIMEOUT_MS);
-        if (!ready) {
-            throw new Error('Server did not become ready in time.');
-        }
+		const ready = await waitForServer(BASE_URL, SERVER_READY_TIMEOUT_MS);
+		if (!ready) {
+			throw new Error('Server did not become ready in time.');
+		}
 
-        await runCoreSuite(env);
-        await runAdminSuite(env);
-        await runSessionAuthSuite(env);
-        await runCatalogSuite(env);
-        await runEnrollmentSuite(env);
-        await runConcurrencySuite(env);
-        await runEdgeCasesSuite(env);
-        await runUnitStyleSuite(env);
-        await runCleanupSuite(env);
-    } catch (error) {
-        console.error(error.stack || error.message);
-        process.exitCode = 1;
-    } finally {
-        await harness.writeLog();
-        await stopServer(child);
-        await closeDb();
-    }
+		await runCoreSuite(env);
+		await runAdminSuite(env);
+		await runSessionAuthSuite(env);
+		await runCatalogSuite(env);
+		await runEnrollmentSuite(env);
+		await runConcurrencySuite(env);
+		await runEdgeCasesSuite(env);
+		await runUnitStyleSuite(env);
+		await runCleanupSuite(env);
+	} catch (error) {
+		console.error(error.stack || error.message);
+		process.exitCode = 1;
+	} finally {
+		await harness.writeLog();
+		await stopServer(child);
+		await closeDb();
+	}
 
-    const failed = harness.results.filter((result) => !result.passed);
-    const passed = harness.results.filter((result) => result.passed);
+	const failed = harness.results.filter((result) => !result.passed);
+	const passed = harness.results.filter((result) => result.passed);
 
-    console.log(`\nTest log written to ${LOG_PATH}`);
-    console.log(`Passed: ${passed.length}`);
-    console.log(`Failed: ${failed.length}`);
+	console.log(`\nTest log written to ${LOG_PATH}`);
+	console.log(`Passed: ${passed.length}`);
+	console.log(`Failed: ${failed.length}`);
 
-    if (failed.length > 0) {
-        process.exitCode = 1;
-    }
+	if (failed.length > 0) {
+		process.exitCode = 1;
+	}
 }

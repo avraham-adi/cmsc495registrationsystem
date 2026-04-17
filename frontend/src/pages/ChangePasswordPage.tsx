@@ -70,35 +70,37 @@ export function ChangePasswordPage() {
 	return (
 		<div className="auth-layout">
 			<section className="auth-card auth-card-wide">
-			<div className="panel-header">
-				<div>
-					<p className="eyebrow">Authentication</p>
-					<h1>Change Password</h1>
+				<div className="panel-header">
+					<div>
+						<p className="eyebrow">Authentication</p>
+						<h1>Change Password</h1>
+					</div>
 				</div>
-			</div>
 
-			{requiresPasswordChange ? <StatusMessage kind="info" message="It appears to be your first time logging in. Password change is required before other workflows become available." /> : null}
+				{requiresPasswordChange ? (
+					<StatusMessage kind="info" message="It appears to be your first time logging in. Password change is required before other workflows become available." />
+				) : null}
 
-			<form className="stack" onSubmit={submit}>
-				<FormField id="new-password" label="New Password" type="password" value={password} onChange={setPassword} autoComplete="new-password" required />
-				<FormField id="confirm-password" label="Confirm Password" type="password" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" required />
+				<form className="stack" onSubmit={submit}>
+					<FormField id="new-password" label="New Password" type="password" value={password} onChange={setPassword} autoComplete="new-password" required />
+					<FormField id="confirm-password" label="Confirm Password" type="password" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" required />
 
-				<p className="hint">
-					Password requires:
-					<br /> - at least 8 characters
-					<br /> - 1 upper/lowercase
-					<br /> - 1 number
-					<br /> - 1 special character
-					<br /> - cannot contain the email address
-				</p>
+					<p className="hint">
+						Password requires:
+						<br /> - at least 8 characters
+						<br /> - 1 upper/lowercase
+						<br /> - 1 number
+						<br /> - 1 special character
+						<br /> - cannot contain the email address
+					</p>
 
-				{feedback.feedback.message ? <StatusMessage kind="success" message={feedback.feedback.message} /> : null}
-				{feedback.feedback.error ? <StatusMessage kind="error" message={feedback.feedback.error} /> : null}
+					{feedback.feedback.message ? <StatusMessage kind="success" message={feedback.feedback.message} /> : null}
+					{feedback.feedback.error ? <StatusMessage kind="error" message={feedback.feedback.error} /> : null}
 
-				<button type="submit" className="primary-button" disabled={isSubmitting}>
-					{isSubmitting ? 'Updating...' : 'Update Password'}
-				</button>
-			</form>
+					<button type="submit" className="primary-button" disabled={isSubmitting}>
+						{isSubmitting ? 'Updating...' : 'Update Password'}
+					</button>
+				</form>
 			</section>
 		</div>
 	);

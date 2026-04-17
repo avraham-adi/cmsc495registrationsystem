@@ -14,12 +14,12 @@ import { request } from './client';
 import type { Enrollment, EnrollmentCreatePayload, EnrollmentListResponse, EnrollmentUpdatePayload, PrerequisiteListResponse, Section, SectionListResponse, SemesterListResponse } from '../types/api';
 
 export type SectionListParams = {
-	page?: number,
-	limit?: number,
-	search?: string,
-	semId?: number | null,
-	subject?: string,
-	days?: string,
+	page?: number;
+	limit?: number;
+	search?: string;
+	semId?: number | null;
+	subject?: string;
+	days?: string;
 };
 
 // Requests the semester list used by student, professor, and admin views.

@@ -15,11 +15,7 @@ import EnrollmentController from '../controllers/enrollment.controller.js';
 import auth, { flMw as flm } from '../../middleware/session.middleware.js';
 import { default as roles } from '../../middleware/rbac.middleware.js';
 import { validateBody as body, validateParams as params, validateQuery as query } from '../middleware/validateRequest.middleware.js';
-import {
-	enrollmentCreateBodySchema as create,
-	enrollmentListQuerySchema as list,
-	enrollmentUpdateBodySchema as upd,
-} from '../schemas/enrollment.schema.js';
+import { enrollmentCreateBodySchema as create, enrollmentListQuerySchema as list, enrollmentUpdateBodySchema as upd } from '../schemas/enrollment.schema.js';
 import { idParamSchema as id } from '../schemas/common.schema.js';
 
 const r = Router();

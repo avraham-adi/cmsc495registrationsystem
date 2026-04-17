@@ -31,10 +31,10 @@ import type {
 } from '../types/api';
 
 type UserListQuery = {
-	page?: number,
-	limit?: number,
-	search?: string,
-	role?: UserRole | '',
+	page?: number;
+	limit?: number;
+	search?: string;
+	role?: UserRole | '';
 };
 
 // Requests paginated users with optional search and role filtering.
@@ -74,21 +74,21 @@ export function deleteUser(id: number) {
 }
 
 type CourseListQuery = {
-	page?: number,
-	limit?: number,
-	search?: string,
-	subject?: string,
+	page?: number;
+	limit?: number;
+	search?: string;
+	subject?: string;
 };
 
 type SectionListQuery = {
-	page?: number,
-	limit?: number,
-	search?: string,
-	crsId?: number,
-	semId?: number,
-	profId?: number,
-	subject?: string,
-	days?: string,
+	page?: number;
+	limit?: number;
+	search?: string;
+	crsId?: number;
+	semId?: number;
+	profId?: number;
+	subject?: string;
+	days?: string;
 };
 
 // Requests paginated courses with optional search and subject filters.

@@ -46,52 +46,52 @@ type AdminHomeView = 'overview' | 'profile' | 'password';
 type AdminToolView = 'users' | 'courses' | 'prerequisites' | 'semesters' | 'sections';
 
 type AdminDataState = {
-	users: User[],
-	professors: User[],
-	courses: Course[],
-	semesters: Semester[],
-	sections: Section[],
+	users: User[];
+	professors: User[];
+	courses: Course[];
+	semesters: Semester[];
+	sections: Section[];
 };
 
 type UserFormState = {
-	name: string,
-	email: string,
-	type: UserRole,
-	detail: string,
+	name: string;
+	email: string;
+	type: UserRole;
+	detail: string;
 };
 
 type CourseFormState = {
-	courseId: number | null,
-	code: string,
-	title: string,
-	desc: string,
-	cred: string,
+	courseId: number | null;
+	code: string;
+	title: string;
+	desc: string;
+	cred: string;
 };
 
 type SemesterFormState = {
-	term: string,
-	year: string,
+	term: string;
+	year: string;
 };
 
 type SectionFormState = {
-	sectionId: number | null,
-	courseId: string,
-	semId: string,
-	profId: string,
-	capacity: string,
-	days: string,
-	startTm: string,
-	endTm: string,
+	sectionId: number | null;
+	courseId: string;
+	semId: string;
+	profId: string;
+	capacity: string;
+	days: string;
+	startTm: string;
+	endTm: string;
 };
 
 type PaginationState = {
-	page: number,
-	pageSize: number,
+	page: number;
+	pageSize: number;
 };
 
 type PaginatedResult<T> = {
-	items: T[],
-	meta: Meta,
+	items: T[];
+	meta: Meta;
 };
 
 const EMPTY_ADMIN_DATA: AdminDataState = {
@@ -512,7 +512,7 @@ function AdminOverview({ data }: { data: AdminDataState }) {
 	);
 }
 
-function AdminUsersView({ users, onReload }: { users: User[], onReload: () => Promise<void> }) {
+function AdminUsersView({ users, onReload }: { users: User[]; onReload: () => Promise<void> }) {
 	const [userSearch, setUserSearch] = useState('');
 	const [form, setForm] = useState<UserFormState>(DEFAULT_USER_FORM);
 	const createFeedback = useFormFeedback();
@@ -588,7 +588,7 @@ function AdminUsersView({ users, onReload }: { users: User[], onReload: () => Pr
 	);
 }
 
-function AdminCoursesView({ courses, onReload }: { courses: Course[], onReload: () => Promise<void> }) {
+function AdminCoursesView({ courses, onReload }: { courses: Course[]; onReload: () => Promise<void> }) {
 	const [courseSearch, setCourseSearch] = useState('');
 	const [form, setForm] = useState<CourseFormState>(DEFAULT_COURSE_FORM);
 	const saveFeedback = useFormFeedback();
@@ -854,7 +854,7 @@ function AdminPrerequisitesView({ courses }: { courses: Course[] }) {
 	);
 }
 
-function AdminSemestersView({ semesters, onReload }: { semesters: Semester[], onReload: () => Promise<void> }) {
+function AdminSemestersView({ semesters, onReload }: { semesters: Semester[]; onReload: () => Promise<void> }) {
 	const [search, setSearch] = useState('');
 	const [form, setForm] = useState<SemesterFormState>(DEFAULT_SEMESTER_FORM);
 	const createFeedback = useFormFeedback();
@@ -954,11 +954,11 @@ function AdminSectionsView({
 	sections,
 	onReload,
 }: {
-	courses: Course[],
-	professors: User[],
-	semesters: Semester[],
-	sections: Section[],
-	onReload: () => Promise<void>,
+	courses: Course[];
+	professors: User[];
+	semesters: Semester[];
+	sections: Section[];
+	onReload: () => Promise<void>;
 }) {
 	const [sectionSearch, setSectionSearch] = useState('');
 	const [form, setForm] = useState<SectionFormState>(DEFAULT_SECTION_FORM);
@@ -1157,7 +1157,7 @@ function AdminSectionsView({
 	);
 }
 
-function UserCard({ user, onReload }: { user: User, onReload: () => Promise<void> }) {
+function UserCard({ user, onReload }: { user: User; onReload: () => Promise<void> }) {
 	const [type, setType] = useState<UserRole>(user.role);
 	const [detail, setDetail] = useState(user.role_details);
 	const feedback = useFormFeedback();

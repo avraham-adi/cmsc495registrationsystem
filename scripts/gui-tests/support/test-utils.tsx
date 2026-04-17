@@ -15,14 +15,11 @@ import { render } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 type RenderWithRouterOptions = {
-	initialEntries?: string[],
-	path?: string,
+	initialEntries?: string[];
+	path?: string;
 };
 
-export function renderWithRouter(
-	ui: ReactElement,
-	{ initialEntries = ['/'], path = '/' }: RenderWithRouterOptions = {}
-) {
+export function renderWithRouter(ui: ReactElement, { initialEntries = ['/'], path = '/' }: RenderWithRouterOptions = {}) {
 	return render(
 		<MemoryRouter initialEntries={initialEntries}>
 			<Routes>

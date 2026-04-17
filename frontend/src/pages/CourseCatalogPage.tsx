@@ -24,20 +24,20 @@ import type { Meta, Prerequisite, Section, Semester } from '../types/api';
 import { FormField } from '../components/FormField';
 
 type CatalogSection = {
-	section: Section,
+	section: Section;
 };
 
 type EnrollmentResult = {
-	sectionId: number,
-	courseCode: string,
-	status: 'success' | 'error',
-	message: string,
+	sectionId: number;
+	courseCode: string;
+	status: 'success' | 'error';
+	message: string;
 };
 
 type FlashMessage = {
-	id: number,
-	kind: 'success' | 'error' | 'info',
-	message: string,
+	id: number;
+	kind: 'success' | 'error' | 'info';
+	message: string;
 };
 
 const SUBJECT_OPTIONS = [
@@ -56,7 +56,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 // Builds the persistent meeting-day dropdown options from the semester's section list.
 function generateDaysOptions(sections: Section[]) {
-	const options: Array<{ value: string, label: string }> = [{ value: '', label: 'All Meeting Days' }];
+	const options: Array<{ value: string; label: string }> = [{ value: '', label: 'All Meeting Days' }];
 
 	const uniqueDays = new Set<string>();
 	for (const section of sections) {

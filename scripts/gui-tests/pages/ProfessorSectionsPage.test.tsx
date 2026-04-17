@@ -5,13 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ProfessorSectionsPage } from '../../../frontend/src/pages/ProfessorSectionsPage';
 import { ApiError } from '../../../frontend/src/api/client';
 
-const {
-	useAuthMock,
-	listProfessorSectionsMock,
-	listSectionAccessCodesMock,
-	generateSectionAccessCodesMock,
-	revokeSectionAccessCodeMock,
-} = vi.hoisted(() => ({
+const { useAuthMock, listProfessorSectionsMock, listSectionAccessCodesMock, generateSectionAccessCodesMock, revokeSectionAccessCodeMock } = vi.hoisted(() => ({
 	useAuthMock: vi.fn(),
 	listProfessorSectionsMock: vi.fn(),
 	listSectionAccessCodesMock: vi.fn(),
@@ -29,7 +23,7 @@ vi.mock('../../../frontend/src/api/professor', () => ({
 	generateSectionAccessCodes: generateSectionAccessCodesMock,
 	revokeSectionAccessCode: revokeSectionAccessCodeMock,
 	mapSectionList: (response: { Section: Array<{ Section: unknown }> }) => response.Section.map((entry) => entry.Section),
-	sortSectionsByCourse: (sections: Array<{ course: { course_code: string }, section_id: number }>) =>
+	sortSectionsByCourse: (sections: Array<{ course: { course_code: string }; section_id: number }>) =>
 		[...sections].sort((left, right) => left.course.course_code.localeCompare(right.course.course_code) || left.section_id - right.section_id),
 }));
 

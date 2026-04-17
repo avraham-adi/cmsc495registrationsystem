@@ -32,6 +32,7 @@ const sectionA = {
 	section_id: 10,
 	capacity: 25,
 	enrolled_count: 20,
+	waitlisted_count: 0,
 	seats_available: 5,
 	days: 'MWF',
 	start_time: '09:00:00',
@@ -59,6 +60,7 @@ const sectionB = {
 	section_id: 11,
 	capacity: 25,
 	enrolled_count: 18,
+	waitlisted_count: 2,
 	seats_available: 7,
 	days: 'TR',
 	start_time: '11:00:00',
@@ -145,11 +147,7 @@ describe('studentEnrollment', () => {
 
 	it('sorts semesters by year descending then term rank', () => {
 		const result = sortSemesters(semesters);
-		expect(result.map((semester) => `${semester.year}-${semester.term}`)).toEqual([
-			'2025-Fall',
-			'2025-Spring',
-			'2024-Summer',
-		]);
+		expect(result.map((semester) => `${semester.year}-${semester.term}`)).toEqual(['2025-Fall', '2025-Spring', '2024-Summer']);
 	});
 
 	it('places unknown terms after ranked terms within the same year', () => {
@@ -198,11 +196,11 @@ describe('studentEnrollment', () => {
 		expect(result[0].totalCredits).toBe(7);
 	});
 
-it('builds one weekly event per scheduled meeting day', () => {
-	const result = buildWeeklySchedule([{ enrollment: enrollments[0], section: sectionA }]);
-	expect(result).toHaveLength(3);
-	expect(result.every((event) => event.courseCode === 'CMSC350')).toBe(true);
-});
+	it('builds one weekly event per scheduled meeting day', () => {
+		const result = buildWeeklySchedule([{ enrollment: enrollments[0], section: sectionA }]);
+		expect(result).toHaveLength(3);
+		expect(result.every((event) => event.courseCode === 'CMSC350')).toBe(true);
+	});
 
 	it('anchors weekly events to the current Monday-based week', () => {
 		vi.useFakeTimers();
@@ -257,10 +255,7 @@ it('builds one weekly event per scheduled meeting day', () => {
 
 	it('deduplicates section fetches when multiple enrollments share a section', async () => {
 		listSemestersMock.mockResolvedValue([{ Semester: semesters[0] }]);
-		listEnrollmentsMock.mockResolvedValue([
-			{ Enrollment: enrollments[0] },
-			{ Enrollment: { ...enrollments[0], enrollment_id: 8 } },
-		]);
+		listEnrollmentsMock.mockResolvedValue([{ Enrollment: enrollments[0] }, { Enrollment: { ...enrollments[0], enrollment_id: 8 } }]);
 		getSectionMock.mockResolvedValue(sectionA);
 
 		await loadStudentEnrollmentData(1);
@@ -280,13 +275,8 @@ it('builds one weekly event per scheduled meeting day', () => {
 
 	it('handles concurrent section fetch resolution order without changing the returned section set', async () => {
 		listSemestersMock.mockResolvedValue([{ Semester: semesters[0] }]);
-		listEnrollmentsMock.mockResolvedValue([
-			{ Enrollment: enrollments[0] },
-			{ Enrollment: enrollments[1] },
-		]);
-		getSectionMock
-			.mockImplementationOnce(() => new Promise((resolve) => setTimeout(() => resolve(sectionA), 20)))
-			.mockImplementationOnce(() => Promise.resolve(sectionB));
+		listEnrollmentsMock.mockResolvedValue([{ Enrollment: enrollments[0] }, { Enrollment: enrollments[1] }]);
+		getSectionMock.mockImplementationOnce(() => new Promise((resolve) => setTimeout(() => resolve(sectionA), 20))).mockImplementationOnce(() => Promise.resolve(sectionB));
 
 		const result = await loadStudentEnrollmentData(1);
 

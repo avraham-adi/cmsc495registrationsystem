@@ -32,10 +32,10 @@ app.set('trust proxy', 1);
 
 // Core middleware
 app.use(
-    cors({
-        origin: true,
-        credentials: true,
-    })
+	cors({
+		origin: true,
+		credentials: true,
+	})
 );
 app.use(express.json());
 app.use(morgan('dev'));
@@ -43,7 +43,7 @@ app.use(session(sessionConfig()));
 
 // Health Check
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ message: 'API is running' });
+	res.status(200).json({ message: 'API is running' });
 });
 
 // Route Mounting
@@ -57,25 +57,25 @@ app.use('/semester', semesterRoutes);
 
 // 404 Handler
 app.use((req, res) => {
-    res.status(404).json({ error: 'Route Not Found' });
+	res.status(404).json({ error: 'Route Not Found' });
 });
 
 // Central Error handler
 app.use((err, req, res, next) => {
-    const status = err.statusCode || err.status || 500;
-    const payload = {
-        error: err.message || 'Internal Server Error',
-    };
+	const status = err.statusCode || err.status || 500;
+	const payload = {
+		error: err.message || 'Internal Server Error',
+	};
 
-    if (err.code) {
-        payload.code = err.code;
-    }
+	if (err.code) {
+		payload.code = err.code;
+	}
 
-    if (err.details) {
-        payload.details = err.details;
-    }
+	if (err.details) {
+		payload.details = err.details;
+	}
 
-    res.status(status).json(payload);
+	res.status(status).json(payload);
 });
 
 export default app;

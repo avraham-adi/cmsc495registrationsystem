@@ -1,12 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import {
-	generateSectionAccessCodes,
-	listProfessorSections,
-	listSectionAccessCodes,
-	mapSectionList,
-	revokeSectionAccessCode,
-	sortSectionsByCourse,
-} from '../../../frontend/src/api/professor';
+import { generateSectionAccessCodes, listProfessorSections, listSectionAccessCodes, mapSectionList, revokeSectionAccessCode, sortSectionsByCourse } from '../../../frontend/src/api/professor';
 
 const { requestMock } = vi.hoisted(() => ({
 	requestMock: vi.fn(),
@@ -56,9 +49,7 @@ describe('professor api', () => {
 	});
 
 	it('preserves concurrent access-code requests independently', async () => {
-		requestMock
-			.mockResolvedValueOnce({ code1: 'ABCD-1234' })
-			.mockResolvedValueOnce({ code1: 'WXYZ-9999' });
+		requestMock.mockResolvedValueOnce({ code1: 'ABCD-1234' }).mockResolvedValueOnce({ code1: 'WXYZ-9999' });
 
 		const [one, two] = await Promise.all([listSectionAccessCodes(10), listSectionAccessCodes(11)]);
 

@@ -19,8 +19,8 @@ import { useFormFeedback } from '../lib/useFormFeedback';
 
 type LocationState = {
 	from?: {
-		pathname?: string,
-	},
+		pathname?: string;
+	};
 };
 
 export function LoginPage() {

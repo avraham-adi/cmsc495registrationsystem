@@ -19,18 +19,18 @@ import { StatusMessage } from './StatusMessage';
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 type AdminListShellProps = {
-	searchId: string,
-	searchValue: string,
-	onSearchChange: (value: string) => void,
-	searchPlaceholder: string,
-	pageSizeId: string,
-	pageSize: number,
-	onPageSizeChange: (value: number) => void,
-	meta: Meta,
-	setPage: (page: number) => void,
-	children: ReactNode,
-	statusMessage?: string,
-	statusError?: string,
+	searchId: string;
+	searchValue: string;
+	onSearchChange: (value: string) => void;
+	searchPlaceholder: string;
+	pageSizeId: string;
+	pageSize: number;
+	onPageSizeChange: (value: number) => void;
+	meta: Meta;
+	setPage: (page: number) => void;
+	children: ReactNode;
+	statusMessage?: string;
+	statusError?: string;
 };
 
 export function AdminListShell({
@@ -56,7 +56,11 @@ export function AdminListShell({
 						<label className="field" htmlFor={pageSizeId}>
 							<span>Items Per Page</span>
 							<select id={pageSizeId} value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}>
-								{PAGE_SIZE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+								{PAGE_SIZE_OPTIONS.map((option) => (
+									<option key={option} value={option}>
+										{option}
+									</option>
+								))}
 							</select>
 						</label>
 					</div>
@@ -66,9 +70,7 @@ export function AdminListShell({
 			{statusError ? <StatusMessage kind="error" message={statusError} /> : null}
 			<div className="catalog-list-window">
 				<PaginationControls meta={meta} onPageChange={setPage} position="top" />
-				<div className="catalog-list-scroll">
-					{children}
-				</div>
+				<div className="catalog-list-scroll">{children}</div>
 				<PaginationControls meta={meta} onPageChange={setPage} />
 			</div>
 		</section>

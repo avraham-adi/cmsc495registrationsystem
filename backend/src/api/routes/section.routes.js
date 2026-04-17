@@ -14,17 +14,8 @@ import { Router } from 'express';
 import SectionController from '../controllers/section.controller.js';
 import auth, { flMw as flm } from '../../middleware/session.middleware.js';
 import { default as roles } from '../../middleware/rbac.middleware.js';
-import {
-	validateBody as body,
-	validateParams as params,
-	validateQuery as query,
-} from '../middleware/validateRequest.middleware.js';
-import {
-	generateAccessCodesBodySchema as gen,
-	getAllSectionsQuerySchema as sections,
-	revokeAccessCodesQuerySchema as rev,
-	sectionBodySchema as section,
-} from '../schemas/section.schemas.js';
+import { validateBody as body, validateParams as params, validateQuery as query } from '../middleware/validateRequest.middleware.js';
+import { generateAccessCodesBodySchema as gen, getAllSectionsQuerySchema as sections, revokeAccessCodesQuerySchema as rev, sectionBodySchema as section } from '../schemas/section.schemas.js';
 import { cIdParamSchema as courseId, idParamSchema as id } from '../schemas/common.schema.js';
 
 const r = Router();

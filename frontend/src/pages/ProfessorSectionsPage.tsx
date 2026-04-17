@@ -31,24 +31,24 @@ const TERM_RANK: Record<string, number> = {
 type ProfessorView = 'sections' | 'profile' | 'password';
 
 type SectionCodeEntry = {
-	key: string,
-	value: string,
-	used: boolean,
+	key: string;
+	value: string;
+	used: boolean;
 };
 
 type SectionCardState = {
-	quantity: string,
-	message: string,
-	error: string,
-	isGenerating: boolean,
-	revokingCode: string | null,
+	quantity: string;
+	message: string;
+	error: string;
+	isGenerating: boolean;
+	revokingCode: string | null;
 };
 
 type SectionGroup = {
-	key: string,
-	semesterLabel: string,
-	subjectLabel: string,
-	sections: Section[],
+	key: string;
+	semesterLabel: string;
+	subjectLabel: string;
+	sections: Section[];
 };
 
 const DEFAULT_CARD_STATE: SectionCardState = {
@@ -109,9 +109,9 @@ function getCurrentSemesterId(sections: Section[]): number | null {
 }
 
 type SectionGroupSection = {
-	currentSectionGroups: SectionGroup[],
-	previousSectionGroups: SectionGroup[],
-	currentSectionCount: number,
+	currentSectionGroups: SectionGroup[];
+	previousSectionGroups: SectionGroup[];
+	currentSectionCount: number;
 };
 
 export function ProfessorSectionsPage() {

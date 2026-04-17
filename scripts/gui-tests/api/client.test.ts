@@ -22,10 +22,13 @@ describe('api client request', () => {
 	it('adds json content type when a request body is provided', async () => {
 		vi.mocked(globalThis.fetch).mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
 		await request('/user/login', { method: 'POST', body: { email: 'a@example.edu' } });
-		expect(globalThis.fetch).toHaveBeenCalledWith('/user/login', expect.objectContaining({
-			body: JSON.stringify({ email: 'a@example.edu' }),
-			headers: expect.any(Headers),
-		}));
+		expect(globalThis.fetch).toHaveBeenCalledWith(
+			'/user/login',
+			expect.objectContaining({
+				body: JSON.stringify({ email: 'a@example.edu' }),
+				headers: expect.any(Headers),
+			})
+		);
 	});
 
 	it('returns undefined for 204 responses', async () => {

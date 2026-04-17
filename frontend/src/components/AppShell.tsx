@@ -22,11 +22,11 @@ function LockedNavItem({
 	end = false,
 	isActive,
 }: {
-	to: string,
-	children: React.ReactNode,
-	disabled: boolean,
-	end?: boolean,
-	isActive?: (pathname: string, search: string) => boolean,
+	to: string;
+	children: React.ReactNode;
+	disabled: boolean;
+	end?: boolean;
+	isActive?: (pathname: string, search: string) => boolean;
 }) {
 	const location = useLocation();
 
@@ -113,12 +113,7 @@ export function AppShell() {
 					)}
 					{user?.role === 'ADMIN' ? (
 						<>
-							<LockedNavItem
-								to="/console/admin"
-								disabled={locked}
-								end
-								isActive={(pathname, search) => pathname === '/console/admin' && !new URLSearchParams(search).get('tool')}
-							>
+							<LockedNavItem to="/console/admin" disabled={locked} end isActive={(pathname, search) => pathname === '/console/admin' && !new URLSearchParams(search).get('tool')}>
 								Admin Home
 							</LockedNavItem>
 							<LockedNavItem

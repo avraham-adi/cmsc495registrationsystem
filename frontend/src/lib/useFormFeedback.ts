@@ -14,8 +14,8 @@ import { useState } from 'react';
 import { ApiError } from '../api/client';
 
 export type FeedbackState = {
-	message: string,
-	error: string,
+	message: string;
+	error: string;
 };
 
 export const EMPTY_FEEDBACK: FeedbackState = {

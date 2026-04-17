@@ -5,13 +5,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { AuthProvider, useAuth } from '../../../frontend/src/context/AuthContext';
 import { ApiError } from '../../../frontend/src/api/client';
 
-const {
-	getUserMock,
-	loginMock,
-	logoutMock,
-	updPasswordMock,
-	updUserMock,
-} = vi.hoisted(() => ({
+const { getUserMock, loginMock, logoutMock, updPasswordMock, updUserMock } = vi.hoisted(() => ({
 	getUserMock: vi.fn(),
 	loginMock: vi.fn(),
 	logoutMock: vi.fn(),
@@ -147,10 +141,7 @@ describe('AuthContext', () => {
 
 		renderWithProvider();
 		await screen.findByText('user:Auth User');
-		await Promise.all([
-			user.click(screen.getByRole('button', { name: 'refresh' })),
-			user.click(screen.getByRole('button', { name: 'refresh' })),
-		]);
+		await Promise.all([user.click(screen.getByRole('button', { name: 'refresh' })), user.click(screen.getByRole('button', { name: 'refresh' }))]);
 
 		await waitFor(() => {
 			expect(screen.getByText(/user:(Slow Refresh|Fast Refresh)/)).toBeInTheDocument();
@@ -163,16 +154,7 @@ describe('AuthContext', () => {
 });
 
 function AuthConsumer() {
-	const {
-		user,
-		isAuthenticated,
-		requiresPasswordChange,
-		loginAction,
-		logoutAction,
-		refreshUser,
-		updateProfileAction,
-		changePasswordAction,
-	} = useAuth();
+	const { user, isAuthenticated, requiresPasswordChange, loginAction, logoutAction, refreshUser, updateProfileAction, changePasswordAction } = useAuth();
 	const [lastRefresh, setLastRefresh] = React.useState('none');
 	const [error, setError] = React.useState('');
 
@@ -200,11 +182,21 @@ function AuthConsumer() {
 			<div>{`requiresPasswordChange:${String(requiresPasswordChange)}`}</div>
 			<div>{`lastRefresh:${lastRefresh}`}</div>
 			<div>{`error:${error}`}</div>
-			<button type="button" onClick={() => void loginAction({ email: 'auth@example.edu', password: 'Password123!' })}>login</button>
-			<button type="button" onClick={() => void logoutAction()}>logout</button>
-			<button type="button" onClick={() => void runRefresh()}>refresh</button>
-			<button type="button" onClick={() => void updateProfileAction({ name: 'Updated User', email: 'updated@example.edu' })}>update-profile</button>
-			<button type="button" onClick={() => void runChangePassword()}>change-password</button>
+			<button type="button" onClick={() => void loginAction({ email: 'auth@example.edu', password: 'Password123!' })}>
+				login
+			</button>
+			<button type="button" onClick={() => void logoutAction()}>
+				logout
+			</button>
+			<button type="button" onClick={() => void runRefresh()}>
+				refresh
+			</button>
+			<button type="button" onClick={() => void updateProfileAction({ name: 'Updated User', email: 'updated@example.edu' })}>
+				update-profile
+			</button>
+			<button type="button" onClick={() => void runChangePassword()}>
+				change-password
+			</button>
 		</div>
 	);
 }
