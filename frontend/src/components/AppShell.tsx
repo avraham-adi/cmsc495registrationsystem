@@ -162,7 +162,7 @@ export function AppShell() {
 				{requiresPasswordChange ? (
 					<section className="banner warning persistent-banner">
 						<div>
-							<strong>Password update required.</strong> Your account is still on first login, and most protected backend routes stay blocked until you change your password.
+							<strong>Password update required.</strong> You must change your password to access registration systems.
 						</div>
 						<NavLink to="/change-password" className="banner-link">
 							Change Password

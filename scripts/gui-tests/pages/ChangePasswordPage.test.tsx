@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom/vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
@@ -47,7 +48,8 @@ describe('ChangePasswordPage', () => {
 		renderPage();
 
 		expect(screen.getByRole('heading', { name: 'Change Password' })).toBeInTheDocument();
-		expect(screen.getByText('It appears to be your first time logging in. Password change is required before other workflows become available.')).toBeInTheDocument();
+		expect(screen.getByText(/Password update required\./)).toBeInTheDocument();
+		expect(screen.getByText(/Registration access is waiting on this step\./)).toBeInTheDocument();
 		expect(screen.queryByText('Dashboard Password Route')).not.toBeInTheDocument();
 	});
 

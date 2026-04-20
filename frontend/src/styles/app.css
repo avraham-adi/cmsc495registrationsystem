@@ -314,7 +314,9 @@ p {
 	background-position:
 		calc(100% - 18px) calc(50% - 1px),
 		calc(100% - 12px) calc(50% - 1px);
-	background-size: 6px 6px, 6px 6px;
+	background-size:
+		6px 6px,
+		6px 6px;
 	background-repeat: no-repeat;
 }
 
@@ -797,6 +799,35 @@ p {
 	display: grid;
 	place-items: center;
 	padding: 24px;
+}
+
+.auth-password-layout {
+	align-items: start;
+	padding-top: clamp(28px, 6vh, 64px);
+}
+
+.auth-password-shell {
+	width: min(100%, 1080px);
+	display: grid;
+	gap: 18px;
+}
+
+.auth-password-banner {
+	margin-bottom: 0;
+}
+
+.auth-password-card {
+	width: min(100%, 520px);
+	justify-self: center;
+}
+
+.auth-password-message {
+	margin: 0 0 18px;
+}
+
+.auth-password-message strong {
+	display: inline-block;
+	margin-right: 4px;
 }
 
 .auth-card {
