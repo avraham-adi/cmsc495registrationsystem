@@ -49,9 +49,9 @@ export function AdminListShell({
 }: AdminListShellProps) {
 	return (
 		<section className="panel stack admin-data-panel">
-			<div className="catalog-toolbar">
-				<section className="catalog-toolbar-box catalog-toolbar-filters">
-					<div className="catalog-filter-grid">
+			<div className="admin-list-toolbar">
+				<section className="catalog-toolbar-box admin-list-toolbar-box">
+					<div className="admin-list-filter-grid">
 						<FormField id={searchId} label="Search" value={searchValue} onChange={onSearchChange} placeholder={searchPlaceholder} />
 						<label className="field" htmlFor={pageSizeId}>
 							<span>Items Per Page</span>

@@ -3,6 +3,7 @@ import {
 	buildEnrichedEnrollments,
 	buildWeeklySchedule,
 	calculateEnrollmentCredits,
+	formatDayCombination,
 	formatSchedule,
 	getAsyncEnrollments,
 	groupEnrollmentsBySemester,
@@ -114,11 +115,15 @@ describe('studentEnrollment', () => {
 	});
 
 	it('formats sections with days but no times as the raw meeting days', () => {
-		expect(formatSchedule({ ...sectionA, start_time: null, end_time: null })).toBe('MWF');
+		expect(formatSchedule({ ...sectionA, start_time: null, end_time: null })).toBe('Mon / Wed / Fri');
 	});
 
 	it('formats scheduled sections with times', () => {
-		expect(formatSchedule(sectionA)).toBe('MWF - 09:00-09:50');
+		expect(formatSchedule(sectionA)).toBe('Mon / Wed / Fri - 09:00-09:50');
+	});
+
+	it('formats canonical day combinations into human-readable labels', () => {
+		expect(formatDayCombination('TR')).toBe('Tue / Thu');
 	});
 
 	it('builds enriched enrollments for the default active statuses', () => {

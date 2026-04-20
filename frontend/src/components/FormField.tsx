@@ -18,6 +18,7 @@ type FormFieldProps = {
 	onChange: (value: string) => void;
 	autoComplete?: string;
 	required?: boolean;
+	showRequiredMarker?: boolean;
 	placeholder?: string;
 };
 

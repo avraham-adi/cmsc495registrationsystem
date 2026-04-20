@@ -26,8 +26,7 @@ export function PaginationControls({ meta, onPageChange, position = 'bottom' }: 
 				Previous
 			</button>
 			<p className="sidebar-meta">
-				Page {meta.page} of {Math.max(meta.totalPages, 1)}. Showing{' '}
-				{meta.total === 0 ? 0 : meta.limit < meta.total ? Math.min(meta.limit, meta.total - (meta.page - 1) * meta.limit) : meta.total} of {meta.total}
+				{meta.page}/{Math.max(meta.totalPages, 1)}
 			</p>
 			<button type="button" className="secondary-button" onClick={() => onPageChange(Math.min(meta.page + 1, Math.max(meta.totalPages, 1)))} disabled={meta.page >= Math.max(meta.totalPages, 1)}>
 				Next

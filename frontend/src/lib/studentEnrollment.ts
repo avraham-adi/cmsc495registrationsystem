@@ -105,16 +105,19 @@ function eventDate(date: Date) {
 	return time + meridiem;
 }
 
-// Formats event Days into human-readable days
-function eventDays(days: string) {
-	const d = days.split('');
-	let dayView = '';
+export function formatTimeRange(startTime: string | null, endTime: string | null) {
+	if (!startTime || !endTime) {
+		return 'Unscheduled';
+	}
 
-	d.map((str) => {
-		return (dayView = dayView.concat(DAY_LABELS[str], '/'));
-	});
+	const s = startTime.split(':');
+	const start = new Date();
+	start.setHours(Number(s[0]), Number(s[1]), Number(s[2]));
+	const e = endTime.split(':');
+	const end = new Date();
+	end.setHours(Number(e[0]), Number(e[1]), Number(e[2]));
 
-	return dayView.trim().slice(0, dayView.length - 1);
+	return `${eventDate(start)}-${eventDate(end)}`;
 }
 
 export function formatSchedule(section: Section) {
@@ -123,17 +126,10 @@ export function formatSchedule(section: Section) {
 	}
 
 	if (!section.start_time || !section.end_time) {
-		return section.days;
+		return formatDayCombination(section.days);
 	}
 
-	const s = section.start_time.split(':');
-	const start = new Date();
-	start.setHours(Number(s[0]), Number(s[1]), Number(s[2]));
-	const e = section.end_time.split(':');
-	const end = new Date();
-	end.setHours(Number(e[0]), Number(e[1]), Number(e[2]));
-
-	return `${eventDays(section.days)} - ${eventDate(start)}-${eventDate(end)}`;
+	return `${formatDayCombination(section.days)} - ${formatTimeRange(section.start_time, section.end_time)}`;
 }
 
 export function buildEnrichedEnrollments(data: StudentEnrollmentData, semester?: number, statuses: EnrollmentStatus[] = ['enrolled', 'waitlisted']) {

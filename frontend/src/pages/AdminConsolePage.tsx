@@ -17,6 +17,7 @@ import { AdminOnly } from '../components/AppShell';
 import { FormField } from '../components/FormField';
 import { StatusMessage } from '../components/StatusMessage';
 import { useAuth } from '../context/AuthContext';
+import { formatDayCombination, formatTimeRange } from '../lib/studentEnrollment';
 import { buildSingleParamState, hasQueryParam, normalizeEnumParam } from '../lib/queryParams';
 import { getErrorMessage, useFormFeedback } from '../lib/useFormFeedback';
 import {
@@ -73,15 +74,22 @@ type SemesterFormState = {
 	year: string;
 };
 
+type Meridiem = 'AM' | 'PM';
+
 type SectionFormState = {
 	sectionId: number | null;
 	courseId: string;
 	semId: string;
 	profId: string;
 	capacity: string;
-	days: string;
-	startTm: string;
-	endTm: string;
+	selectedDays: string[];
+	isAsync: boolean;
+	startHour: string;
+	startMinute: string;
+	startMeridiem: Meridiem;
+	endHour: string;
+	endMinute: string;
+	endMeridiem: Meridiem;
 };
 
 type PaginationState = {
@@ -89,10 +97,19 @@ type PaginationState = {
 	pageSize: number;
 };
 
+type FlashMessage = {
+	id: number;
+	kind: 'success' | 'error' | 'info';
+	message: string;
+};
+
 type PaginatedResult<T> = {
 	items: T[];
 	meta: Meta;
 };
+
+type UserResponsePayload = User | { User: User };
+type CourseResponsePayload = Course | { Course: Course };
 
 const EMPTY_ADMIN_DATA: AdminDataState = {
 	users: [],
@@ -122,15 +139,51 @@ const DEFAULT_SEMESTER_FORM: SemesterFormState = {
 	year: String(new Date().getFullYear()),
 };
 
+const TERM_OPTIONS = ['Fall', 'Spring', 'Summer'] as const;
+const DAY_OPTIONS = [
+	{ value: 'M', label: 'Mon' },
+	{ value: 'T', label: 'Tue' },
+	{ value: 'W', label: 'Wed' },
+	{ value: 'R', label: 'Thu' },
+	{ value: 'F', label: 'Fri' },
+	{ value: 'S', label: 'Sat' },
+	{ value: 'U', label: 'Sun' },
+	{ value: 'async', label: 'Async' },
+] as const;
+
+const SUBJECT_DEPARTMENT_MAP: Record<string, string> = {
+	CMSC: 'Computer Science',
+	'COMPUTER SCIENCE': 'Computer Science',
+	MATH: 'Mathematics',
+	MATHEMATICS: 'Mathematics',
+	ENGL: 'English',
+	ENGLISH: 'English',
+	HIST: 'History',
+	HISTORY: 'History',
+	PHYS: 'Physics',
+	PHYSICS: 'Physics',
+	CHEM: 'Chemistry',
+	CHEMISTRY: 'Chemistry',
+	NURS: 'Nursing',
+	NURSING: 'Nursing',
+	IFSM: 'Information Systems Management',
+	'INFORMATION SYSTEMS MANAGEMENT': 'Information Systems Management',
+};
+
 const DEFAULT_SECTION_FORM: SectionFormState = {
 	sectionId: null,
 	courseId: '',
 	semId: '',
 	profId: '',
 	capacity: '25',
-	days: '',
-	startTm: '',
-	endTm: '',
+	selectedDays: [],
+	isAsync: false,
+	startHour: '',
+	startMinute: '',
+	startMeridiem: 'AM',
+	endHour: '',
+	endMinute: '',
+	endMeridiem: 'AM',
 };
 
 const ROLE_DETAIL_LABEL: Record<UserRole, string> = {
@@ -143,10 +196,141 @@ function toTimeValue(value: string | null) {
 	return value ? value.slice(0, 8) : '';
 }
 
-// Converts empty optional text inputs into undefined values for API payloads.
-function normalizeOptional(value: string) {
-	const trimmed = value.trim();
-	return trimmed === '' ? undefined : trimmed;
+function AdminFieldLabel({ label }: { label: string; required?: boolean }) {
+	return <span>{label}</span>;
+}
+
+function unwrapUser(payload: UserResponsePayload) {
+	return 'User' in payload ? payload.User : payload;
+}
+
+function inferCourseSubject(courseCode: string) {
+	const match = courseCode.match(/^[A-Za-z]+/);
+	return match ? match[0].toUpperCase() : '';
+}
+
+function normalizeCourseRecord(course: Course, fallback?: Course | null): Course {
+	return {
+		...fallback,
+		...course,
+		subject: course.subject ?? fallback?.subject ?? inferCourseSubject(course.course_code),
+	};
+}
+
+function unwrapCourse(payload: CourseResponsePayload, fallback?: Course | null) {
+	const course = 'Course' in payload ? payload.Course : payload;
+	return normalizeCourseRecord(course, fallback);
+}
+
+function sortUsers(users: User[]) {
+	return [...users].sort((left, right) => left.name.localeCompare(right.name) || left.id - right.id);
+}
+
+function sortCourses(courses: Course[]) {
+	return [...courses].sort((left, right) => left.course_code.localeCompare(right.course_code) || left.course_id - right.course_id);
+}
+
+function getCanonicalDayCombination(days: string[]) {
+	const selectedDays = new Set(days);
+	return DAY_OPTIONS.filter((option) => selectedDays.has(option.value))
+		.map((option) => option.value)
+		.join('');
+}
+
+function parseDayCombination(days: string | null) {
+	if (!days || days === 'async') {
+		return [];
+	}
+
+	return DAY_OPTIONS.map((option) => option.value).filter((day) => days.includes(day));
+}
+
+function parseTimeParts(value: string | null) {
+	if (!value) {
+		return { hour: '', minute: '', meridiem: 'AM' as Meridiem };
+	}
+
+	const [hoursText, minutesText] = toTimeValue(value).split(':');
+	const hours24 = Number(hoursText);
+	const hour12 = hours24 % 12 || 12;
+
+	return {
+		hour: String(hour12),
+		minute: minutesText,
+		meridiem: hours24 >= 12 ? ('PM' as const) : ('AM' as const),
+	};
+}
+
+function buildTimeValue(hour: string, minute: string, meridiem: Meridiem) {
+	const trimmedHour = hour.trim();
+	const trimmedMinute = minute.trim();
+
+	if (trimmedHour === '' || trimmedMinute === '') {
+		return { value: undefined, error: 'Both hour and minute are required.' };
+	}
+
+	if (!/^\d{1,2}$/.test(trimmedHour)) {
+		return { value: undefined, error: 'Hour must be a number from 1 to 12.' };
+	}
+
+	if (!/^\d{1,2}$/.test(trimmedMinute)) {
+		return { value: undefined, error: 'Minute must be a number from 0 to 59.' };
+	}
+
+	const numericHour = Number(trimmedHour);
+	const numericMinute = Number(trimmedMinute);
+
+	if (numericHour < 1 || numericHour > 12) {
+		return { value: undefined, error: 'Hour must be a number from 1 to 12.' };
+	}
+
+	if (numericMinute < 0 || numericMinute > 59) {
+		return { value: undefined, error: 'Minute must be a number from 0 to 59.' };
+	}
+
+	const hours24 = meridiem === 'PM' ? (numericHour % 12) + 12 : numericHour % 12;
+	return {
+		value: `${String(hours24).padStart(2, '0')}:${String(numericMinute).padStart(2, '0')}:00`,
+		error: null,
+	};
+}
+
+function formatTimePickerValue(hour: string, minute: string, meridiem: Meridiem) {
+	const built = buildTimeValue(hour, minute, meridiem);
+	return built.value ? built.value.slice(0, 5) : '';
+}
+
+function applyTimePickerValue(value: string) {
+	if (!/^\d{2}:\d{2}$/.test(value)) {
+		return { hour: '', minute: '', meridiem: 'AM' as Meridiem };
+	}
+
+	const [hoursText, minute] = value.split(':');
+	const hours24 = Number(hoursText);
+	const hour12 = hours24 % 12 || 12;
+
+	return {
+		hour: String(hour12),
+		minute,
+		meridiem: hours24 >= 12 ? ('PM' as const) : ('AM' as const),
+	};
+}
+
+function resolveCourseDepartment(course: Course | null) {
+	if (!course) {
+		return null;
+	}
+
+	const rawSubject = (course.subject ?? inferCourseSubject(course.course_code)).trim();
+	if (rawSubject === '') {
+		return null;
+	}
+
+	return SUBJECT_DEPARTMENT_MAP[rawSubject.toUpperCase()] ?? SUBJECT_DEPARTMENT_MAP[inferCourseSubject(course.course_code)] ?? rawSubject;
+}
+
+function getSectionMeetingLabel(days: string) {
+	return days === 'async' ? 'Asynchronous' : formatDayCombination(days);
 }
 
 // Slices an in-memory list into a consistent page payload for local pagination.
@@ -187,6 +371,53 @@ function useLocalPagination(initialPageSize = 10) {
 			setState((current) => ({ ...current, page: 1 }));
 		},
 	};
+}
+
+function AdminTimeField({
+	idPrefix,
+	label,
+	hour,
+	minute,
+	meridiem,
+	onHourChange,
+	onMinuteChange,
+	onMeridiemChange,
+	required = false,
+	disabled = false,
+}: {
+	idPrefix: string;
+	label: string;
+	hour: string;
+	minute: string;
+	meridiem: Meridiem;
+	onHourChange: (value: string) => void;
+	onMinuteChange: (value: string) => void;
+	onMeridiemChange: (value: Meridiem) => void;
+	required?: boolean;
+	disabled?: boolean;
+}) {
+	return (
+		<div className="field">
+			<AdminFieldLabel label={label} required={required} />
+			<div className="admin-time-input-row">
+				<input
+					id={idPrefix}
+					type="time"
+					step="60"
+					value={formatTimePickerValue(hour, minute, meridiem)}
+					onChange={(event) => {
+						const next = applyTimePickerValue(event.target.value);
+						onHourChange(next.hour);
+						onMinuteChange(next.minute);
+						onMeridiemChange(next.meridiem);
+					}}
+					aria-label={label}
+					required={required}
+					disabled={disabled}
+				/>
+			</div>
+		</div>
+	);
 }
 
 // Loads every page of users into one client-side list for local admin filtering and paging.
@@ -288,6 +519,44 @@ export function AdminConsolePage({ area = 'home' }: { area?: AdminArea }) {
 		await loadAdminData({ silent: true });
 	}
 
+	function applyUserUpsert(nextUser: User) {
+		setData((current) => {
+			const users = sortUsers([...current.users.filter((entry) => entry.id !== nextUser.id), nextUser]);
+			const professors =
+				nextUser.role === 'PROFESSOR'
+					? sortUsers([...current.professors.filter((entry) => entry.id !== nextUser.id), nextUser])
+					: current.professors.filter((entry) => entry.id !== nextUser.id);
+
+			return {
+				...current,
+				users,
+				professors,
+			};
+		});
+	}
+
+	function applyUserRemoval(userId: number) {
+		setData((current) => ({
+			...current,
+			users: current.users.filter((entry) => entry.id !== userId),
+			professors: current.professors.filter((entry) => entry.id !== userId),
+		}));
+	}
+
+	function applyCourseUpsert(nextCourse: Course) {
+		setData((current) => ({
+			...current,
+			courses: sortCourses([...current.courses.filter((entry) => entry.course_id !== nextCourse.course_id), normalizeCourseRecord(nextCourse)]),
+		}));
+	}
+
+	function applyCourseRemoval(courseId: number) {
+		setData((current) => ({
+			...current,
+			courses: current.courses.filter((entry) => entry.course_id !== courseId),
+		}));
+	}
+
 	// Switches the Admin Home subview while keeping query params normalized.
 	function setAdminHomeView(view: AdminHomeView) {
 		setSearchParams(buildSingleParamState('view', view, 'overview'));
@@ -295,7 +564,7 @@ export function AdminConsolePage({ area = 'home' }: { area?: AdminArea }) {
 
 	// Switches the Admin Tools subview while keeping query params normalized.
 	function setAdminToolView(view: AdminToolView) {
-		setSearchParams(buildSingleParamState('tool', view, 'users'));
+		setSearchParams({ tool: view });
 	}
 
 	// Saves the current admin user's editable profile information.
@@ -481,8 +750,12 @@ export function AdminConsolePage({ area = 'home' }: { area?: AdminArea }) {
 					</section>
 				) : null}
 
-				{!isLoading && !loadError && activeArea === 'tools' && activeToolView === 'users' ? <AdminUsersView users={data.users} onReload={refreshAdminData} /> : null}
-				{!isLoading && !loadError && activeArea === 'tools' && activeToolView === 'courses' ? <AdminCoursesView courses={data.courses} onReload={refreshAdminData} /> : null}
+				{!isLoading && !loadError && activeArea === 'tools' && activeToolView === 'users' ? (
+					<AdminUsersView users={data.users} onReload={refreshAdminData} onUserSaved={applyUserUpsert} onUserDeleted={applyUserRemoval} />
+				) : null}
+				{!isLoading && !loadError && activeArea === 'tools' && activeToolView === 'courses' ? (
+					<AdminCoursesView courses={data.courses} onReload={refreshAdminData} onCourseSaved={applyCourseUpsert} onCourseDeleted={applyCourseRemoval} />
+				) : null}
 				{!isLoading && !loadError && activeArea === 'tools' && activeToolView === 'prerequisites' ? <AdminPrerequisitesView courses={data.courses} /> : null}
 				{!isLoading && !loadError && activeArea === 'tools' && activeToolView === 'semesters' ? <AdminSemestersView semesters={data.semesters} onReload={refreshAdminData} /> : null}
 				{!isLoading && !loadError && activeArea === 'tools' && activeToolView === 'sections' ? (
@@ -512,7 +785,7 @@ function AdminOverview({ data }: { data: AdminDataState }) {
 	);
 }
 
-function AdminUsersView({ users, onReload }: { users: User[]; onReload: () => Promise<void> }) {
+function AdminUsersView({ users, onReload, onUserSaved, onUserDeleted }: { users: User[]; onReload: () => Promise<void>; onUserSaved: (user: User) => void; onUserDeleted: (userId: number) => void }) {
 	const [userSearch, setUserSearch] = useState('');
 	const [form, setForm] = useState<UserFormState>(DEFAULT_USER_FORM);
 	const createFeedback = useFormFeedback();
@@ -534,10 +807,11 @@ function AdminUsersView({ users, onReload }: { users: User[]; onReload: () => Pr
 		event.preventDefault();
 		try {
 			const payload: AdminUserCreatePayload = { name: form.name, email: form.email, type: form.type, detail: form.detail };
-			await createUser(payload);
+			const createdUser = unwrapUser(await createUser(payload));
+			onUserSaved(createdUser);
 			setForm(DEFAULT_USER_FORM);
 			createFeedback.setSuccess('User created successfully.');
-			await onReload();
+			void onReload();
 		} catch (error) {
 			createFeedback.setErrorFromUnknown(error, 'Unable to create that user.');
 		}
@@ -548,17 +822,32 @@ function AdminUsersView({ users, onReload }: { users: User[]; onReload: () => Pr
 			<section className="subpanel stack admin-form-panel">
 				<h3>Create User</h3>
 				<form className="stack" onSubmit={handleCreateUser}>
-					<FormField id="admin-user-name" label="Name" value={form.name} onChange={(value) => setForm((current) => ({ ...current, name: value }))} required />
-					<FormField id="admin-user-email" label="Email" type="email" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} required />
+					<FormField id="admin-user-name" label="Name" value={form.name} onChange={(value) => setForm((current) => ({ ...current, name: value }))} required showRequiredMarker />
+					<FormField
+						id="admin-user-email"
+						label="Email"
+						type="email"
+						value={form.email}
+						onChange={(value) => setForm((current) => ({ ...current, email: value }))}
+						required
+						showRequiredMarker
+					/>
 					<label className="field" htmlFor="admin-user-type">
-						<span>Role</span>
+						<AdminFieldLabel label="Role" required />
 						<select id="admin-user-type" value={form.type} onChange={(event) => setForm((current) => ({ ...current, type: event.target.value as UserRole, detail: '' }))}>
 							<option value="STUDENT">Student</option>
 							<option value="PROFESSOR">Professor</option>
 							<option value="ADMIN">Admin</option>
 						</select>
 					</label>
-					<FormField id="admin-user-detail" label={ROLE_DETAIL_LABEL[form.type]} value={form.detail} onChange={(value) => setForm((current) => ({ ...current, detail: value }))} required />
+					<FormField
+						id="admin-user-detail"
+						label={ROLE_DETAIL_LABEL[form.type]}
+						value={form.detail}
+						onChange={(value) => setForm((current) => ({ ...current, detail: value }))}
+						required
+						showRequiredMarker
+					/>
 					{createFeedback.feedback.message ? <StatusMessage kind="success" message={createFeedback.feedback.message} /> : null}
 					{createFeedback.feedback.error ? <StatusMessage kind="error" message={createFeedback.feedback.error} /> : null}
 					<button type="submit" className="primary-button">
@@ -580,7 +869,7 @@ function AdminUsersView({ users, onReload }: { users: User[]; onReload: () => Pr
 			>
 				<div className="admin-card-list">
 					{paginated.items.map((entry) => (
-						<UserCard key={entry.id} user={entry} onReload={onReload} />
+						<UserCard key={entry.id} user={entry} onReload={onReload} onUserSaved={onUserSaved} onUserDeleted={onUserDeleted} />
 					))}
 				</div>
 			</AdminListShell>
@@ -588,7 +877,17 @@ function AdminUsersView({ users, onReload }: { users: User[]; onReload: () => Pr
 	);
 }
 
-function AdminCoursesView({ courses, onReload }: { courses: Course[]; onReload: () => Promise<void> }) {
+function AdminCoursesView({
+	courses,
+	onReload,
+	onCourseSaved,
+	onCourseDeleted,
+}: {
+	courses: Course[];
+	onReload: () => Promise<void>;
+	onCourseSaved: (course: Course) => void;
+	onCourseDeleted: (courseId: number) => void;
+}) {
 	const [courseSearch, setCourseSearch] = useState('');
 	const [form, setForm] = useState<CourseFormState>(DEFAULT_COURSE_FORM);
 	const saveFeedback = useFormFeedback();
@@ -613,14 +912,16 @@ function AdminCoursesView({ courses, onReload }: { courses: Course[]; onReload: 
 		try {
 			const payload = { code: form.code, title: form.title, desc: form.desc, cred: Number(form.cred) };
 			if (form.courseId) {
-				await updateCourse(form.courseId, payload);
+				const updatedCourse = unwrapCourse(await updateCourse(form.courseId, payload), selectedCourse);
+				onCourseSaved(updatedCourse);
 				saveFeedback.setSuccess(`Updated ${selectedCourse?.course_code ?? 'course'} successfully.`);
 			} else {
-				await createCourse(payload);
+				const createdCourse = unwrapCourse(await createCourse(payload));
+				onCourseSaved(createdCourse);
 				saveFeedback.setSuccess('Course created successfully.');
 			}
 			setForm(DEFAULT_COURSE_FORM);
-			await onReload();
+			void onReload();
 		} catch (error) {
 			saveFeedback.setErrorFromUnknown(error, 'Unable to save that course.');
 		}
@@ -629,8 +930,9 @@ function AdminCoursesView({ courses, onReload }: { courses: Course[]; onReload: 
 	async function handleDeleteCourse(course: Course) {
 		try {
 			await deleteCourse(course.course_id);
+			onCourseDeleted(course.course_id);
 			deleteFeedback.setSuccess(`${course.course_code} deleted successfully.`);
-			await onReload();
+			void onReload();
 		} catch (error) {
 			deleteFeedback.setErrorFromUnknown(error, 'Unable to delete that course.');
 		}
@@ -641,13 +943,28 @@ function AdminCoursesView({ courses, onReload }: { courses: Course[]; onReload: 
 			<section className="subpanel stack admin-form-panel">
 				<h3>{form.courseId ? 'Edit Course' : 'Create Course'}</h3>
 				<form className="stack" onSubmit={handleSaveCourse}>
-					<FormField id="course-code" label="Course Code" value={form.code} onChange={(value) => setForm((current) => ({ ...current, code: value.toUpperCase() }))} required />
-					<FormField id="course-title" label="Title" value={form.title} onChange={(value) => setForm((current) => ({ ...current, title: value }))} required />
+					<FormField
+						id="course-code"
+						label="Course Code"
+						value={form.code}
+						onChange={(value) => setForm((current) => ({ ...current, code: value.toUpperCase() }))}
+						required
+						showRequiredMarker
+					/>
+					<FormField id="course-title" label="Title" value={form.title} onChange={(value) => setForm((current) => ({ ...current, title: value }))} required showRequiredMarker />
 					<label className="field" htmlFor="course-desc">
-						<span>Description</span>
+						<AdminFieldLabel label="Description" required />
 						<textarea id="course-desc" className="admin-textarea" value={form.desc} onChange={(event) => setForm((current) => ({ ...current, desc: event.target.value }))} required />
 					</label>
-					<FormField id="course-credits" label="Credits" type="number" value={form.cred} onChange={(value) => setForm((current) => ({ ...current, cred: value }))} required />
+					<FormField
+						id="course-credits"
+						label="Credits"
+						type="number"
+						value={form.cred}
+						onChange={(value) => setForm((current) => ({ ...current, cred: value }))}
+						required
+						showRequiredMarker
+					/>
 					{saveFeedback.feedback.message ? <StatusMessage kind="success" message={saveFeedback.feedback.message} /> : null}
 					{saveFeedback.feedback.error ? <StatusMessage kind="error" message={saveFeedback.feedback.error} /> : null}
 					<div className="admin-action-row">
@@ -785,7 +1102,7 @@ function AdminPrerequisitesView({ courses }: { courses: Course[] }) {
 			<section className="subpanel stack admin-form-panel">
 				<h3>Manage Prerequisites</h3>
 				<label className="field" htmlFor="prereq-course">
-					<span>Course</span>
+					<AdminFieldLabel label="Course" required />
 					<select id="prereq-course" value={selectedCourseId ?? ''} onChange={(event) => setSelectedCourseId(Number(event.target.value))}>
 						{courses.map((entry) => (
 							<option key={entry.course_id} value={entry.course_id}>
@@ -796,7 +1113,7 @@ function AdminPrerequisitesView({ courses }: { courses: Course[] }) {
 				</label>
 				<form className="stack" onSubmit={handleAddPrerequisite}>
 					<label className="field" htmlFor="prereq-candidate">
-						<span>Add Prerequisite</span>
+						<AdminFieldLabel label="Add Prerequisite" required />
 						<select id="prereq-candidate" value={candidateId} onChange={(event) => setCandidateId(event.target.value)}>
 							<option value="">Select a course</option>
 							{candidates.map((entry) => (
@@ -899,8 +1216,18 @@ function AdminSemestersView({ semesters, onReload }: { semesters: Semester[]; on
 			<section className="subpanel stack admin-form-panel">
 				<h3>Create Semester</h3>
 				<form className="stack" onSubmit={handleCreateSemester}>
-					<FormField id="semester-term" label="Term" value={form.term} onChange={(value) => setForm((current) => ({ ...current, term: value }))} required />
-					<FormField id="semester-year" label="Year" type="number" value={form.year} onChange={(value) => setForm((current) => ({ ...current, year: value }))} required />
+					<label className="field" htmlFor="semester-term">
+						<AdminFieldLabel label="Term" required />
+						<select id="semester-term" value={form.term} onChange={(event) => setForm((current) => ({ ...current, term: event.target.value }))} required>
+							<option value="">Select a term</option>
+							{TERM_OPTIONS.map((term) => (
+								<option key={term} value={term}>
+									{term}
+								</option>
+							))}
+						</select>
+					</label>
+					<FormField id="semester-year" label="Year" type="number" value={form.year} onChange={(value) => setForm((current) => ({ ...current, year: value }))} required showRequiredMarker />
 					{createFeedback.feedback.message ? <StatusMessage kind="success" message={createFeedback.feedback.message} /> : null}
 					{createFeedback.feedback.error ? <StatusMessage kind="error" message={createFeedback.feedback.error} /> : null}
 					<button type="submit" className="primary-button">
@@ -962,6 +1289,7 @@ function AdminSectionsView({
 }) {
 	const [sectionSearch, setSectionSearch] = useState('');
 	const [form, setForm] = useState<SectionFormState>(DEFAULT_SECTION_FORM);
+	const [flashMessages, setFlashMessages] = useState<FlashMessage[]>([]);
 	const saveFeedback = useFormFeedback();
 	const deleteFeedback = useFormFeedback();
 	const pagination = useLocalPagination();
@@ -975,21 +1303,67 @@ function AdminSectionsView({
 	}, [sectionSearch, sections]);
 	const paginated = useMemo(() => paginateItems(filteredSections, pagination.page, pagination.pageSize), [filteredSections, pagination.page, pagination.pageSize]);
 	const selectedSection = sections.find((entry) => entry.section_id === form.sectionId) ?? null;
+	const selectedCourse = courses.find((entry) => String(entry.course_id) === form.courseId) ?? null;
+	const selectedDepartment = resolveCourseDepartment(selectedCourse);
+	const availableProfessors = useMemo(() => professors.filter((entry) => selectedDepartment !== null && entry.role_details === selectedDepartment), [professors, selectedDepartment]);
 
 	useEffect(() => {
 		pagination.reset();
 	}, [sectionSearch]);
 
+	useEffect(() => {
+		if (form.profId !== '' && !availableProfessors.some((entry) => String(entry.role_id) === form.profId)) {
+			setForm((current) => ({ ...current, profId: '' }));
+		}
+	}, [availableProfessors, form.profId]);
+
+	useEffect(() => {
+		if (!saveFeedback.feedback.message && !saveFeedback.feedback.error) {
+			return;
+		}
+
+		const kind = saveFeedback.feedback.error ? 'error' : 'success';
+		const message = saveFeedback.feedback.error || saveFeedback.feedback.message;
+		const id = Date.now() + Math.random();
+
+		setFlashMessages((current) => [...current, { id, kind, message }]);
+		saveFeedback.reset();
+
+		const timeoutId = window.setTimeout(() => {
+			setFlashMessages((current) => current.filter((entry) => entry.id !== id));
+		}, 4500);
+
+		return () => window.clearTimeout(timeoutId);
+	}, [saveFeedback, saveFeedback.feedback.error, saveFeedback.feedback.message]);
+
 	async function handleSaveSection(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+
+		if (!form.isAsync && form.selectedDays.length === 0) {
+			saveFeedback.setError('Select at least one meeting day or mark the section as asynchronous.');
+			return;
+		}
+
+		const startTime = form.isAsync ? { value: undefined, error: null } : buildTimeValue(form.startHour, form.startMinute, form.startMeridiem);
+		if (startTime.error) {
+			saveFeedback.setError(`Start Time: ${startTime.error}`);
+			return;
+		}
+
+		const endTime = form.isAsync ? { value: undefined, error: null } : buildTimeValue(form.endHour, form.endMinute, form.endMeridiem);
+		if (endTime.error) {
+			saveFeedback.setError(`End Time: ${endTime.error}`);
+			return;
+		}
+
 		try {
 			const payload = {
 				semId: Number(form.semId),
 				profId: Number(form.profId),
 				capacity: Number(form.capacity),
-				days: normalizeOptional(form.days),
-				startTm: normalizeOptional(form.startTm),
-				endTm: normalizeOptional(form.endTm),
+				days: form.isAsync ? 'async' : getCanonicalDayCombination(form.selectedDays),
+				startTm: startTime.value,
+				endTm: endTime.value,
 			};
 			if (form.sectionId) {
 				await updateSection(form.sectionId, payload);
@@ -1018,11 +1392,32 @@ function AdminSectionsView({
 	return (
 		<section className="admin-tool-layout">
 			<section className="subpanel stack admin-form-panel">
+				{flashMessages.length > 0 ? (
+					<div className="admin-form-flash-stack" aria-live="polite">
+						{flashMessages.map((message) => (
+							<div key={message.id} className="catalog-flash-banner">
+								<StatusMessage kind={message.kind} message={message.message} />
+							</div>
+						))}
+					</div>
+				) : null}
 				<h3>{form.sectionId ? 'Edit Section' : 'Create Section'}</h3>
 				<form className="stack" onSubmit={handleSaveSection}>
 					<label className="field" htmlFor="section-course">
-						<span>Course</span>
-						<select id="section-course" value={form.courseId} onChange={(event) => setForm((current) => ({ ...current, courseId: event.target.value }))} disabled={form.sectionId !== null}>
+						<AdminFieldLabel label="Course" required />
+						<select
+							id="section-course"
+							value={form.courseId}
+							onChange={(event) =>
+								setForm((current) => ({
+									...current,
+									courseId: event.target.value,
+									profId: '',
+								}))
+							}
+							disabled={form.sectionId !== null}
+							required
+						>
 							<option value="">Select a course</option>
 							{courses.map((entry) => (
 								<option key={entry.course_id} value={entry.course_id}>
@@ -1032,8 +1427,8 @@ function AdminSectionsView({
 						</select>
 					</label>
 					<label className="field" htmlFor="section-semester">
-						<span>Semester</span>
-						<select id="section-semester" value={form.semId} onChange={(event) => setForm((current) => ({ ...current, semId: event.target.value }))}>
+						<AdminFieldLabel label="Semester" required />
+						<select id="section-semester" value={form.semId} onChange={(event) => setForm((current) => ({ ...current, semId: event.target.value }))} required>
 							<option value="">Select a semester</option>
 							{semesters.map((entry) => (
 								<option key={entry.semester_id} value={entry.semester_id}>
@@ -1043,28 +1438,98 @@ function AdminSectionsView({
 						</select>
 					</label>
 					<label className="field" htmlFor="section-professor">
-						<span>Professor</span>
-						<select id="section-professor" value={form.profId} onChange={(event) => setForm((current) => ({ ...current, profId: event.target.value }))}>
+						<AdminFieldLabel label="Professor" required />
+						<select id="section-professor" value={form.profId} onChange={(event) => setForm((current) => ({ ...current, profId: event.target.value }))} required>
 							<option value="">Select a professor</option>
-							{professors.map((entry) => (
+							{availableProfessors.map((entry) => (
 								<option key={entry.id} value={entry.role_id}>
 									{entry.name} • {entry.role_details}
 								</option>
 							))}
 						</select>
 					</label>
-					<FormField id="section-capacity" label="Capacity" type="number" value={form.capacity} onChange={(value) => setForm((current) => ({ ...current, capacity: value }))} required />
 					<FormField
-						id="section-days"
-						label="Meeting Days"
-						value={form.days}
-						onChange={(value) => setForm((current) => ({ ...current, days: value.toUpperCase() }))}
-						placeholder="MWF or TR"
+						id="section-capacity"
+						label="Capacity"
+						type="number"
+						value={form.capacity}
+						onChange={(value) => setForm((current) => ({ ...current, capacity: value }))}
+						required
+						showRequiredMarker
 					/>
-					<FormField id="section-start" label="Start Time" value={form.startTm} onChange={(value) => setForm((current) => ({ ...current, startTm: value }))} placeholder="09:00:00" />
-					<FormField id="section-end" label="End Time" value={form.endTm} onChange={(value) => setForm((current) => ({ ...current, endTm: value }))} placeholder="10:15:00" />
-					{saveFeedback.feedback.message ? <StatusMessage kind="success" message={saveFeedback.feedback.message} /> : null}
-					{saveFeedback.feedback.error ? <StatusMessage kind="error" message={saveFeedback.feedback.error} /> : null}
+					<div className="field">
+						<AdminFieldLabel label="Meeting Days" required />
+						<div className="admin-day-checkbox-grid" role="group" aria-label="Meeting Days">
+							{DAY_OPTIONS.map((option) => {
+								const isAsyncOption = option.value === 'async';
+								const isSelected = isAsyncOption ? form.isAsync : form.selectedDays.includes(option.value);
+								const isDisabled = form.isAsync && !isAsyncOption;
+
+								return (
+									<button
+										key={option.value}
+										id={`section-day-${option.value}`}
+										type="button"
+										className={`secondary-button admin-day-toggle ${isSelected ? 'selected' : 'unselected'} ${isDisabled ? 'disabled' : ''}`}
+										aria-pressed={isSelected}
+										aria-label={option.label}
+										disabled={isDisabled}
+										onClick={() =>
+											setForm((current) => {
+												if (isAsyncOption) {
+													const nextAsync = !current.isAsync;
+													return {
+														...current,
+														isAsync: nextAsync,
+														selectedDays: nextAsync ? [] : current.selectedDays,
+														startHour: nextAsync ? '' : current.startHour,
+														startMinute: nextAsync ? '' : current.startMinute,
+														startMeridiem: nextAsync ? 'AM' : current.startMeridiem,
+														endHour: nextAsync ? '' : current.endHour,
+														endMinute: nextAsync ? '' : current.endMinute,
+														endMeridiem: nextAsync ? 'AM' : current.endMeridiem,
+													};
+												}
+
+												return {
+													...current,
+													selectedDays: current.selectedDays.includes(option.value)
+														? current.selectedDays.filter((day) => day !== option.value)
+														: [...current.selectedDays, option.value],
+												};
+											})
+										}
+									>
+										{option.label}
+									</button>
+								);
+							})}
+						</div>
+					</div>
+					<AdminTimeField
+						idPrefix="section-start"
+						label="Start Time"
+						hour={form.startHour}
+						minute={form.startMinute}
+						meridiem={form.startMeridiem}
+						onHourChange={(value) => setForm((current) => ({ ...current, startHour: value }))}
+						onMinuteChange={(value) => setForm((current) => ({ ...current, startMinute: value }))}
+						onMeridiemChange={(value) => setForm((current) => ({ ...current, startMeridiem: value }))}
+						required
+						disabled={form.isAsync}
+					/>
+					<AdminTimeField
+						idPrefix="section-end"
+						label="End Time"
+						hour={form.endHour}
+						minute={form.endMinute}
+						meridiem={form.endMeridiem}
+						onHourChange={(value) => setForm((current) => ({ ...current, endHour: value }))}
+						onMinuteChange={(value) => setForm((current) => ({ ...current, endMinute: value }))}
+						onMeridiemChange={(value) => setForm((current) => ({ ...current, endMeridiem: value }))}
+						required
+						disabled={form.isAsync}
+					/>
 					<div className="admin-action-row">
 						<button type="submit" className="primary-button">
 							{form.sectionId ? 'Save Section' : 'Create Section'}
@@ -1112,11 +1577,11 @@ function AdminSectionsView({
 								</div>
 								<div className="info-card">
 									<span className="info-label">Meeting</span>
-									<strong>{entry.days === 'async' ? 'Asynchronous' : entry.days}</strong>
+									<strong>{getSectionMeetingLabel(entry.days)}</strong>
 								</div>
 								<div className="info-card">
 									<span className="info-label">Time</span>
-									<strong>{entry.start_time && entry.end_time ? `${entry.start_time.slice(0, 5)}-${entry.end_time.slice(0, 5)}` : 'Unscheduled'}</strong>
+									<strong>{formatTimeRange(entry.start_time, entry.end_time)}</strong>
 								</div>
 								<div className="info-card">
 									<span className="info-label">Seats</span>
@@ -1136,9 +1601,20 @@ function AdminSectionsView({
 											semId: String(entry.semester.semester_id),
 											profId: String(entry.professor.professor_id),
 											capacity: String(entry.capacity),
-											days: entry.days === 'async' ? '' : entry.days,
-											startTm: toTimeValue(entry.start_time),
-											endTm: toTimeValue(entry.end_time),
+											selectedDays: parseDayCombination(entry.days),
+											isAsync: entry.days === 'async',
+											...(() => {
+												const start = parseTimeParts(entry.start_time);
+												const end = parseTimeParts(entry.end_time);
+												return {
+													startHour: start.hour,
+													startMinute: start.minute,
+													startMeridiem: start.meridiem,
+													endHour: end.hour,
+													endMinute: end.minute,
+													endMeridiem: end.meridiem,
+												};
+											})(),
 										})
 									}
 								>
@@ -1157,9 +1633,12 @@ function AdminSectionsView({
 	);
 }
 
-function UserCard({ user, onReload }: { user: User; onReload: () => Promise<void> }) {
+function UserCard({ user, onReload, onUserSaved, onUserDeleted }: { user: User; onReload: () => Promise<void>; onUserSaved: (user: User) => void; onUserDeleted: (userId: number) => void }) {
 	const [type, setType] = useState<UserRole>(user.role);
 	const [detail, setDetail] = useState(user.role_details);
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+	const [deleteConfirmation, setDeleteConfirmation] = useState('');
+	const [isDeleting, setIsDeleting] = useState(false);
 	const feedback = useFormFeedback();
 
 	useEffect(() => {
@@ -1169,55 +1648,114 @@ function UserCard({ user, onReload }: { user: User; onReload: () => Promise<void
 
 	async function handleRoleSave() {
 		try {
-			await updateUserRole(user.id, { type, detail });
+			const updatedUser = unwrapUser(await updateUserRole(user.id, { type, detail }));
+			onUserSaved(updatedUser);
 			feedback.setSuccess(`Updated ${user.name}'s role successfully.`);
-			await onReload();
+			void onReload();
 		} catch (error) {
 			feedback.setErrorFromUnknown(error, 'Unable to update that user role.');
 		}
 	}
 
 	async function handleDelete() {
+		feedback.reset();
+		if (deleteConfirmation.trim().toLowerCase() !== 'confirm') {
+			feedback.setError('Type "confirm" to delete this user.');
+			return;
+		}
+
+		setIsDeleting(true);
+
 		try {
 			await deleteUser(user.id);
-			await onReload();
+			onUserDeleted(user.id);
+			void onReload();
 		} catch (error) {
 			feedback.setErrorFromUnknown(error, 'Unable to delete that user.');
+			setIsDeleting(false);
 		}
 	}
 
+	function openDeleteDialog() {
+		feedback.reset();
+		setDeleteConfirmation('');
+		setIsDeleting(false);
+		setIsDeleteDialogOpen(true);
+	}
+
+	function closeDeleteDialog() {
+		if (isDeleting) {
+			return;
+		}
+
+		feedback.reset();
+		setDeleteConfirmation('');
+		setIsDeleteDialogOpen(false);
+	}
+
 	return (
-		<article className="section-card admin-user-card">
-			<div className="admin-user-card-header">
-				<h3>{user.name}</h3>
-				<span className="pill subtle">ID {user.id}</span>
-			</div>
-			<div className="admin-user-card-summary">
-				<span className="eyebrow">{user.role}</span>
-				<span>{user.role_details}</span>
-				<span>{user.email}</span>
-			</div>
-			<div className="admin-inline-grid admin-user-card-controls">
-				<label className="field" htmlFor={`user-role-${user.id}`}>
-					<span>Role</span>
-					<select id={`user-role-${user.id}`} value={type} onChange={(event) => setType(event.target.value as UserRole)}>
-						<option value="STUDENT">Student</option>
-						<option value="PROFESSOR">Professor</option>
-						<option value="ADMIN">Admin</option>
-					</select>
-				</label>
-				<FormField id={`user-detail-${user.id}`} label={ROLE_DETAIL_LABEL[type]} value={detail} onChange={setDetail} required />
-			</div>
-			{feedback.feedback.message ? <StatusMessage kind="success" message={feedback.feedback.message} /> : null}
-			{feedback.feedback.error ? <StatusMessage kind="error" message={feedback.feedback.error} /> : null}
-			<div className="admin-action-row admin-user-card-actions">
-				<button type="button" className="secondary-button" onClick={() => void handleRoleSave()}>
-					Save Role
-				</button>
-				<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDelete()}>
-					Delete User
-				</button>
-			</div>
-		</article>
+		<>
+			<article className="section-card admin-user-card">
+				<div className="admin-user-card-header">
+					<h3>{user.name}</h3>
+					<span className="pill subtle">ID {user.id}</span>
+				</div>
+				<div className="admin-user-card-summary">
+					<span className="eyebrow">{user.role}</span>
+					<span>{user.role_details}</span>
+					<span>{user.email}</span>
+				</div>
+				<div className="admin-inline-grid admin-user-card-controls">
+					<label className="field" htmlFor={`user-role-${user.id}`}>
+						<AdminFieldLabel label="Role" required />
+						<select id={`user-role-${user.id}`} value={type} onChange={(event) => setType(event.target.value as UserRole)}>
+							<option value="STUDENT">Student</option>
+							<option value="PROFESSOR">Professor</option>
+							<option value="ADMIN">Admin</option>
+						</select>
+					</label>
+					<FormField id={`user-detail-${user.id}`} label={ROLE_DETAIL_LABEL[type]} value={detail} onChange={setDetail} required showRequiredMarker />
+				</div>
+				{feedback.feedback.message ? <StatusMessage kind="success" message={feedback.feedback.message} /> : null}
+				{feedback.feedback.error && !isDeleteDialogOpen ? <StatusMessage kind="error" message={feedback.feedback.error} /> : null}
+				<div className="admin-action-row admin-user-card-actions">
+					<button type="button" className="secondary-button" onClick={() => void handleRoleSave()}>
+						Save Role
+					</button>
+					<button type="button" className="secondary-button admin-danger-button" onClick={openDeleteDialog}>
+						Delete User
+					</button>
+				</div>
+			</article>
+
+			{isDeleteDialogOpen ? (
+				<div className="dialog-backdrop" role="presentation" onClick={closeDeleteDialog}>
+					<section className="dialog-card" role="dialog" aria-modal="true" aria-labelledby={`delete-user-title-${user.id}`} onClick={(event) => event.stopPropagation()}>
+						<div className="panel-header">
+							<div>
+								<p className="eyebrow">Delete User</p>
+								<h3 id={`delete-user-title-${user.id}`}>Confirm User Removal</h3>
+							</div>
+						</div>
+						<div className="stack">
+							<p>
+								Delete <strong>{user.name}</strong> from the system.
+							</p>
+							<p className="sidebar-meta">Type "confirm" to continue. This dialog stays open until the delete request finishes.</p>
+							<FormField id={`delete-user-confirmation-${user.id}`} label='Type "confirm"' value={deleteConfirmation} onChange={setDeleteConfirmation} autoComplete="off" />
+							{feedback.feedback.error ? <StatusMessage kind="error" message={feedback.feedback.error} /> : null}
+						</div>
+						<div className="dialog-actions">
+							<button type="button" className="secondary-button" onClick={closeDeleteDialog} disabled={isDeleting}>
+								Cancel
+							</button>
+							<button type="button" className="secondary-button admin-danger-button" onClick={() => void handleDelete()} disabled={isDeleting}>
+								{isDeleting ? 'Deleting...' : 'Delete User'}
+							</button>
+						</div>
+					</section>
+				</div>
+			) : null}
+		</>
 	);
 }

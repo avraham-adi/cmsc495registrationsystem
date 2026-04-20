@@ -17,6 +17,7 @@ import { ProfessorOnly } from '../components/AppShell';
 import { FormField } from '../components/FormField';
 import { StatusMessage } from '../components/StatusMessage';
 import { useAuth } from '../context/AuthContext';
+import { formatSchedule } from '../lib/studentEnrollment';
 import { buildSingleParamState, normalizeEnumParam } from '../lib/queryParams';
 import { getErrorMessage, useFormFeedback } from '../lib/useFormFeedback';
 import type { Section, SectionAccessCodeMap } from '../types/api';
@@ -69,19 +70,6 @@ function parseAccessCodes(source: SectionAccessCodeMap) {
 			value: String(source[key]),
 			used: Boolean(source[`${key}_used`]),
 		}));
-}
-
-// Formats a section meeting pattern into a short professor-facing label.
-function formatMeeting(section: Section) {
-	if (section.days === 'async') {
-		return 'Asynchronous';
-	}
-
-	if (!section.start_time || !section.end_time) {
-		return section.days;
-	}
-
-	return `${section.days} ${section.start_time.slice(0, 5)}-${section.end_time.slice(0, 5)}`;
 }
 
 // Finds the current semester from a professor's assigned sections.
@@ -636,7 +624,7 @@ export function ProfessorSectionsPage() {
 								<strong>{selectedSection.course.title}</strong>
 								<br />
 								<span className="sidebar-meta">
-									{formatMeeting(selectedSection)} • Enrolled {selectedSection.enrolled_count}
+									{formatSchedule(selectedSection)} • Enrolled {selectedSection.enrolled_count}
 								</span>
 							</p>
 
